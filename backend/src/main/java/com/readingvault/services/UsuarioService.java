@@ -1,11 +1,13 @@
 package com.readingvault.services;
 
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service; // IMPORTANTE
+
 import com.readingvault.models.Usuario;
 import com.readingvault.repositories.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UsuarioService {
@@ -13,14 +15,14 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    // Obtener todos para pruebas
-    public List<Usuario> obtenerTodos() {
-        return usuarioRepository.findAll();
-    }
+    @Autowired
+    private PasswordEncoder passwordEncoder; // Inyectamos el triturador
 
-    // Guardar usuario (Registro)
-    public Usuario guardarUsuario(Usuario usuario) {
-        // Aquí podrías añadir lógica para cifrar la contraseña más adelante
+    public Usuario registrarUsuario(Usuario usuario) {
+        // Ciframos la contraseña antes de guardar
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+        
+        // Guardamos al usuario con la contraseña ya protegida
         return usuarioRepository.save(usuario);
     }
 
