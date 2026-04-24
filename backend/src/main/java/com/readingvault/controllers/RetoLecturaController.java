@@ -1,4 +1,4 @@
-package com.readingvault.controller;
+package com.readingvault.controllers;
 
 import java.time.LocalDate;
 
