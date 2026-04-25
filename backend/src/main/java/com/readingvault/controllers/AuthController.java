@@ -4,7 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -17,11 +20,13 @@ import com.readingvault.models.Usuario;
 import com.readingvault.security.JwtUtil;
 import com.readingvault.services.UsuarioService;
 
-/* * Controlador encargado de la autenticación y entrega de Tokens */
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://127.0.0.1:5173")
 public class AuthController {
+
+    @Autowired
+    private AuthenticationManager authenticationManager; // El "validador" oficial
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -32,19 +37,30 @@ public class AuthController {
     @Autowired
     private UsuarioService usuarioService;
 
-    // Nota: Necesitaremos configurar el AuthenticationManager en SecurityConfig después
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
-        String email = loginRequest.get("email");
+        String identifier = loginRequest.get("usernameOrEmail");
         String password = loginRequest.get("password");
 
-        // Aquí se validaría la contraseña (por ahora simplificado)
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        // Si por casualidad el identifier llega nulo, probamos con "email"
+        if (identifier == null) {
+            identifier = loginRequest.get("email");
+        }
 
-        // Generamos el token para el usuario
+        try {
+            // Usamos el identificador (que puede ser email o usuario)
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(identifier, password)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Error: Credenciales incorrectas");
+        }
+
+        // Generamos el token usando el mismo identificador
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(identifier);
         final String token = jwtUtil.generateToken(userDetails.getUsername());
 
-        // Devolvemos el token en un JSON
         Map<String, String> response = new HashMap<>();
         response.put("token", token);
 
@@ -53,11 +69,9 @@ public class AuthController {
 
     @PostMapping("/registro")
     public ResponseEntity<?> registrar(@RequestBody Usuario usuario) {
-        // Comprobamos si el email ya existe para no duplicar
         if (usuarioService.buscarPorEmail(usuario.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("Error: El email ya está registrado.");
+            return ResponseEntity.badRequest().body("Error: El email ya está registrado");
         }
-
         Usuario nuevoUsuario = usuarioService.registrarUsuario(usuario);
         return ResponseEntity.ok("Usuario registrado con éxito: " + nuevoUsuario.getEmail());
     }

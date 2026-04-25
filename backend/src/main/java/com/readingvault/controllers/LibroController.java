@@ -1,6 +1,9 @@
 package com.readingvault.controllers;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -10,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.readingvault.dto.LibroExternoDTO;
-import com.readingvault.services.OpenLibraryService;
+import com.readingvault.services.GoogleBooksService;
 
 @RestController
 @RequestMapping("/api/libros")
@@ -18,14 +21,28 @@ import com.readingvault.services.OpenLibraryService;
 public class LibroController {
 
     @Autowired
-    private OpenLibraryService openLibraryService;
+    private GoogleBooksService googleBooksService;
 
-    //buscador principal (mostrar datos de openLibrary)
     @GetMapping("/buscar")
-    public List<LibroExternoDTO> buscar(@RequestParam(required = false) String titulo,
-                                        @RequestParam(required = false) String autor,
-                                        @RequestParam(required = false) String genero,
-                                        @RequestParam(defaultValue = "1") int pagina) {
-        return openLibraryService.buscarLibros(titulo, autor, genero, pagina);
+    public List<Map<String, Object>> buscar(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "1") int pagina) {
+
+        // Llamamos al servicio con el parámetro único
+        List<LibroExternoDTO> librosExternos = googleBooksService.buscarLibros(q, pagina);
+
+        return librosExternos.stream().map(libro -> {
+            Map<String, Object> respuesta = new HashMap<>();
+            respuesta.put("titulo", libro.getTitle());
+
+            String nombreAutor = (libro.getAuthorNames() != null && !libro.getAuthorNames().isEmpty())
+                    ? libro.getAuthorNames().get(0)
+                    : "Autor desconocido";
+            respuesta.put("autor", nombreAutor);
+            respuesta.put("portada", libro.getCoverId());
+
+            return respuesta;
+        }).collect(Collectors.toList());
+
     }
 }

@@ -16,14 +16,17 @@ public class Usuario {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long idUsuario;
     
+    private String nombre;
+    private String apellidos;
+    private String fechaNacimiento;
+    private String nombreUsuario;
+    private String email;
+    private String password;
+    private String rol = "USER";
+    private String fechaRegistro;
+    private String fotoPerfil;
+
     @ManyToOne 
     @JoinColumn(name = "id_genero")
     private Genero genero;
-
-    private String nombre;
-    private String email;
-    private String password;
-    private String rol; 
-    private String fechaRegistro;
-    private String fotoPerfil;
 }
