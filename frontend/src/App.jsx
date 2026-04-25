@@ -10,6 +10,7 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Registro from "./pages/Registro";
 import BuscadorLibros from "./pages/BuscadorLibros";
+import Home from './pages/Home'
 
 function App() {
   return (
@@ -28,6 +29,8 @@ function App() {
           
           {/* Buscador dinámico de Google Books */}
           <Route path="/buscador" element={<BuscadorLibros />} />
+
+          <Route path="/home" element={<Home />} />
         </Routes>
       </main>
 
