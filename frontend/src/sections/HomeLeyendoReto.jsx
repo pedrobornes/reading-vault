@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export default function HomeLeyendoReto() {
 
     return(
@@ -16,6 +18,10 @@ export default function HomeLeyendoReto() {
                             <div className="progreso__barra"></div>
                         </div>
                     </div>
+                    
+                </div>
+                <div className="leyendo__perfil">
+                    <Link to="/perfilUsuario" className="perfil__boton">Ir a mi perfil</Link>
                 </div>
             </div>
 

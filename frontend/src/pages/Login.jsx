@@ -18,7 +18,12 @@ const Login = () => {
             
             if (response.data.token) {
                 localStorage.setItem("token", response.data.token);
+                // Guardamos el usuario
+                localStorage.setItem("usuario", JSON.stringify(response.data.user));
                 alert("¡Login exitoso! Bienvenido.");
+
+                // Redirigimos a home
+                window.location.href = "/home";
             }
         } catch (error) {
             alert("Error: Credenciales incorrectas");
