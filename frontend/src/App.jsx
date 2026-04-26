@@ -20,6 +20,8 @@ import Login from "./pages/Login";
 import Registro from "./pages/Registro";
 import BuscadorLibros from "./pages/BuscadorLibros";
 import Home from './pages/Home';
+import PerfilUsuario from "./pages/PerfilUsuario";
+
 
 function App() {
   useEffect(() => {
@@ -42,6 +44,7 @@ function App() {
           <Route path="/registro" element={<Registro />} />
           <Route path="/buscador" element={<BuscadorLibros />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/perfilUsuario" element={<PerfilUsuario />} />
         </Routes>
       </main>
 

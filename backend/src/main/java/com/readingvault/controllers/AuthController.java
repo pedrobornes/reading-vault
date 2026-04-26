@@ -1,5 +1,6 @@
 package com.readingvault.controllers;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,8 +51,7 @@ public class AuthController {
         try {
             // Usamos el identificador (que puede ser email o usuario)
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(identifier, password)
-            );
+                    new UsernamePasswordAuthenticationToken(identifier, password));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Error: Credenciales incorrectas");
@@ -61,9 +61,24 @@ public class AuthController {
         final UserDetails userDetails = userDetailsService.loadUserByUsername(identifier);
         final String token = jwtUtil.generateToken(userDetails.getUsername());
 
-        Map<String, String> response = new HashMap<>();
+        // Buscamos al user en la bbdd
+        // Usuario usuario = usuarioService.buscarPorEmail(identifier)
+        // .orElseGet(() -> usuarioService.buscarPorId(null) // Esto es solo un ejemplo,
+        // mejor busca por nombreUsuario si no es email
+        // .orElse(null));
+        Usuario userDb = usuarioService.buscarPorEmail(userDetails.getUsername())
+                .orElse(null);
+
+        Map<String, Object> response = new HashMap<>();
         response.put("token", token);
 
+        if (userDb != null) {
+            userDb.setPassword(null);
+            response.put("user", userDb);
+        }
+        userDb.setUltimaConexion(LocalDateTime.now());
+         // Guardamos la fecha actual
+        usuarioService.registrarUsuario(userDb);
         return ResponseEntity.ok(response);
     }
 

@@ -1,0 +1,127 @@
+/* Perfil.css - Reading Vault */
+
+/* Contenedor principal del perfil (Sidebar + Main) */
+.container-custom {
+    max-width: var(--container-width);
+    margin: 0 auto;
+}
+
+/* Contenedores blancos (Cards) */
+.perfil-card {
+    background-color: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: var(--shadow);
+    margin-bottom: 25px;
+    border: none;
+}
+
+/* Foto de perfil (Sidebar) */
+.foto-perfil-circulo {
+    width: 180px !important;  /* Forzamos el ancho */
+    height: 180px !important; /* Forzamos el alto */
+    border-radius: 50% !important;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto 25px;
+    border: 6px solid white;
+    background-color: white;
+    box-shadow: var(--shadow);
+}
+
+/* Títulos de secciones en Sidebar */
+.sidebar-titulo {
+    font-family: var(--font-titulos);
+    font-size: 1.1rem;
+    color: var(--text-titulos);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid var(--color-azul-footer);
+    padding-bottom: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Estilos para el Resumen (Grid 2x2) */
+.resumen-item p {
+    font-size: 0.85rem;
+    color: var(--color-verde-oscuro);
+    margin-bottom: 2px;
+}
+
+.counter {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-titulos);
+    background: transparent; /* Sobreescribimos el fondo gris del index.css si hace falta */
+    padding: 0;
+}
+
+/* Bloque de biografía (Header Principal) */
+.bio-block {
+    background-color: var(--color-azul-footer);
+    padding: 20px;
+    border-radius: 12px;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--color-verde-oscuro);
+    line-height: 1.6;
+    border-left: 5px solid var(--accent);
+}
+
+/* Etiquetas de datos del usuario */
+.dato-etiqueta {
+    font-weight: 700;
+    color: var(--text-titulos);
+    margin-right: 5px;
+}
+
+/* Botones con estilo Reading Vault */
+.btn-vault {
+    background-color: var(--accent);
+    color: white;
+    border-radius: 25px;
+    border: none;
+    padding: 10px 20px;
+    font-family: var(--font-titulos);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.btn-vault:hover {
+    background-color: var(--color-rojo-vino);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Barra de progreso del reto */
+.progress {
+    background-color: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    transition: width 0.6s ease;
+}
+
+/* Actividad Reciente */
+.list-group-item {
+    border-color: #f0f0f0;
+    background-color: transparent;
+}
+
+.btn-amarillo {
+    background-color: var(--color-amarillo);
+    color: var(--text-titulos);
+    border-radius: 20px;
+    font-weight: bold;
+    padding: 8px 30px;
+    border: none;
+}
+
+.btn-amarillo:hover {
+    filter: brightness(0.9);
+}
