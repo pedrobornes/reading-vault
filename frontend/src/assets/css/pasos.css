@@ -1,0 +1,116 @@
+/* src/assets/css/pasos.css */
+
+.pasos {
+    position: relative;
+    background-color: var(--color-verde-claro); 
+    padding: 120px 0;
+    width: 100%;
+}
+
+.pasos__content-relative {
+    position: relative;
+    width: 100%;
+    min-height: 1000px;
+}
+
+/* LÍNEA DE ENERGÍA */
+.pasos__svg-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    overflow: visible;
+}
+
+.mecha-encendida {
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 6;
+    stroke-linecap: round;
+    filter: 
+        drop-shadow(0 0 5px white)
+        drop-shadow(0 0 15px #00f2ff)
+        drop-shadow(0 0 30px rgba(0, 242, 255, 0.6));
+    animation: pulseEnergy 2s infinite alternate;
+}
+
+@keyframes pulseEnergy {
+    from { stroke-width: 6; }
+    to { stroke-width: 7.5; }
+}
+
+.pasos__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 100px;
+    position: relative;
+    z-index: 5;
+}
+
+.paso__item {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    width: 100%;
+}
+
+.item-izquierda { justify-content: flex-start; padding-left: 10%; }
+.item-derecha { justify-content: flex-end; padding-right: 10%; }
+
+.paso__icono-wrapper {
+    width: 90px;
+    height: 90px;
+    background-color: var(--color-amarillo);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s ease;
+    flex-shrink: 0;
+    box-shadow: var(--shadow);
+}
+
+.paso__img {
+    width: 45px;
+    height: 45px;
+}
+
+.paso__icono-wrapper img {
+    filter: brightness(100);
+    transition: filter 0.4s ease;
+}
+
+.paso__titulo {
+    font-family: var(--font-titulos);
+    color: var(--color-verde-oscuro);
+    font-size: 2rem;
+    margin-bottom: 5px;
+}
+
+.paso__descripcion {
+    font-family: var(--font-body);
+    color: var(--color-marron-medio);
+    max-width: 350px;
+}
+
+.text-right { text-align: right; }
+
+.pasos__ilustracion {
+    position: absolute;
+    bottom: 0;
+    left: 20px;
+    width: 300px;
+    z-index: 2;
+    opacity: 0.9;
+    color: red;
+}
+
+@media (max-width: 1024px) {
+    .pasos__ilustracion { width: 200px; }
+    .paso__item { padding: 0; justify-content: center; text-align: center; flex-direction: column; }
+    .text-right { text-align: center; }
+    .pasos__svg-line { display: none; }
+}

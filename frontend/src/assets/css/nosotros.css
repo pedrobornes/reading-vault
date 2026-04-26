@@ -1,0 +1,73 @@
+/* src/assets/css/nosotros.css */
+
+.nosotros {
+    position: relative;
+    padding: 160px 0;
+    background-color: var(--color-verde-claro); 
+    overflow: hidden;
+}
+
+.nosotros__bg-olas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 120%; /* Un poco más ancho para la animación de movimiento */
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.ola-svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Estilo para las dos capas de olas */
+.ola-path {
+    stroke-linecap: round;
+    will-change: transform;
+}
+
+.content-front {
+    position: relative;
+    z-index: 2;
+}
+
+.nosotros__layout {
+    display: flex;
+    gap: 80px;
+    align-items: center;
+}
+
+.nosotros__col-izq { flex: 1; }
+.nosotros__col-der { flex: 1.5; display: flex; flex-direction: column; gap: 25px; }
+
+.nosotros__titulo {
+    font-family: var(--font-titulos);
+    color: var(--color-amarillo);
+    font-size: 4.2rem;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 0px rgba(0,0,0,0.05); /* Sombra suave para resaltar */
+}
+
+.nosotros__slogan {
+    font-family: var(--font-body);
+    color: var(--color-verde-oscuro);
+    font-size: 1.3rem;
+    line-height: 1.4;
+    font-weight: 600;
+    max-width: 280px;
+}
+
+.nosotros__parrafo {
+    font-family: var(--font-body);
+    color: var(--color-verde-oscuro);
+    font-size: 1.3rem;
+    line-height: 1.4;
+    font-weight: 600;
+}
+
+@media (max-width: 992px) {
+    .nosotros__layout { flex-direction: column; text-align: center; }
+    .nosotros__slogan { max-width: 100%; }
+}

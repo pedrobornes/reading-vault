@@ -1,0 +1,72 @@
+/* src/assets/css/empieza.css */
+
+.empieza {
+    padding: 120px 0;
+    /* Usamos el color salmón de tu imagen de referencia */
+    background-color: var(--color-salmon); 
+    width: 100%;
+}
+
+.empieza__flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 90px;
+}
+
+.empieza__col-izq, .empieza__col-der {
+    flex: 1;
+}
+
+.empieza__titulo {
+    font-family: var(--font-titulos);
+    color: var(--color-verde-oscuro);
+    font-size: 3.2rem;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.empieza__parrafo {
+    font-family: var(--font-body);
+    color: white;
+    font-size: 1.3rem;
+    line-height: 1.6;
+    margin-bottom: 40px;
+}
+
+.empieza__boton-container {
+    display: flex;
+    justify-content: center;
+}
+
+.empieza__enlace {
+    display: inline-block;
+    padding: 18px 50px;
+    background-color: var(--color-amarillo);
+    color: white;
+    font-family: var(--font-body);
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 40px; /* Botón muy redondeado como en la imagen */
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.empieza__enlace:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive para que en móvil se apilen */
+@media (max-width: 992px) {
+    .empieza__flex {
+        flex-direction: column;
+        text-align: center;
+        gap: 40px;
+    }
+    
+    .empieza__titulo {
+        font-size: 2.5rem;
+    }
+}

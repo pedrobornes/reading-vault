@@ -1,5 +1,6 @@
 import React, { useEffect } from "react"; // Añadido useEffect
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import ScrollToTop from './components/ScrollToTop';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
@@ -31,6 +32,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <Header />
 
       <main className="main-content">
