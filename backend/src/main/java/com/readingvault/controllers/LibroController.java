@@ -26,23 +26,25 @@ public class LibroController {
     @GetMapping("/buscar")
     public List<Map<String, Object>> buscar(
             @RequestParam String q,
-            @RequestParam(defaultValue = "1") int pagina) {
+            @RequestParam(defaultValue = "1") int pagina,
+            @RequestParam(defaultValue = "relevance") String orderBy) {
 
-        // Llamamos al servicio con el parámetro único
-        List<LibroExternoDTO> librosExternos = googleBooksService.buscarLibros(q, pagina);
+        List<LibroExternoDTO> librosExternos = googleBooksService.buscarLibros(q, pagina, orderBy);
 
         return librosExternos.stream().map(libro -> {
             Map<String, Object> respuesta = new HashMap<>();
+            
             respuesta.put("titulo", libro.getTitle());
+            respuesta.put("portada", libro.getCoverId());
 
             String nombreAutor = (libro.getAuthorNames() != null && !libro.getAuthorNames().isEmpty())
                     ? libro.getAuthorNames().get(0)
                     : "Autor desconocido";
             respuesta.put("autor", nombreAutor);
-            respuesta.put("portada", libro.getCoverId());
+            
+            respuesta.put("valoracion", libro.getAverageRating());
 
             return respuesta;
         }).collect(Collectors.toList());
-
     }
 }

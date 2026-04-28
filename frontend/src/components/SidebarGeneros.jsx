@@ -1,25 +1,50 @@
-const SidebarGeneros = ({ tusGeneros, todosLosGeneros }) => {
-    return (
-        <aside style={estiloSidebar}>
-            <h3 style={estiloTituloSeccion}>Tus géneros</h3>
-            <div style={estiloLinea} />
-            <ul style={estiloLista}>
-                {tusGeneros.map(g => <li key={g} style={estiloItem}>{g}</li>)}
-            </ul>
+import React from 'react';
+import '../assets/css/buscador.css';
 
-            <h3 style={{...estiloTituloSeccion, marginTop: '20px'}}>Todos los géneros</h3>
-            <div style={estiloLinea} />
-            <ul style={estiloLista}>
-                {todosLosGeneros.map(g => <li key={g} style={estiloItem}>{g}</li>)}
-            </ul>
-        </aside>
-    );
+// Componente para mostrar los géneros
+const SidebarGeneros = ({ tusGeneros, todosLosGeneros, onGeneroClick, generoActivo }) => {
+  return (
+    <div className="sidebar-custom">
+      
+      {/* Sección: Tus Géneros */}
+      <h3 className="sidebar-custom__title">Tus géneros</h3>
+      <hr className="sidebar-custom__divider" />
+      
+      {/* Verifica si hay géneros favoritos */}
+      {tusGeneros && tusGeneros.length > 0 ? (
+        <ul className="sidebar-custom__list">
+          {tusGeneros.map((genero, idx) => (
+            <li 
+              key={`tus-${idx}`} 
+              className={`sidebar-custom__item ${generoActivo === genero ? "active" : ""}`}
+              onClick={() => onGeneroClick(genero)}
+            >
+              {genero}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="sidebar-custom__empty">Aún no tienes favoritos</p>
+      )}
+
+      {/* Sección: Todos los Géneros */}
+      <h3 className="sidebar-custom__title mt-5">Todos los géneros</h3>
+      <hr className="sidebar-custom__divider" />
+      
+      <ul className="sidebar-custom__list">
+        {todosLosGeneros.map((genero, idx) => (
+          <li 
+            key={`todos-${idx}`}
+            className={`sidebar-custom__item ${generoActivo === genero ? "active" : ""}`}
+            onClick={() => onGeneroClick(genero)}
+          >
+            {genero}
+          </li>
+        ))}
+      </ul>
+      
+    </div>
+  );
 };
-
-const estiloSidebar = { width: '220px', backgroundColor: '#A8CBBF', padding: '20px', borderRadius: '15px', color: '#444', height: 'fit-content' };
-const estiloTituloSeccion = { fontSize: '1.1rem', marginBottom: '5px', textAlign: 'center' };
-const estiloLinea = { height: '1px', backgroundColor: '#888', marginBottom: '10px' };
-const estiloLista = { listStyle: 'none', padding: 0, margin: 0, textAlign: 'center' };
-const estiloItem = { padding: '5px 0', fontSize: '0.9rem', cursor: 'pointer' };
 
 export default SidebarGeneros;

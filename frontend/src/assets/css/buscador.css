@@ -1,23 +1,45 @@
 /* src/assets/css/buscador.css */
 
-/* Bloque Principal */
+/* Contenedor principal */
 .buscador-page {
     background-color: var(--color-azul-claro); 
     min-height: 100vh;
-    padding: 40px 0;
+    padding: 60px 0;
     font-family: var(--font-body);
 }
 
-/* Contenedor del buscador */
+/* Encabezado */
+.header-buscador {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+/* Título del encabezado */
+.header-buscador__titulo {
+    font-family: var(--font-titulos); 
+    color: var(--color-verde-oscuro);
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+}
+
+/* Subtítulo del encabezado */
+.header-buscador__subtitulo {
+    color: var(--text-body);
+    font-size: 1.1rem;
+    font-style: italic;
+}
+
+/* Barra de búsqueda */
 .search-bar {
     background-color: var(--color-azul-footer); 
     padding: 15px 40px;
     border-radius: 50px;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
     display: flex;
     justify-content: center;
 }
 
+/* Formulario interno */
 .search-bar__form {
     display: flex;
     width: 100%;
@@ -28,6 +50,7 @@
     box-shadow: var(--shadow);
 }
 
+/* Icono de lupa */
 .search-bar__icon {
     padding: 0 15px;
     display: flex;
@@ -35,6 +58,7 @@
     color: var(--text-body);
 }
 
+/* Input de texto */
 .search-bar__input {
     flex: 1;
     border: none;
@@ -44,6 +68,7 @@
     font-family: var(--font-body);
 }
 
+/* Botón de buscar */
 .search-bar__button {
     background-color: var(--color-salmon);
     color: white;
@@ -55,48 +80,19 @@
     transition: 0.3s;
 }
 
-/* src/assets/css/buscador.css */
-
-.ver-mas-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 60px; 
-    padding-bottom: 40px; 
-}
-
-.btn-ver-mas {
-    background-color: var(--color-salmon);
-    color: white;
-    border: none;
-    padding: 12px 45px;
-    border-radius: 50px;
-    font-weight: bold;
-    font-family: var(--font-body);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    cursor: pointer;
-    box-shadow: var(--shadow);
-    transition: all 0.3s ease;
-}
-
-.btn-ver-mas:hover {
-    background-color: var(--color-amarillo);
-    color: var(--color-marron-oscuro);
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-}
-
+/* Hover botón buscar */
 .search-bar__button:hover {
     background-color: var(--color-verde-oscuro); 
 }
 
-/* Grid de libros */
+/* Grid de resultados */
 .libros-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 25px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 40px;
 }
 
+/* Mensaje sin resultados */
 .libros-grid__mensaje {
     text-align: center;
     grid-column: 1/-1;
@@ -104,16 +100,112 @@
     margin-top: 50px;
 }
 
-/* Select de ordenación */
+/* Selector de orden */
 .sort-section {
     text-align: right;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
+/* Input del selector */
 .sort-section__select {
     padding: 5px 10px;
     border-radius: 5px;
     border: 1px solid var(--color-azul-footer);
     font-family: var(--font-body);
+    color: var(--text-body);
+}
+
+/* Contenedor de paginación */
+.pagination-wrapper {
+    user-select: none;
+}
+
+/* Botones de paginación */
+.pagination-wrapper .btn {
+    min-width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+/* Página activa */
+.pagination-wrapper .btn-success {
+    background-color: var(--color-verde-oscuro);
+    border-color: var(--color-verde-oscuro);
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Hover en páginas inactivas */
+.pagination-wrapper .btn-outline-success:hover {
+    background-color: var(--color-azul-claro);
+    color: var(--color-verde-oscuro);
+}
+
+/* Contenedor lateral (Sidebar) */
+.sidebar-custom {
+    background-color: var(--color-azul-footer); 
+    border-radius: 15px;
+    padding: 30px 20px;
+    text-align: center;
+    margin-left: -40px;
+    margin-right: 40px;
+}
+
+/* Títulos del sidebar */
+.sidebar-custom__title {
+    font-family: var(--font-titulos); 
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-titulos); 
+    margin-bottom: 10px;
+}
+
+/* Separador */
+.sidebar-custom__divider {
+    border: 0;
+    height: 1px;
+    background-color: var(--color-salmon); 
+    margin: 0 auto 20px auto;
+    width: 85%;
+    opacity: 1; 
+}
+
+/* Listas de géneros */
+.sidebar-custom__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Elementos de la lista */
+.sidebar-custom__item {
+    font-size: 1.1rem;
+    color: var(--text-body);
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+/* Hover elementos lista */
+.sidebar-custom__item:hover {
+    color: var(--color-verde-oscuro);
+    transform: scale(1.05);
+}
+
+/* Elemento activo */
+.sidebar-custom__item.active {
+    font-weight: bold;
+    color: var(--text-titulos);
+}
+
+/* Mensaje lista vacía */
+.sidebar-custom__empty {
+    font-size: 0.9rem;
+    font-style: italic;
     color: var(--text-body);
 }

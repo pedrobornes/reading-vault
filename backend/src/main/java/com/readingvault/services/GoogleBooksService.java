@@ -20,13 +20,17 @@ public class GoogleBooksService {
     private final String GOOGLE_BOOKS_URL = "https://www.googleapis.com/books/v1/volumes";
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public List<LibroExternoDTO> buscarLibros(String query, int pagina) {
+    public List<LibroExternoDTO> buscarLibros(String query, int pagina, String orderBy) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(GOOGLE_BOOKS_URL);
 
-        // Google busca por defecto en todos los campos
         builder.queryParam("q", query);
-        builder.queryParam("maxResults", 20);
-        builder.queryParam("startIndex", (pagina - 1) * 20);
+        builder.queryParam("maxResults", 12); 
+        builder.queryParam("startIndex", (pagina - 1) * 12); 
+        
+        if (orderBy != null && !orderBy.isEmpty()) {
+            builder.queryParam("orderBy", orderBy);
+        }
+        
         builder.queryParam("key", apiKey);
 
         try {
@@ -39,12 +43,23 @@ public class GoogleBooksService {
                 Map<String, Object> volumeInfo = (Map<String, Object>) item.get("volumeInfo");
                 LibroExternoDTO dto = new LibroExternoDTO();
 
+                // Título
                 dto.setTitle(String.valueOf(volumeInfo.getOrDefault("title", "Sin título")));
 
+                // Autores
                 if (volumeInfo.containsKey("authors")) {
                     dto.setAuthorNames((List<String>) volumeInfo.get("authors"));
                 }
 
+                // NUEVO: Extraer valoración media de Google
+                if (volumeInfo.containsKey("averageRating")) {
+                    // Convertimos el valor a double de forma segura
+                    dto.setAverageRating(Double.parseDouble(volumeInfo.get("averageRating").toString()));
+                } else {
+                    dto.setAverageRating(0.0);
+                }
+
+                // Portada
                 if (volumeInfo.containsKey("imageLinks")) {
                     Map<String, String> images = (Map<String, String>) volumeInfo.get("imageLinks");
                     String coverUrl = images.get("thumbnail");
