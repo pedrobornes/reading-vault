@@ -27,7 +27,13 @@ public class LibroExternoDTO {
     // Valoración media de Google Books
     private double averageRating;
 
+    private String nombrePrimerAutor;
+
     public String getNombrePrimerAutor() {
         return (authorNames != null && !authorNames.isEmpty()) ? authorNames.get(0) : "Autor desconocido";
+    }
+
+    public void setNombrePrimerAutor(String nombrePrimerAutor) {
+        this.nombrePrimerAutor = nombrePrimerAutor;
     }
 }

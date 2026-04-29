@@ -33,6 +33,8 @@ public class UsuarioController {
     @Autowired
     private CloudinaryService cloudinaryService;
 
+
+
     @GetMapping("/{id}")
     public ResponseEntity<Usuario> obtenerPerfil(@PathVariable Long id) {
         Optional<Usuario> usuario = usuarioService.buscarPorId(id);
@@ -100,14 +102,14 @@ public class UsuarioController {
             Usuario usuario = usuarioService.buscarPorId(id)
                     .orElseThrow(() -> new Exception("Usuario no encontrado"));
 
-            // 1. Borrar la foto de Cloudinary si no es la por defecto
+            // Borrar la foto de Cloudinary si no es la por defecto
             String urlFoto = usuario.getFotoPerfil();
             if (urlFoto != null && urlFoto.contains("cloudinary")) {
                 String publicId = cloudinaryService.extraerPublicId(urlFoto);
                 cloudinaryService.eliminarFoto(publicId);
             }
 
-            // 2. Borrar de la base de datos
+            // Borrar de la base de datos
             usuarioService.eliminar(id);
 
             return ResponseEntity.ok(Map.of("mensaje", "Usuario y datos eliminados con éxito"));

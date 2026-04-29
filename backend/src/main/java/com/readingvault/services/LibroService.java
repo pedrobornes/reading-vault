@@ -26,5 +26,15 @@ public class LibroService {
         return libroRepository.save(libro);
     }
 
-    
+    public Libro obtenerOCrear(String titulo, String autor, String fotoPortada) {
+    // Buscamos si ya existe por título y autor para evitar duplicados
+    return libroRepository.findByTituloAndAutor(titulo, autor)
+        .orElseGet(() -> {
+            Libro nuevo = new Libro();
+            nuevo.setTitulo(titulo);
+            nuevo.setAutor(autor);
+            nuevo.setFotoPortada(fotoPortada);
+            return libroRepository.save(nuevo);
+        });
+}
 }

@@ -30,23 +30,24 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(request -> {
-            CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedOrigins(List.of("http://localhost:5173", "http://127.0.0.1:5173"));
-            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-            config.setAllowedHeaders(List.of("*"));
-            config.setAllowCredentials(true);
-            return config;
-        }))
+                    CorsConfiguration config = new CorsConfiguration();
+                    config.setAllowedOrigins(List.of("http://localhost:5173", "http://127.0.0.1:5173"));
+                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    config.setAllowedHeaders(List.of("*"));
+                    config.setAllowCredentials(true);
+                    return config;
+                }))
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/libros/**").permitAll()
-                .anyRequest().authenticated()
-                )
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/libros/**").permitAll()
+                        .requestMatchers("/api/bibliotecas/**").authenticated()                                                                                
+                        .anyRequest().authenticated())
                 .sessionManagement(session -> session
-                .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS)
-                )
+                        .sessionCreationPolicy(
+                                org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter,
+                        org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

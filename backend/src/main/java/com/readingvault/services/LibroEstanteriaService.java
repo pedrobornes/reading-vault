@@ -22,4 +22,15 @@ public class LibroEstanteriaService {
     public List<LibroEstanteria> obtenerLibrosDeEstanteria(Long idEstanteria) {
         return libroEstanteriaRepository.findByEstanteriaIdEstanteria(idEstanteria);
     }
+
+    public void guardar(LibroEstanteria libroEstanteria) {
+        // Comprobamos si el libro ya está en esa estantería para no repetir
+        boolean existe = libroEstanteriaRepository.existsByEstanteriaAndLibro(
+                libroEstanteria.getEstanteria(),
+                libroEstanteria.getLibro());
+
+        if (!existe) {
+            libroEstanteriaRepository.save(libroEstanteria);
+        }
+    }
 }

@@ -1,0 +1,78 @@
+/* En tu archivo libroCard.css */
+
+.btn-add-vault {
+    transition: all 0.3s ease !important;
+    font-family: var(--font-titulos);
+}
+
+.btn-add-vault:hover {
+    /* Un pelín más oscuro que tu salmón para el hover */
+    filter: brightness(1.1); 
+    transform: scale(1.03);
+}
+
+.libro-card:hover .btn-add-vault {
+    animation: pulseSalmon 2s infinite;
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.vault-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px; /* Posicionado a la derecha */
+  z-index: 2000;
+  padding: 12px 24px;
+  border-radius: 12px;
+  color: white;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  font-family: var(--font-body);
+  min-width: 250px;
+  
+  /* Animación: dura 3s en total */
+  /* Aparece en 0.5s, se queda, y se desvanece al final */
+  animation: fadeToast 3s forwards; 
+}
+
+.vault-toast--success { background-color: #49d66a; }
+.vault-toast--error { background-color: #630A10; }
+
+@keyframes fadeToast {
+  0% { opacity: 0; transform: translateX(50px); } /* Viene de la derecha */
+  15% { opacity: 1; transform: translateX(0); }   /* Se queda fijo */
+  85% { opacity: 1; transform: translateX(0); }   /* Empieza a irse */
+  100% { opacity: 0; transform: translateX(20px); } /* Se desvanece */
+}
+
+.menu-desplegable div:hover {
+  background-color: #f8fafc !important;
+  color: var(--color-salmon) !important;
+}
+
+/* Excepción para el de eliminar para que brille en rojo */
+.menu-desplegable div.opcion-eliminar:hover {
+  background-color: #fee2e2 !important; 
+  color: #b91c1c !important; 
+}
+
+/* Pequeña animación de escala al abrirse */
+.menu-desplegable {
+  animation: popMenu 0.2s ease-out;
+}
+
+@keyframes popMenu {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}

@@ -1,5 +1,7 @@
 package com.readingvault.services;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +42,8 @@ public class EstanteriaService {
     public void agregarLibroAEstanteria(LibroExternoDTO libroExterno, Long usuarioId, String nombreEstanteria) {
 
         // Buscamos el libro en nuestra BD local para no repetir datos
-        Libro libroLocal = libroRepository.findByTituloAndAutor(libroExterno.getTitle(), libroExterno.getNombrePrimerAutor())
+        Libro libroLocal = libroRepository
+                .findByTituloAndAutor(libroExterno.getTitle(), libroExterno.getNombrePrimerAutor())
                 .orElseGet(() -> {
                     // Si no existe, mapeamos los datos del DTO de Google al modelo Libro
                     Libro nuevoLibro = new Libro();
@@ -52,9 +55,10 @@ public class EstanteriaService {
                     return libroRepository.save(nuevoLibro);
                 });
 
-        // Buscamos la estantería específica del usuario (ej. "Favoritos", "Leídos")
+        // Buscamos la estantería específica del usuario
         Estanteria estanteria = estanteriaRepository.findByUsuario_IdUsuarioAndNombre(usuarioId, nombreEstanteria)
-                .orElseThrow(() -> new RuntimeException("La estantería '" + nombreEstanteria + "' no existe para este usuario"));
+                .orElseThrow(() -> new RuntimeException(
+                        "La estantería '" + nombreEstanteria + "' no existe para este usuario"));
 
         // Verificamos si el libro ya está en esa estantería para evitar duplicados
         boolean yaExiste = libroEstanteriaRepository.existsByEstanteriaAndLibro(estanteria, libroLocal);
@@ -66,6 +70,27 @@ public class EstanteriaService {
             relacion.setLibro(libroLocal);
             // La fecha se gestiona automáticamente en el modelo
             libroEstanteriaRepository.save(relacion);
+        }
+    }
+
+    public Optional<Estanteria> buscarPorUsuarioYNombre(Long idUsuario, String nombre) {
+        // Buscamos la estantería específica de ese usuario
+        return estanteriaRepository.findByUsuario_IdUsuarioAndNombre(idUsuario, nombre);
+    }
+
+    public Estanteria guardar(Estanteria estanteria) {
+        return estanteriaRepository.save(estanteria);
+    }
+
+    @Transactional
+    public void eliminarLibroDeUsuario(Long idUsuario, String titulo, String autor) {
+        // 1. Buscamos el libro
+        Optional<Libro> libro = libroRepository.findByTituloAndAutor(titulo, autor);
+
+        if (libro.isPresent()) {
+            // 2. Borramos cualquier relación de ese libro con las estanterías de ese
+            // usuario
+            libroEstanteriaRepository.deleteByLibroAndEstanteria_Usuario_IdUsuario(libro.get(), idUsuario);
         }
     }
 }
