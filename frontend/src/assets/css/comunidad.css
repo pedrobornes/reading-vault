@@ -1,0 +1,125 @@
+/* Fondo general */
+.comunidad-bg {
+    background-color: #d6f6e5; /* Menta claro */
+    min-height: 100vh;
+}
+
+.comunidad-titulo {
+    font-family: var(--font-titulos), serif;
+    font-size: 3rem;
+    color: #3b4543;
+}
+
+/* Caja del buscador */
+.busqueda-container {
+    background-color: #9ebcb6; /* Salvia oscuro */
+    border-radius: 15px;
+}
+
+.input-buscar:focus {
+    box-shadow: none;
+    border-color: #ced4da;
+}
+
+/* Pestañas */
+.nav-pestañas {
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.btn-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 8px;
+    color: #4a5754;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-tab.active {
+    background-color: white;
+    color: #3b4543;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Tarjetas */
+.comunidad-card {
+    background-color: white;
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.comunidad-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Elementos de Grupo */
+.grupo-img {
+    height: 150px;
+    object-fit: cover;
+}
+
+.lectura-actual {
+    background-color: #f8f9fa;
+    border: 1px dashed #ced4da;
+}
+
+/* Elementos de Usuario */
+.usuario-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #d6f6e5;
+}
+
+/* Botones de acción */
+.btn-crear-grupo {
+    background-color: #f6c860; /* Amarillo */
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: background-color 0.2s;
+}
+
+.btn-crear-grupo:hover {
+    background-color: #dfb24e;
+}
+
+.btn-unirse {
+    background-color: #c98b80; /* Salmón */
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.btn-unirse:hover {
+    background-color: #b37a70;
+}
+
+.btn-seguir {
+    background-color: transparent;
+    color: #9ebcb6; /* Salvia */
+    border: 2px solid #9ebcb6;
+    padding: 6px 15px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-seguir:hover {
+    background-color: #9ebcb6;
+    color: white;
+}

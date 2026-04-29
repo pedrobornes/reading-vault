@@ -1,7 +1,7 @@
-import React, { useEffect } from "react"; // React y hooks
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ScrollToTop from './components/ScrollToTop';
-import BotonSubir from './components/BotonSubir'; // Botón visual subir
+import BotonSubir from './components/BotonSubir';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
@@ -11,7 +11,7 @@ import 'aos/dist/aos.css';
 
 import "./App.css";
 
-// Globales
+// Componentes globales
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 
@@ -24,9 +24,9 @@ import Home from './pages/Home';
 import PerfilUsuario from "./pages/PerfilUsuario";
 import AjustesCuenta from "./pages/AjustesCuenta";
 import DetalleLibro from "./pages/DetalleLibro";
+import Comunidad from "./pages/Comunidad";
 
 function App() {
-  // Inicializa AOS
   useEffect(() => {
     AOS.init({
       duration: 1000, 
@@ -37,14 +37,15 @@ function App() {
 
   return (
     <Router>
-      {/* Reseteo de scroll automático */}
       <ScrollToTop />
       
       <Header />
 
       <main className="main-content">
         <Routes>
+          {/* Definición de rutas */}
           <Route path="/" element={<Landing />} />
+          <Route path="/comunidad" element={<Comunidad />} />
           <Route path="/login" element={<Login />} />
           <Route path="/registro" element={<Registro />} />
           <Route path="/buscador" element={<BuscadorLibros />} />
@@ -57,7 +58,6 @@ function App() {
 
       <Footer />
 
-      {/* Botón flotante */}
       <BotonSubir />
     </Router>
   );
