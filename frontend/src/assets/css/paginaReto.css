@@ -1,0 +1,158 @@
+/* --- CONTENEDOR PRINCIPAL (EL ESTANTE) --- */
+.pagina-reto{
+    background-color: var(--color-azul-footer);
+}
+
+.reto-main-content {
+  perspective: 3000px; 
+  position: relative;
+  width: 100%;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  /* Altura fija para que el footer no se pegue a las cartas */
+  min-height: 700px; 
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Alineamos arriba */
+  padding-top: 50px;
+  
+}
+
+/* --- LA CARTA / HOJA DEL LIBRO --- */
+.reto-card {
+  position: absolute; /* CLAVE: Todas en el mismo punto exacto */
+  background-color: var(--color-azul-claro);
+  width: 100%;
+  max-width: 1000px;
+  min-height: 520px;
+  border-radius: 15px 40px 40px 15px;
+  
+  /* Lomo del libro grueso a la izquierda */
+  border-left: 20px solid var(--color-verde-oscuro); 
+  border-top: 1px solid rgba(255,255,255,0.8);
+  
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.2), 
+    0 0 30px rgba(255, 255, 255, 0.3);
+    
+  transition: transform 1.2s cubic-bezier(0.645, 0.045, 0.355, 1), opacity 0.8s;
+  transform-origin: left center;
+  cursor: pointer;
+  backface-visibility: hidden;
+}
+
+.reto-card__title-container {
+  background-color: white;
+  margin: 30px 0 0 40px; /* Separado del lomo y arriba */
+  padding: 10px 40px;
+  border-radius: 12px;
+  width: fit-content;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 5;
+}
+
+.reto-card__title {
+  color: var(--color-salmon) !important; /* Color de acento Salmón */
+  font-family: var(--font-titulos);
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+/* --- ESTRUCTURA INTERNA --- */
+.reto-card__body {
+  display: flex;
+  flex-direction: row-reverse; /* Icono a la derecha como en la imagen */
+  align-items: center;
+  justify-content: space-between;
+  padding: 40px 60px 60px;
+  gap: 40px;
+}
+
+/* --- ESTADOS DE LA PÁGINA --- */
+.pagina-pasada {
+  transform: rotateY(-140deg) scale(0.9);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* --- LA ETIQUETA (MARCAPÁGINAS) --- */
+.reto-card::after {
+  content: "SIGUE LEYENDO";
+  position: absolute;
+  top: -5px;
+  right: -10px; /* Sobresale un poco del borde derecho */
+  width: 70px;
+  height: 150px;
+  background-color: var(--color-amarillo);
+  color: var(--color-verde-oscuro);
+  font-family: var(--font-titulos);
+  font-weight: bold;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 15px;
+  writing-mode: vertical-rl;
+  
+  white-space: nowrap;
+  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 50% 88%, 0% 100%);
+  box-shadow: -5px 5px 15px rgba(0,0,0,0.2);
+  z-index: 50;
+  transition: transform 0.3s ease;
+}
+
+.reto-card:hover::after {
+  background-color: var(--color-salmon); /* Cambio a Salmón */
+  color: #FFFFFF; /* Letras en Blanco puro */
+  transform: translateY(4px); /* Un pequeño movimiento hacia abajo opcional, sin agrandar */
+  height: 150px;
+}
+
+/* --- ICONO Y PROGRESO XXL --- */
+.reto-card__icon-circle {
+width: 160px;
+  height: 160px;
+  background-color: white;
+  border: 4px solid var(--color-amarillo);
+  color: var(--color-verde-oscuro);
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4.5rem;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.reto-progress-bar {
+background-color: white; /* Fondo blanco para que destaque */
+  height: 35px;
+  border-radius: 20px;
+  width: 100%;
+  margin-top: 20px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.reto-progress-bar__fill {
+  background: linear-gradient(90deg, var(--color-salmon) 0%, var(--color-amarillo) 100%);
+  height: 100%;
+  border-radius: 20px;
+  box-shadow: 0 0 15px rgba(235, 189, 108, 0.4); /* Brillo amarillo */
+}
+
+/* Quitamos el marcapáginas a la última hoja */
+.reto-card.ultima-hoja::after {
+  display: none !important;
+}
+
+/* Cambiamos el cursor en la última hoja para que no invite a pasar página */
+.reto-card.ultima-hoja {
+  cursor: default;
+}
+
+/* Opcional: que el botón de "Volver a empezar" sí tenga cursor de click */
+.reto-card.ultima-hoja .btn-add-progress {
+  cursor: pointer;
+}

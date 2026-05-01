@@ -29,6 +29,7 @@ export default function HomeLeyendoReto() {
                 <h3 className="leyendo__titulo">Reto del año</h3>
                 <h4 className="libro__progreso"></h4>
                 <div className="reto__barra"></div>
+                <Link to="/reto">ir a mi reto</Link>
             </div>
         </section>
     )

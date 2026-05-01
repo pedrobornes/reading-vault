@@ -1,0 +1,209 @@
+.reto-header {
+  background-color: var(--color-azul-claro);
+  position: relative;
+  width: 100%;
+  padding-bottom: 0px; 
+}
+
+.reto-header__banner {
+  position: relative;
+  height: 300px; 
+  background-image: url('/img/reto.jpg'); 
+  background-size: cover;
+  background-position: center;
+}
+
+.reto-header__wave {
+  position: absolute;
+  bottom: -1px;
+  left: -2%; 
+  width: 104%; 
+  height: 140px; 
+  z-index: 1;
+  pointer-events: none; 
+}
+
+.reto-header__content {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  max-width: var(--container-width);
+  margin: 0 auto; 
+  transform: translateY(-30px); 
+  padding: 0 20px;
+  position: relative;
+  z-index: 10;
+}
+
+.reto-header__logo-reading {
+  font-family: var(--font-titulos);
+  font-size: 4rem;
+  color: var(--color-verde-oscuro);
+  align-self: flex-start; 
+  line-height: 0.9;
+  margin: 0;
+  padding-bottom: 1rem;
+}
+
+.reto-header__title {
+  font-family: var(--font-titulos);
+  font-size: 1.6rem; 
+  color: var(--color-salmon);
+  margin: 0;
+}
+
+.reto-header__logo-vault {
+  font-family: var(--font-titulos);
+  font-size: 4rem;
+  color: var(--color-amarillo);
+  align-self: flex-end; 
+  line-height: 0.9;
+  margin: 0;
+  padding-left: 60px;
+}
+
+.reto-header__logo-container {
+  display: flex;
+  flex-direction: column; 
+  width: fit-content; 
+  gap: 0; 
+}
+
+/* Contenedor de la info */
+.reto-header__info-container {
+  overflow: hidden;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Animación de vaivén lateral */
+@keyframes waveMove {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(-25px); } 
+  100% { transform: translateX(0); }
+}
+
+.reto-header__wave {
+  position: absolute;
+  bottom: -1px;
+  left: -2%; 
+  width: 104%; 
+  height: 180px;
+  z-index: 1;
+  pointer-events: none; 
+}
+
+
+.reto-header__wave path {
+  animation: waveMove 3s ease-in-out infinite;
+}
+
+.reto-header__wave path:first-child {
+  animation-duration: 6s;
+  animation-direction: alternate-reverse;
+}
+
+
+@keyframes revealFromBottom {
+  0% {
+    transform: translateY(110%); 
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0); 
+    opacity: 1;
+  }
+}
+
+.reto-header__logo-container {
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  gap: 0;
+  overflow: hidden; 
+}
+
+.reto-header__logo-reading {
+  padding-top: 1rem;
+  font-family: var(--font-titulos);
+  font-size: 4rem;
+  color: var(--color-verde-oscuro);
+  align-self: flex-start; 
+  line-height: 0.9;
+  margin: 0;
+  
+  
+  display: block; 
+  animation: revealFromBottom 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.reto-header__logo-vault {
+  font-family: var(--font-titulos);
+  font-size: 4rem;
+  color: var(--color-amarillo);
+  align-self: flex-end; 
+  line-height: 0.9;
+  margin: 0;
+  padding-left: 60px; 
+  
+ 
+  display: block;
+  animation: revealFromBottom 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+  opacity: 0; 
+}
+
+.reto-header__info-container {
+  overflow: hidden;
+  animation: revealFromBottom 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+  opacity: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.reto-header__title {
+  margin-bottom: 5px;
+}
+
+.reto-card::after {
+  content: "SIGUE LEYENDO"; /* El texto que aparece en la cinta */
+  position: absolute;
+  top: -10px; /* Sobresale un poco por arriba para dar relieve */
+  right: 50px; /* Posicionado a la derecha */
+  width: 50px;
+  height: 100px;
+  background-color: var(--color-amarillo);
+  color: var(--color-verde-oscuro);
+  font-family: var(--font-titulos);
+  font-weight: bold;
+  font-size: 0.8rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Texto en vertical */
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  
+  /* Forma de cinta (corte en V abajo) */
+  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 50% 85%, 0% 100%);
+  
+  /* Sombra para que parezca que vuela sobre la card */
+  box-shadow: 2px 5px 15px rgba(0, 0, 0, 0.2);
+  
+  z-index: 20;
+  transition: all 0.3s ease;
+}
+
+/* Efecto al pasar el ratón por la card */
+.reto-card:hover::after {
+  height: 115px; /* Se estira un poco al hacer hover */
+  background-color: var(--color-salmon); /* Cambia a salmón para avisar del click */
+  color: white;
+}
+
+/* Cuando la página ya ha pasado, ocultamos su marcapáginas */
+.reto-card.pagina-pasada::after {
+  display: none;
+}

@@ -25,6 +25,7 @@ import PerfilUsuario from "./pages/PerfilUsuario";
 import AjustesCuenta from "./pages/AjustesCuenta";
 import DetalleLibro from "./pages/DetalleLibro";
 import Comunidad from "./pages/Comunidad";
+import Reto from "./pages/Reto";
 
 function App() {
   useEffect(() => {
@@ -53,6 +54,7 @@ function App() {
           <Route path="/perfilUsuario" element={<PerfilUsuario />} />
           <Route path="/ajustesCuenta" element={<AjustesCuenta />} />
           <Route path="/detalle" element={<DetalleLibro />} />
+          <Route path="/reto" element={<Reto />} />
         </Routes>
       </main>
 
