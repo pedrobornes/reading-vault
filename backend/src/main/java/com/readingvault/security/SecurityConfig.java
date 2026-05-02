@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/libros/**").permitAll()
                 .requestMatchers("/api/generos/**").permitAll() 
                 .requestMatchers("/api/bibliotecas/**").authenticated()
+                .requestMatchers("/api/reviews/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

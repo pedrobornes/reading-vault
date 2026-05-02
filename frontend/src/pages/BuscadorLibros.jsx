@@ -11,24 +11,38 @@ const BuscadorLibros = () => {
   const [orden, setOrden] = useState("relevance"); 
   const [pagina, setPagina] = useState(1); 
   const [tusGeneros, setTusGeneros] = useState([]); 
-  
-  //  Estado para la lista maestra de géneros de la BD
   const [listaMaestraGeneros, setListaMaestraGeneros] = useState([]);
 
   useEffect(() => {
-    //  Cargar géneros del usuario para la sección "Mis Favoritos"
     const sesion = localStorage.getItem("usuario");
-    if (sesion) {
+    const token = localStorage.getItem("token");
+
+    if (sesion && token) {
       const userObj = JSON.parse(sesion);
-      if (userObj.generosFavoritos) {
-        setTusGeneros(userObj.generosFavoritos.map(g => g.nombre));
-      }
+      
+      axios.get(`http://localhost:8080/api/usuarios/${userObj.idUsuario}`, {
+        headers: {
+          Authorization: `Bearer ${token}` 
+        }
+      })
+      .then(res => {
+        if (res.data.generosFavoritos) {
+          // Sincronizamos los géneros reales de la base de datos
+          setTusGeneros(res.data.generosFavoritos.map(g => g.nombre));
+        }
+      })
+      .catch(err => {
+        console.error("Error al sincronizar géneros del usuario:", err);
+        if (userObj.generosFavoritos) {
+          setTusGeneros(userObj.generosFavoritos.map(g => g.nombre));
+        }
+      });
     }
 
-    //  Cargar todos los géneros disponibles desde la BD
+    // La lista maestra suele ser pública, así que no suele necesitar token
     axios.get("http://localhost:8080/api/generos")
       .then(res => setListaMaestraGeneros(res.data))
-      .catch(err => console.error("Error cargando géneros:", err));
+      .catch(err => console.error("Error cargando géneros maestros:", err));
   }, []);
 
   const obtenerLibros = async (busqueda, generoNombre, ordenSeleccionado, paginaActual) => {
@@ -45,14 +59,18 @@ const BuscadorLibros = () => {
     if (!query) return;
 
     try {
+      // El backend ahora nos devuelve la lista ya filtrada y única por ISBN
       const response = await axios.get(
         `http://localhost:8080/api/libros/buscar?q=${query}&orderBy=${ordenSeleccionado === 'rating' ? 'relevance' : ordenSeleccionado}&pagina=${paginaActual}`
       );
       
       let resultados = response.data;
+
+      // Ordenación local por rating si es necesario
       if (ordenSeleccionado === "rating") {
         resultados = [...resultados].sort((a, b) => (b.valoracion || 0) - (a.valoracion || 0));
       }
+
       setLibros(resultados);
     } catch (error) {
       console.error("Error al obtener libros:", error);
@@ -151,10 +169,14 @@ const BuscadorLibros = () => {
             <div className="libros-grid">
               {libros.length > 0 ? (
                 libros.map((libro) => (
-                  <LibroCard key={libro.id || `${libro.titulo}-${libro.autor}`} libro={libro} />
+                  <LibroCard key={libro.isbn} libro={libro} />
                 ))
               ) : (
-                <p className="libros-grid__mensaje">Usa el buscador para encontrar tus libros favoritos.</p>
+                <p className="libros-grid__mensaje">
+                  {textoBusqueda || generoActivo 
+                    ? "No se encontraron libros con ISBN disponible." 
+                    : "Usa el buscador para encontrar tus libros favoritos."}
+                </p>
               )}
             </div>
 
@@ -175,7 +197,7 @@ const BuscadorLibros = () => {
                 <button 
                   className="btn btn-outline-success" 
                   onClick={() => cambiarPagina(pagina + 1)}
-                  disabled={libros.length < 12} 
+                  disabled={libros.length < 5} 
                 >
                   <i className="bi bi-chevron-right"></i>
                 </button>

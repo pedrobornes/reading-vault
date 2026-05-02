@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "../assets/css/libroCard.css";
 
 const LibroCard = ({ libro }) => {
@@ -6,10 +7,10 @@ const LibroCard = ({ libro }) => {
   const [estanteriaActual, setEstanteriaActual] = useState(null);
   const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
 
+  const navigate = useNavigate();
   const usuarioSesion = JSON.parse(localStorage.getItem("usuario"));
 
   useEffect(() => {
-    // Limpia estado al reciclar tarjeta
     setEstanteriaActual(null);
     setShowMenu(false);
 
@@ -25,7 +26,6 @@ const LibroCard = ({ libro }) => {
 
         if (response.ok) {
           const data = await response.json();
-          // Actualiza estado si hay datos
           if (data && data.nombreEstanteria) {
             setEstanteriaActual(data.nombreEstanteria);
           }
@@ -38,8 +38,12 @@ const LibroCard = ({ libro }) => {
     verificarEstadoLibro();
   }, [libro, usuarioSesion?.idUsuario]);
 
+  // Función para ir al detalle
+  const irADetalle = () => {
+    navigate(`/libro/${libro.isbn}`, { state: { libro } });
+  };
+
   const mostrarNotificacion = (texto, tipo) => {
-    // Muestra toast temporal
     setMensaje({ texto, tipo });
     setTimeout(() => setMensaje({ texto: "", tipo: "" }), 3000);
   };
@@ -50,7 +54,6 @@ const LibroCard = ({ libro }) => {
       return;
     }
 
-    // Payload para backend
     const payload = {
       idUsuario: usuarioSesion.idUsuario,
       nombreEstanteria: nombreEstanteria,
@@ -73,7 +76,6 @@ const LibroCard = ({ libro }) => {
       });
 
       if (response.ok) {
-        // Actualiza vista tras guardar
         setEstanteriaActual(nombreEstanteria);
         setShowMenu(false);
         mostrarNotificacion(`Libro movido a ${nombreEstanteria}`, "success");
@@ -84,7 +86,7 @@ const LibroCard = ({ libro }) => {
   };
 
   const eliminarDeBiblioteca = async (e) => {
-    if (e) e.stopPropagation();
+    if (e) e.stopPropagation(); // Evita que el clic en eliminar active la navegación de la card
 
     try {
       const response = await fetch(
@@ -96,7 +98,6 @@ const LibroCard = ({ libro }) => {
       );
 
       if (response.ok) {
-        // Limpia vista tras borrar
         setEstanteriaActual(null);
         setShowMenu(false);
         mostrarNotificacion("Libro eliminado del Vault", "success");
@@ -107,7 +108,6 @@ const LibroCard = ({ libro }) => {
   };
 
   const renderEstrellas = (rating) => {
-    // Genera iconos de estrellas
     const estrellas = [];
     const ratingRedondeado = Math.round(rating || 0);
     for (let i = 1; i <= 5; i++) {
@@ -118,7 +118,6 @@ const LibroCard = ({ libro }) => {
     return estrellas;
   };
 
-  // Define la clase CSS de color según el estado
   const getClaseBoton = () => {
     if (estanteriaActual === "Pendiente") return "btn-add-vault--pendiente";
     if (estanteriaActual === "Leyendo") return "btn-add-vault--leyendo";
@@ -128,7 +127,6 @@ const LibroCard = ({ libro }) => {
 
   return (
     <>
-      {/* Toast */}
       {mensaje.texto && (
         <div className={`vault-toast vault-toast--${mensaje.tipo}`}>
           {mensaje.tipo === "success" ? (
@@ -140,8 +138,8 @@ const LibroCard = ({ libro }) => {
         </div>
       )}
 
-      {/* Tarjeta del Libro */}
-      <div className="libro-card">
+      {/* TODA LA CARD ES CLICABLE */}
+      <div className="libro-card" onClick={irADetalle} style={{ cursor: 'pointer' }}>
         <div className="libro-card__contenedor-imagen">
           <img
             src={libro.portada || "https://via.placeholder.com/100x150?text=Sin+Portada"}
@@ -155,14 +153,11 @@ const LibroCard = ({ libro }) => {
         <h4 className="libro-card__titulo">{libro.titulo}</h4>
         <p className="libro-card__autor">{libro.autor}</p>
 
-        <div className="libro-card__acciones">
-          {/* Botón dinámico */}
+        {/* DETENEMOS LA PROPAGACIÓN AQUÍ PARA QUE EL BOTÓN Y MENÚ NO DISPAREN EL CLIC DE LA CARD */}
+        <div className="libro-card__acciones" onClick={(e) => e.stopPropagation()}>
           <button
             className={`btn-add-vault ${getClaseBoton()}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowMenu(!showMenu);
-            }}
+            onClick={() => setShowMenu(!showMenu)}
           >
             {estanteriaActual ? estanteriaActual : "Añadir a mi Vault"}
             <i className={`bi bi-chevron-${showMenu ? "up" : "down"} ms-2`}></i>

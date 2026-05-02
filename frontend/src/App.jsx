@@ -53,8 +53,8 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/perfilUsuario" element={<PerfilUsuario />} />
           <Route path="/ajustesCuenta" element={<AjustesCuenta />} />
-          <Route path="/detalle" element={<DetalleLibro />} />
           <Route path="/reto" element={<Reto />} />
+          <Route path="/libro/:isbn" element={<DetalleLibro />} />
         </Routes>
       </main>
 

@@ -1,89 +1,115 @@
 /* --- Fondos divididos --- */
-.detalle-top-bg {
-    background-color: #d6f6e5; /* Menta claro */
-}
+.detalle-top-bg { background-color: #d6f6e5; }
+.detalle-reviews-bg { background-color: #9ebcb6; min-height: 50vh; }
 
-.detalle-reviews-bg {
-    background-color: #9ebcb6; /* Salvia oscuro */
-    min-height: 50vh;
-}
-
-/* --- Resto de estilos superiores (mantenidos) --- */
+/* --- Componentes Base --- */
 .detalle-portada { width: 100%; max-width: 260px; border-radius: 12px; object-fit: cover; }
 .detalle-card { background-color: #9ebcb6; border-radius: 20px; color: #4a4a4a; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-.detalle-titulo { font-family: var(--font-titulos), serif; font-size: 3rem; color: #3b4543; }
-.detalle-titulo-seccion { font-family: var(--font-titulos), serif; font-size: 2.5rem; color: #4a5754; }
+.detalle-titulo { font-family: var(--font-titulos); font-size: 3rem; color: #3b4543; }
 .detalle-autor { font-size: 1.8rem; font-weight: 300; color: #4a5754; }
 .detalle-stats { font-size: 0.95rem; color: #4a5754; }
 .detalle-texto { font-size: 1.05rem; line-height: 1.5; }
 
-.btn-estado { background-color: #c98b80; color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 1.1rem; }
-.btn-estado:hover { background-color: #b37a70; }
-.btn-mas { background: none; border: none; color: #f6c860; font-weight: bold; padding: 0; font-size: 0.95rem; }
-.btn-mas:hover { color: #dfb24e; text-decoration: underline; }
+/* --- Tarjeta de Votación (Estilo image_3e14f7.png) --- */
+.voto-interactivo-card {
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    border-left: 6px solid var(--accent); /* Línea coral lateral */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
 
-.estrellas { color: #f6c860; font-size: 1.1rem; }
+.voto-interactivo-card p {
+    font-family: var(--font-titulos);
+    letter-spacing: 2px;
+    font-weight: 700;
+    color: var(--text-titulos);
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
 
-/* --- NUEVA SECCIÓN: Reseñas --- */
+/* El botón azul de la captura */
+.btn-escribir-vault {
+    border: 2px solid var(--color-azul-footer); 
+    background: transparent;
+    color: var(--color-azul-footer);
+    border-radius: 12px;
+    padding: 18px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
 
-/* Tarjeta principal con resplandor blanco */
+.btn-escribir-vault:hover:not(:disabled) {
+    background-color: rgba(155, 196, 188, 0.1);
+    transform: translateY(-2px);
+}
+
+.btn-escribir-vault:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: #ccc;
+    color: #999;
+}
+
+.btn-escribir-vault i { font-size: 2.2rem; line-height: 1; }
+
+/* Estrellas Selector */
+.estrellas-selector i {
+    font-size: 2.2rem;
+    color: var(--color-amarillo);
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    margin: 0 4px;
+}
+
+.estrellas-selector i:hover { transform: scale(1.2); }
+
+/* --- Editor de Reseña --- */
+.resena-editor { animation: fadeInSlide 0.3s ease-out; width: 100%; }
+
+.resena-editor textarea {
+    border: 1.5px solid #d6f6e5;
+    background-color: #fafafa;
+    border-radius: 10px;
+    padding: 12px;
+    width: 100%;
+    transition: border-color 0.3s;
+    outline: none;
+}
+
+.resena-editor textarea:focus { border-color: var(--accent); background-color: #fff; }
+
+/* --- Reseñas de la Comunidad --- */
 .review-card {
     background-color: #ffffff;
     border-radius: 15px;
     display: flex;
     gap: 20px;
-    align-items: stretch;
-    box-shadow: 0 0 25px rgba(255, 255, 255, 0.45); /* Efecto glow blanco de la imagen */
+    padding: 20px;
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.45);
 }
 
-/* Avatar del usuario */
-.review-user {
-    width: 100px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+.review-content { background-color: #d6f6e5; border-radius: 12px; flex-grow: 1; padding: 15px; }
+
+.avatar-placeholder {
+    width: 60px; height: 60px;
+    background-color: var(--accent);
+    color: white; font-weight: bold; font-size: 1.5rem;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; margin: 0 auto 10px;
 }
 
-.review-avatar {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #e0e0e0;
-}
-
-/* Caja de texto interior (Menta claro) */
-.review-content {
-    background-color: #d6f6e5;
-    border-radius: 12px;
-    flex-grow: 1;
-}
-
-/* Botón Ver más (Píldora amarilla) */
-.btn-ver-mas {
-    background-color: #f6c860;
-    color: white;
-    font-weight: bold;
-    border: none;
-    border-radius: 30px;
-    font-size: 1.1rem;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    transition: transform 0.2s, background-color 0.2s;
-}
-
-.btn-ver-mas:hover {
-    background-color: #dfb24e;
-    transform: translateY(-2px);
-}
-
-/* Responsivo para móviles */
-@media (max-width: 576px) {
-    .review-card {
-        flex-direction: column;
-        align-items: center;
-    }
-    .review-user {
-        margin-bottom: 10px;
-    }
+@keyframes fadeInSlide {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }

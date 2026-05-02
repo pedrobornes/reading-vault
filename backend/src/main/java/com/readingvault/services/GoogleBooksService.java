@@ -24,9 +24,13 @@ public class GoogleBooksService {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(GOOGLE_BOOKS_URL);
 
         builder.queryParam("q", query);
-        builder.queryParam("maxResults", 12); 
+        builder.queryParam("maxResults", 40); 
         builder.queryParam("startIndex", (pagina - 1) * 12); 
         
+        // Idioma
+        builder.queryParam("langRestrict", "es"); // Restringe o prioriza resultados en español
+        builder.queryParam("hl", "es");
+
         if (orderBy != null && !orderBy.isEmpty()) {
             builder.queryParam("orderBy", orderBy);
         }
@@ -43,20 +47,50 @@ public class GoogleBooksService {
                 Map<String, Object> volumeInfo = (Map<String, Object>) item.get("volumeInfo");
                 LibroExternoDTO dto = new LibroExternoDTO();
 
-                // Título
+                // Título y Autores
                 dto.setTitle(String.valueOf(volumeInfo.getOrDefault("title", "Sin título")));
-
-                // Autores
                 if (volumeInfo.containsKey("authors")) {
                     dto.setAuthorNames((List<String>) volumeInfo.get("authors"));
                 }
 
-                // NUEVO: Extraer valoración media de Google
+                // Valoración
                 if (volumeInfo.containsKey("averageRating")) {
-                    // Convertimos el valor a double de forma segura
                     dto.setAverageRating(Double.parseDouble(volumeInfo.get("averageRating").toString()));
                 } else {
                     dto.setAverageRating(0.0);
+                }
+
+                // Votos
+                if (volumeInfo.containsKey("ratingsCount")) {
+                    dto.setRatingsCount((Integer) volumeInfo.get("ratingsCount"));
+                } else {
+                    dto.setRatingsCount(0);
+                }
+
+                // Descripción
+                dto.setDescription(String.valueOf(volumeInfo.getOrDefault("description", "Sin descripción disponible.")));
+
+                // Número de páginas
+                if (volumeInfo.containsKey("pageCount")) {
+                    dto.setPageCount((Integer) volumeInfo.get("pageCount"));
+                }
+
+                // Fecha de publicación
+                dto.setPublishedDate(String.valueOf(volumeInfo.getOrDefault("publishedDate", "Fecha desconocida")));
+
+                // Categorías / Géneros
+                if (volumeInfo.containsKey("categories")) {
+                    dto.setCategories((List<String>) volumeInfo.get("categories"));
+                }
+
+                // ISBN
+                if (volumeInfo.containsKey("industryIdentifiers")) {
+                    List<Map<String, String>> ids = (List<Map<String, String>>) volumeInfo.get("industryIdentifiers");
+                    for (Map<String, String> id : ids) {
+                        if ("ISBN_13".equals(id.get("type"))) {
+                            dto.setIsbn(id.get("identifier"));
+                        }
+                    }
                 }
 
                 // Portada
@@ -67,6 +101,7 @@ public class GoogleBooksService {
                         dto.setCoverId(coverUrl.replace("http://", "https://"));
                     }
                 }
+                
                 return dto;
             }).collect(Collectors.toList());
 

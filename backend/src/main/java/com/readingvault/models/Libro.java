@@ -18,8 +18,14 @@ public class Libro {
     private String titulo;
     private String autor;
     private String isbn;
-    @Column(columnDefinition = "TEXT") // Para descripciones largas
+    
+    @Column(columnDefinition = "TEXT") 
     private String descripcion;
+    
     private String fechaPublicacion;
     private String fotoPortada;
+    private String generos; 
+    private Integer paginas; 
+    private Integer votos = 0;
+    private Double valoracion = 0.0;
 }

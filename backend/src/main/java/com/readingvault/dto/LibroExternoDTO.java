@@ -17,24 +17,29 @@ public class LibroExternoDTO {
 
     // Lista de autores
     private List<String> authorNames;
-
-    // Número de páginas
-    private int numberOfPages;
+    // Numero de páginas
+    private Integer pageCount;
 
     // URL de la imagen de portada
     private String coverId;
 
     // Valoración media
-    private double averageRating;
+    private Double averageRating;
+
+    // Numero de personas que han votado
+    private Integer ratingsCount;
 
     // Descripción completa del libro
     private String description;
     
-    // Fecha de publicación
-    private String fechaPublicacion;
+    // Cambiamos a 'publishedDate' para seguir la convención de Google/Controlador
+    private String publishedDate;
     
     // ISBN
     private String isbn;
+
+    // Lista de categorías (Géneros)
+    private List<String> categories;
 
     // Campo auxiliar para facilitar el guardado
     private String nombrePrimerAutor;
