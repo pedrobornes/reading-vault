@@ -1,5 +1,6 @@
 package com.readingvault.controllers;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.readingvault.dto.LibroExternoDTO;
+import com.readingvault.models.LibroEstanteria;
+import com.readingvault.repositories.LibroEstanteriaRepository;
 import com.readingvault.services.EstanteriaService;
 
 @RestController
@@ -25,11 +29,13 @@ public class BibliotecaController {
     @Autowired
     private EstanteriaService estanteriaService;
 
+    @Autowired
+    private LibroEstanteriaRepository libroEstanteriaRepository;
 
     @GetMapping("/estado")
     public ResponseEntity<?> obtenerEstadoLibro(
-            @RequestParam Long idUsuario, 
-            @RequestParam String titulo, 
+            @RequestParam Long idUsuario,
+            @RequestParam String titulo,
             @RequestParam String autor) {
         try {
             return estanteriaService.obtenerNombreEstanteriaDelLibro(idUsuario, titulo, autor)
@@ -73,4 +79,13 @@ public class BibliotecaController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/usuario/{idUsuario}/completa")
+    public ResponseEntity<List<LibroEstanteria>> obtenerTodaLaBiblioteca(@PathVariable Long idUsuario) {
+        // Esto devuelve la lista de LibroEstanteria, que incluye el objeto Libro y el
+        // objeto Estanteria
+        List<LibroEstanteria> biblioteca = libroEstanteriaRepository.findByEstanteria_Usuario_IdUsuario(idUsuario);
+        return ResponseEntity.ok(biblioteca);
+    }
+
 }
