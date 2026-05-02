@@ -40,31 +40,31 @@ public class ReviewController {
         try {
             Long idUsuario = Long.valueOf(payload.get("idUsuario").toString());
             Integer puntuacionNueva = (Integer) payload.get("puntuacion");
-            
+
             Map<String, Object> libroData = (Map<String, Object>) payload.get("libro");
             String isbn = (String) libroData.get("isbn");
 
             // 1. Buscamos o creamos el libro con los datos base de Google
             Libro libro = libroRepository.findByIsbn(isbn)
-                .orElseGet(() -> {
-                    Libro nuevo = new Libro();
-                    nuevo.setIsbn(isbn);
-                    nuevo.setTitulo((String) libroData.get("titulo"));
-                    nuevo.setAutor((String) libroData.get("autor"));
-                    nuevo.setFotoPortada((String) libroData.get("portada"));
-                    nuevo.setDescripcion((String) libroData.get("descripcion"));
-                    nuevo.setFechaPublicacion((String) libroData.get("fechaPublicacion"));
-                    nuevo.setPaginas((Integer) libroData.get("paginas"));
-                    nuevo.setGeneros((String) libroData.get("generos"));
-                    
-                    // Guardamos los votos y valoración de Google como punto de partida
-                    Object vG = libroData.get("votos");
-                    Object rG = libroData.get("valoracion");
-                    nuevo.setVotos(vG != null ? (Integer) vG : 0);
-                    nuevo.setValoracion(rG != null ? Double.valueOf(rG.toString()) : 0.0);
-                    
-                    return libroRepository.save(nuevo);
-                });
+                    .orElseGet(() -> {
+                        Libro nuevo = new Libro();
+                        nuevo.setIsbn(isbn);
+                        nuevo.setTitulo((String) libroData.get("titulo"));
+                        nuevo.setAutor((String) libroData.get("autor"));
+                        nuevo.setFotoPortada((String) libroData.get("portada"));
+                        nuevo.setDescripcion((String) libroData.get("descripcion"));
+                        nuevo.setFechaPublicacion((String) libroData.get("fechaPublicacion"));
+                        nuevo.setPaginas((Integer) libroData.get("paginas"));
+                        nuevo.setGeneros((String) libroData.get("generos"));
+
+                        // Guardamos los votos y valoración de Google como punto de partida
+                        Object vG = libroData.get("votos");
+                        Object rG = libroData.get("valoracion");
+                        nuevo.setVotos(vG != null ? (Integer) vG : 0);
+                        nuevo.setValoracion(rG != null ? Double.valueOf(rG.toString()) : 0.0);
+
+                        return libroRepository.save(nuevo);
+                    });
 
             // 2. Buscamos si el usuario ya tenía una review/voto previo
             Review review = reviewRepository.findByUsuario_IdUsuarioAndLibro_IdLibro(idUsuario, libro.getIdLibro())
@@ -75,7 +75,7 @@ public class ReviewController {
 
             if (esNuevoVoto) {
                 Usuario usuario = usuarioRepository.findById(idUsuario)
-                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
                 review.setUsuario(usuario);
                 review.setLibro(libro);
             }
@@ -84,7 +84,7 @@ public class ReviewController {
             review.setPuntuacion(puntuacionNueva);
             review.setFecha(LocalDate.now().toString());
             reviewRepository.save(review);
-            
+
             // 4. Suma ponderada sobre la base existente
             int votosBase = libro.getVotos();
             double valoracionBase = libro.getValoracion();
@@ -93,11 +93,12 @@ public class ReviewController {
                 // Caso A: Voto nuevo. Incrementamos el contador y ajustamos el promedio.
                 int nuevosVotosTotal = votosBase + 1;
                 double nuevaVal = ((valoracionBase * votosBase) + puntuacionNueva) / nuevosVotosTotal;
-                
+
                 libro.setVotos(nuevosVotosTotal);
                 libro.setValoracion(nuevaVal);
             } else {
-                // Caso B: El usuario cambia su nota. El contador no sube, solo ajustamos el promedio.
+                // Caso B: El usuario cambia su nota. El contador no sube, solo ajustamos el
+                // promedio.
                 double nuevaVal = ((valoracionBase * votosBase) - puntuacionAnterior + puntuacionNueva) / votosBase;
                 libro.setValoracion(nuevaVal);
             }
@@ -106,11 +107,10 @@ public class ReviewController {
             libroRepository.save(libro);
 
             return ResponseEntity.ok(Map.of(
-                "mensaje", "Estadísticas actualizadas con éxito",
-                "votos", libro.getVotos(),
-                "valoracion", libro.getValoracion()
-            ));
-            
+                    "mensaje", "Estadísticas actualizadas con éxito",
+                    "votos", libro.getVotos(),
+                    "valoracion", libro.getValoracion()));
+
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error al registrar el voto: " + e.getMessage());
         }
@@ -128,7 +128,8 @@ public class ReviewController {
             String contenido = (String) payload.get("contenido");
 
             Review review = reviewRepository.findByUsuario_IdUsuarioAndLibro_IdLibro(idUsuario, idLibro)
-                    .orElseThrow(() -> new RuntimeException("Debes votar el libro antes de reseñarlo. No se encontró un voto previo."));
+                    .orElseThrow(() -> new RuntimeException(
+                            "Debes votar el libro antes de reseñarlo. No se encontró un voto previo."));
 
             review.setContenido(contenido);
             reviewRepository.save(review);
@@ -156,4 +157,10 @@ public class ReviewController {
     public List<Review> obtenerReviewsPorLibro(@PathVariable Long idLibro) {
         return reviewRepository.findByLibroIdLibro(idLibro);
     }
+
+    @GetMapping("/usuario/{idUsuario}/total")
+    public ResponseEntity<List<Review>> obtenerReviewsUsuario(@PathVariable Long idUsuario) {
+        return ResponseEntity.ok(reviewRepository.findByUsuario_IdUsuario(idUsuario));
+    }
+
 }

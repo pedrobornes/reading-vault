@@ -13,14 +13,14 @@
   min-height: 700px; 
   display: flex;
   justify-content: center;
-  align-items: flex-start; /* Alineamos arriba */
+  align-items: flex-start; 
   padding-top: 50px;
   
 }
 
 /* --- LA CARTA / HOJA DEL LIBRO --- */
 .reto-card {
-  position: absolute; /* CLAVE: Todas en el mismo punto exacto */
+  position: absolute; 
   background-color: var(--color-azul-claro);
   width: 100%;
   max-width: 1000px;
@@ -43,7 +43,7 @@
 
 .reto-card__title-container {
   background-color: white;
-  margin: 30px 0 0 40px; /* Separado del lomo y arriba */
+  margin: 30px 0 0 40px; 
   padding: 10px 40px;
   border-radius: 12px;
   width: fit-content;
@@ -53,7 +53,7 @@
 }
 
 .reto-card__title {
-  color: var(--color-salmon) !important; /* Color de acento Salmón */
+  color: var(--color-salmon) !important; 
   font-family: var(--font-titulos);
   margin: 0;
   font-size: 1.8rem;
@@ -62,26 +62,26 @@
 /* --- ESTRUCTURA INTERNA --- */
 .reto-card__body {
   display: flex;
-  flex-direction: row-reverse; /* Icono a la derecha como en la imagen */
+  flex-direction: row-reverse; 
   align-items: center;
   justify-content: space-between;
   padding: 40px 60px 60px;
   gap: 40px;
 }
 
-/* --- ESTADOS DE LA PÁGINA --- */
+
 .pagina-pasada {
   transform: rotateY(-140deg) scale(0.9);
   opacity: 0;
   pointer-events: none;
 }
 
-/* --- LA ETIQUETA (MARCAPÁGINAS) --- */
+
 .reto-card::after {
   content: "SIGUE LEYENDO";
   position: absolute;
   top: -5px;
-  right: -10px; /* Sobresale un poco del borde derecho */
+  right: -10px;
   width: 70px;
   height: 150px;
   background-color: var(--color-amarillo);
@@ -103,13 +103,12 @@
 }
 
 .reto-card:hover::after {
-  background-color: var(--color-salmon); /* Cambio a Salmón */
-  color: #FFFFFF; /* Letras en Blanco puro */
-  transform: translateY(4px); /* Un pequeño movimiento hacia abajo opcional, sin agrandar */
+  background-color: var(--color-salmon); 
+  color: #FFFFFF; 
+  transform: translateY(4px); 
   height: 150px;
 }
 
-/* --- ICONO Y PROGRESO XXL --- */
 .reto-card__icon-circle {
 width: 160px;
   height: 160px;
@@ -125,7 +124,7 @@ width: 160px;
 }
 
 .reto-progress-bar {
-background-color: white; /* Fondo blanco para que destaque */
+background-color: white; 
   height: 35px;
   border-radius: 20px;
   width: 100%;
@@ -139,20 +138,81 @@ background-color: white; /* Fondo blanco para que destaque */
   background: linear-gradient(90deg, var(--color-salmon) 0%, var(--color-amarillo) 100%);
   height: 100%;
   border-radius: 20px;
-  box-shadow: 0 0 15px rgba(235, 189, 108, 0.4); /* Brillo amarillo */
+  box-shadow: 0 0 15px rgba(235, 189, 108, 0.4); 
 }
 
-/* Quitamos el marcapáginas a la última hoja */
 .reto-card.ultima-hoja::after {
   display: none !important;
 }
 
-/* Cambiamos el cursor en la última hoja para que no invite a pasar página */
+
 .reto-card.ultima-hoja {
   cursor: default;
 }
 
-/* Opcional: que el botón de "Volver a empezar" sí tenga cursor de click */
+
 .reto-card.ultima-hoja .btn-add-progress {
   cursor: pointer;
+}
+
+.reto-banner {
+  background-color: var(--color-azul-claro); 
+  width: 100%;
+  padding: 50px 0;
+  display: flex;
+  justify-content: center; 
+  margin-bottom: 40px;
+}
+
+
+.reto-banner__textboton {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  width: 85%;
+  max-width: 1100px;
+}
+
+.reto-banner__text h2 {
+  font-family: var(--font-titulos);
+  font-size: 3.2rem; 
+  margin: 0;
+  line-height: 1.1;
+}
+
+.reto-banner__text .text-verde {
+  color: var(--color-verde-oscuro);
+  font-weight: 500;
+}
+
+.reto-banner__text .text-amarillo {
+  color: var(--color-amarillo);
+  padding-left: 60px; 
+  font-weight: 400;
+}
+
+.reto-banner__button-wrapper{
+  padding-right: 10rem;
+}
+
+.btn-progreso {
+  background-color: var(--color-salmon);
+  color: white;
+  border: none;
+  padding: 20px 25px;
+  border-radius: 18px; 
+  font-family: var(--font-cuerpo);
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%; 
+  line-height: 1.2;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.btn-progreso:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.1);
 }
