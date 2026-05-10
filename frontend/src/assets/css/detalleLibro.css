@@ -1,217 +1,67 @@
 /* --- Estructura de Fondos --- */
-.detalle-top-bg { 
-    background-color: #d6f6e5; 
-}
-.detalle-reviews-bg { 
-    background-color: #9ebcb6; 
-    min-height: 50vh; 
-}
+.detalle-top-bg { background-color: #d6f6e5; }
+.detalle-reviews-bg { background-color: #9ebcb6; min-height: 50vh; }
 
-/* --- Columna Lateral (Portada e Interacción) --- */
-.col-md-4.col-lg-3 {
-    overflow: visible !important; /* Vital para que el menú no se corte */
-}
-
-.detalle-portada { 
-    width: 100%; 
-    max-width: 260px; 
-    border-radius: 12px; 
-    object-fit: cover; 
-}
+/* --- Columna Lateral e Imagen --- */
+.col-md-4.col-lg-3 { overflow: visible !important; }
+.detalle-portada { width: 100%; max-width: 260px; border-radius: 12px; object-fit: cover; }
 
 /* --- Tarjetas de Contenido --- */
-.detalle-card { 
-    background-color: #9ebcb6; 
-    border-radius: 20px; 
-    color: #4a4a4a; 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
-}
-
-.detalle-titulo { 
-    font-family: var(--font-titulos); 
-    font-size: 3rem; 
-    color: #3b4543; 
-}
-
-.detalle-autor { 
-    font-size: 1.8rem; 
-    font-weight: 300; 
-    color: #4a5754; 
-}
-
+.detalle-card { background-color: #9ebcb6; border-radius: 20px; color: #4a4a4a; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.detalle-titulo { font-family: var(--font-titulos); font-size: 3rem; color: #3b4543; }
+.detalle-autor { font-size: 1.8rem; font-weight: 300; color: #4a5754; }
 .detalle-stats { font-size: 0.95rem; color: #4a5754; }
 .detalle-texto { font-size: 1.05rem; line-height: 1.5; }
 
-/* --- Sistema del Vault (Botón y Menú) --- */
-.libro-card__acciones {
-    position: relative;
-    width: 100%;
+/* --- Sistema del Vault --- */
+.libro-card__acciones { position: relative; width: 100%; }
+.btn-add-vault { 
+    width: 100%; padding: 12px; border-radius: 25px; border: none; 
+    background-color: var(--color-salmon); color: white; 
+    font-family: var(--font-titulos); font-size: 1rem; font-weight: bold; 
+    cursor: pointer; box-shadow: var(--shadow); transition: all 0.3s ease; 
+    display: flex; justify-content: center; align-items: center; 
 }
-
-.btn-add-vault {
-    width: 100%;
-    padding: 12px;
-    border-radius: 25px;
-    border: none;
-    background-color: var(--color-salmon);
-    color: white;
-    font-family: var(--font-titulos);
-    font-size: 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: var(--shadow);
-    transition: all 0.3s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-}
-
-.btn-add-vault i {
-    position: absolute;
-    right: 20px; 
-}
-
 .btn-add-vault:hover { filter: brightness(1.1); transform: scale(1.02); }
+.btn-add-vault--pendiente { background-color: #dbb646 !important; }
+.btn-add-vault--leyendo { background-color: #5d8cca !important; }
+.btn-add-vault--leido { background-color: #68c768 !important; }
 
-/* Colores de estado */
-.btn-add-vault.btn-add-vault--pendiente { background-color: #dbb646 !important; }
-.btn-add-vault.btn-add-vault--leyendo { background-color: #5d8cca !important; }
-.btn-add-vault.btn-add-vault--leido { background-color: #68c768 !important; }
+/* --- Votación Estrellas --- */
+.voto-interactivo-card { background-color: #ffffff; border-radius: 20px; padding: 24px; box-shadow: var(--shadow); border-left: 6px solid var(--accent); display: flex; flex-direction: column; align-items: center; }
+.estrellas-selector i { font-size: 2.2rem; color: var(--accent); cursor: pointer; transition: all 0.2s ease; margin: 0 4px; }
 
-/* Menú Desplegable Corregido */
-.acciones-detalle .menu-desplegable {
-    position: absolute;
-    top: 100% !important;   /* Baja del botón */
-    bottom: auto !important; /* Anula el estilo del buscador */
-    left: 0;
-    right: 0;
-    background-color: #ffffff;
-    border-radius: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
-    z-index: 9999 !important;
-    overflow: hidden;
-    border: 1px solid rgba(0,0,0,0.05);
-    padding: 5px 0;
-    margin-top: 5px;
-    animation: popMenu 0.2s ease-out;
+/* HOVER AMARILLO ICONO OSCURO */
+.estrellas-selector i:hover, .estrellas-selector i.bi-star-fill { 
+    color: var(--color-amarillo) !important; 
+    filter: drop-shadow(0 0 1px var(--color-marron-oscuro));
 }
 
-.menu-desplegable__item {
-    padding: 12px 20px;
-    font-family: var(--font-body);
-    font-size: 0.95rem;
-    color: #334155;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    transition: background-color 0.2s ease;
-    border-bottom: 1px solid #f1f5f9;
-    text-align: left;
+/* --- SECCIÓN ESCRIBIR --- */
+.seccion-escribir-resena { background-color: white; border-radius: 15px; padding: 25px; margin-bottom: 40px; border-left: 6px solid var(--accent); box-shadow: var(--shadow); animation: fadeInSlide 0.4s ease; }
+.steam-textarea { width: 100%; min-height: 120px; background-color: #f4f9f7; border: 2px solid var(--color-azul-footer); border-radius: 10px; padding: 15px; font-family: var(--font-body); resize: vertical; }
+.steam-textarea:focus { outline: none; border-color: var(--accent); background-color: white; }
+.steam-acciones { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+.btn-steam { padding: 8px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; border: none; }
+.btn-steam-publicar { background-color: var(--color-verde-oscuro); color: white; }
+
+/* --- RESEÑAS COMUNIDAD --- */
+.review-card { background-color: #ffffff; border-radius: 15px; display: flex; gap: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative; }
+.review-card--propia { border: 2px solid var(--accent) !important; background-color: #fffaf9 !important; }
+.review-content { background-color: #d6f6e5; border-radius: 12px; flex-grow: 1; padding: 15px; }
+
+/* BOTONES GESTIÓN EXTERNOS */
+.mis-acciones-review { position: absolute; top: 15px; right: 15px; display: flex; gap: 8px; }
+.btn-accion-steam { 
+    background-color: var(--color-salmon); border: 1px solid #e2e8f0; width: 34px; height: 34px; 
+    border-radius: 8px; display: flex; align-items: center; justify-content: center; 
+    cursor: pointer; transition: all 0.2s ease; 
 }
+.btn-accion-steam:hover { background-color: var(--color-amarillo); border-color: var(--color-marron-oscuro); }
+.btn-accion-steam:hover i { color: var(--color-marron-oscuro); }
+.btn-accion-steam i { color: #ffffff; font-size: 1rem; }
 
-.menu-desplegable__item:hover { background-color: #f8fafc !important; color: var(--color-salmon) !important; }
+.badge-tu-resena { background-color: var(--accent); color: white; padding: 2px 10px; border-radius: 4px; font-size: 0.7rem; text-transform: uppercase; font-weight: bold; }
+.avatar-placeholder { width: 50px; height: 50px; background-color: var(--accent); color: white; font-weight: bold; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
 
-.menu-desplegable__item--eliminar {
-    color: #ef4444;
-    border-bottom: none;
-    font-weight: 600;
-    background-color: #fef2f2;
-}
-
-.menu-desplegable__item--eliminar:hover { background-color: #fee2e2 !important; color: #b91c1c !important; }
-
-/* --- Tarjeta de Votación y Editor --- */
-.voto-interactivo-card {
-    background-color: #ffffff;
-    border-radius: 20px;
-    padding: 24px;
-    box-shadow: var(--shadow);
-    border-left: 6px solid var(--accent);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-}
-
-.voto-interactivo-card p {
-    font-family: var(--font-titulos);
-    letter-spacing: 2px;
-    font-weight: 700;
-    color: var(--text-titulos);
-    margin-bottom: 20px;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-}
-
-.btn-escribir-vault {
-    border: 2px solid var(--color-azul-footer); 
-    background: transparent;
-    color: var(--color-azul-footer);
-    border-radius: 12px;
-    padding: 15px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.estrellas-selector i {
-    font-size: 2.2rem;
-    color: var(--color-amarillo);
-    cursor: pointer;
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    margin: 0 4px;
-}
-
-.resena-editor textarea {
-    border: 1.5px solid #d6f6e5;
-    background-color: #fafafa;
-    border-radius: 10px;
-    padding: 12px;
-    width: 100%;
-    outline: none;
-}
-
-/* --- Reseñas Comunidad --- */
-.review-card {
-    background-color: #ffffff;
-    border-radius: 15px;
-    display: flex;
-    gap: 20px;
-    padding: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-}
-
-.review-content { 
-    background-color: #d6f6e5; 
-    border-radius: 12px; 
-    flex-grow: 1; 
-    padding: 15px; 
-}
-
-.avatar-placeholder {
-    width: 50px; height: 50px;
-    background-color: var(--accent);
-    color: white; font-weight: bold;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 50%;
-}
-
-/* --- Animaciones y Utilidades --- */
-@keyframes popMenu {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes fadeInSlide {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.text-warning { color: #d97706 !important; }
-.text-primary { color: #2563eb !important; }
-.text-success { color: #16a34a !important; }
+@keyframes fadeInSlide { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }

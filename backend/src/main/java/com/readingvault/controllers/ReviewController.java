@@ -140,6 +140,25 @@ public class ReviewController {
         }
     }
 
+    @PostMapping("/borrar-comentario")
+    public ResponseEntity<?> borrarComentario(@RequestBody Map<String, Object> payload) {
+        try {
+            Long idUsuario = Long.valueOf(payload.get("idUsuario").toString());
+            Long idLibro = Long.valueOf(payload.get("idLibro").toString());
+
+            Review review = reviewRepository.findByUsuario_IdUsuarioAndLibro_IdLibro(idUsuario, idLibro)
+                    .orElseThrow(() -> new RuntimeException("Reseña no encontrada"));
+
+            // Limpiamos el texto pero mantenemos la puntuación
+            review.setContenido(null);
+            reviewRepository.save(review);
+
+            return ResponseEntity.ok(Map.of("mensaje", "Comentario eliminado"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+
     /**
      * Obtiene la review (voto y contenido) de un usuario específico para un libro.
      */

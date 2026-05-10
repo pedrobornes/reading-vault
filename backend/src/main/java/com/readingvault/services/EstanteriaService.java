@@ -1,11 +1,11 @@
 package com.readingvault.services;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.readingvault.dto.LibroExternoDTO;
 import com.readingvault.models.Estanteria;
 import com.readingvault.models.Libro;
 import com.readingvault.models.LibroEstanteria;
@@ -19,6 +19,9 @@ import jakarta.transaction.Transactional;
 public class EstanteriaService {
 
     @Autowired
+    private GoogleBooksService googleBooksService;
+
+    @Autowired
     private EstanteriaRepository estanteriaRepository;
 
     @Autowired
@@ -28,50 +31,68 @@ public class EstanteriaService {
     private LibroEstanteriaRepository libroEstanteriaRepository;
 
     @Transactional
-    public void agregarLibroAEstanteria(LibroExternoDTO libroExterno, Long usuarioId, String nombreEstanteria) {
-        
-        // Recupera el libro o lo crea con los datos completos
-        Libro libroLocal = libroRepository
-                .findByTituloAndAutor(libroExterno.getTitle(), libroExterno.getNombrePrimerAutor())
-                .orElseGet(() -> {
-                    Libro nuevoLibro = new Libro();
-                    nuevoLibro.setTitulo(libroExterno.getTitle());
-                    nuevoLibro.setAutor(libroExterno.getNombrePrimerAutor());
-                    
-                    // Sincronización de descripción
-                    nuevoLibro.setDescripcion(libroExterno.getDescription() != null ? 
-                            libroExterno.getDescription() : "Sin descripción disponible.");
-                    nuevoLibro.setFotoPortada(libroExterno.getCoverId());
-                    nuevoLibro.setFechaPublicacion(libroExterno.getPublishedDate());
-                    nuevoLibro.setIsbn(libroExterno.getIsbn());
-                    nuevoLibro.setPaginas(libroExterno.getPageCount());
-                    
-                    // Convertimos la lista de categorías a un String para la BD
-                    if (libroExterno.getCategories() != null && !libroExterno.getCategories().isEmpty()) {
-                        nuevoLibro.setGeneros(String.join(", ", libroExterno.getCategories()));
-                    } else {
-                        nuevoLibro.setGeneros("General");
-                    }
-                    
-                    return libroRepository.save(nuevoLibro);
-                });
+    public void agregarLibroAEstanteria(Map<String, Object> libroData, Long usuarioId, String nombreEstanteria) {
+        String titulo = (String) libroData.get("titulo");
+        String autor = (String) libroData.get("autor");
+        String isbn = (String) libroData.get("isbn");
 
-        // Limpia relaciones anteriores (para permitir mover de estantería)
-        eliminarLibroDeUsuario(usuarioId, libroLocal.getTitulo(), libroLocal.getAutor());
+        // 1. Intentamos buscar en nuestra BD local
+        Optional<Libro> libroOpt = (isbn != null && !isbn.isEmpty()) 
+            ? libroRepository.findByIsbn(isbn) 
+            : libroRepository.findByTituloAndAutor(titulo, autor);
 
-        // Si la acción es eliminar (o cancelar), no creamos la nueva relación
-        if ("cancelar".equalsIgnoreCase(nombreEstanteria)) {
-            return; 
+        Libro libroLocal;
+
+        if (libroOpt.isPresent()) {
+            libroLocal = libroOpt.get();
+        } else {
+            // 2. Si no está en BD, necesitamos el libro COMPLETO antes de insertar
+            // Hacemos una búsqueda específica en la API para obtener todos los campos
+            String queryEnriquecer = (isbn != null && !isbn.isEmpty()) ? "isbn:" + isbn : "intitle:\"" + titulo + "\" inauthor:\"" + autor + "\"";
+            var resultadosFull = googleBooksService.buscarLibros(queryEnriquecer, 1, "relevance");
+
+            Libro nuevoLibro = new Libro();
+            
+            if (resultadosFull != null && !resultadosFull.isEmpty()) {
+                // Usamos los datos enriquecidos de la API
+                var libroFull = resultadosFull.get(0);
+                nuevoLibro.setTitulo(libroFull.getTitle());
+                nuevoLibro.setAutor(libroFull.getNombrePrimerAutor());
+                nuevoLibro.setIsbn(libroFull.getIsbn());
+                nuevoLibro.setFechaPublicacion(libroFull.getPublishedDate());
+                nuevoLibro.setPaginas(libroFull.getPageCount());
+                nuevoLibro.setDescripcion(libroFull.getDescription());
+                nuevoLibro.setFotoPortada(libroFull.getCoverId());
+                nuevoLibro.setValoracion(libroFull.getAverageRating());
+                nuevoLibro.setVotos(libroFull.getRatingsCount());
+            } else {
+                // Fallback: Si Google no devuelve nada raro, usamos lo que venía del front
+                nuevoLibro.setTitulo(titulo);
+                nuevoLibro.setAutor(autor);
+                nuevoLibro.setIsbn(isbn);
+                nuevoLibro.setFotoPortada((String) libroData.get("portada"));
+                nuevoLibro.setDescripcion((String) libroData.getOrDefault("descripcion", "Sin descripción."));
+            }
+
+            // Mantenemos tus géneros del frontend
+            String generosFront = (String) libroData.get("generos");
+            nuevoLibro.setGeneros(generosFront != null ? generosFront : "General");
+
+            libroLocal = libroRepository.save(nuevoLibro);
         }
 
-        // Busca estantería y guarda la relación
-        Estanteria estanteria = estanteriaRepository.findByUsuario_IdUsuarioAndNombre(usuarioId, nombreEstanteria)
-                .orElseThrow(() -> new RuntimeException("La estantería '" + nombreEstanteria + "' no existe para este usuario"));
+        // 3. Gestionar la estantería del usuario
+        eliminarLibroDeUsuario(usuarioId, libroLocal.getTitulo(), libroLocal.getAutor());
 
-        LibroEstanteria relacion = new LibroEstanteria();
-        relacion.setEstanteria(estanteria);
-        relacion.setLibro(libroLocal); 
-        libroEstanteriaRepository.save(relacion);
+        if (!"cancelar".equalsIgnoreCase(nombreEstanteria)) {
+            Estanteria estanteria = estanteriaRepository.findByUsuario_IdUsuarioAndNombre(usuarioId, nombreEstanteria)
+                .orElseThrow(() -> new RuntimeException("Estantería no encontrada"));
+
+            LibroEstanteria relacion = new LibroEstanteria();
+            relacion.setEstanteria(estanteria);
+            relacion.setLibro(libroLocal); 
+            libroEstanteriaRepository.save(relacion);
+        }
     }
 
     @Transactional

@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.readingvault.dto.LibroExternoDTO;
 import com.readingvault.models.Estanteria;
 import com.readingvault.models.LibroEstanteria;
 import com.readingvault.repositories.EstanteriaRepository;
@@ -52,21 +51,19 @@ public class BibliotecaController {
         }
     }
 
+    // Guarda un libro en la biblioteca (y en la BD local si no existe)
     @PostMapping("/add")
     public ResponseEntity<?> añadirLibro(@RequestBody Map<String, Object> payload) {
         try {
             Long idUsuario = Long.valueOf(payload.get("idUsuario").toString());
             String nombreEstanteria = payload.get("nombreEstanteria").toString();
 
-            // Mapeamos los datos que vienen del frontend al DTO que espera tu service
+            // Extraemos todo el objeto libro (incluyendo ISBN, géneros, etc.)
+            @SuppressWarnings("unchecked")
             Map<String, Object> libroData = (Map<String, Object>) payload.get("libro");
 
-            LibroExternoDTO dto = new LibroExternoDTO();
-            dto.setTitle(libroData.get("titulo").toString());
-            dto.setNombrePrimerAutor(libroData.get("autor").toString());
-            dto.setCoverId(libroData.get("portada") != null ? libroData.get("portada").toString() : null);
-
-            estanteriaService.agregarLibroAEstanteria(dto, idUsuario, nombreEstanteria);
+            // Pasamos el mapa completo al servicio
+            estanteriaService.agregarLibroAEstanteria(libroData, idUsuario, nombreEstanteria);
 
             return ResponseEntity.ok(Map.of("mensaje", "¡Libro guardado en " + nombreEstanteria + "!"));
         } catch (Exception e) {

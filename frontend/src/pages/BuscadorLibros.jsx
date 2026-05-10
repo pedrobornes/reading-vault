@@ -5,14 +5,18 @@ import SidebarGeneros from "../components/SidebarGeneros";
 import "../assets/css/buscador.css";
 
 const BuscadorLibros = () => {
+  // Estados de la vista
   const [libros, setLibros] = useState([]);
   const [textoBusqueda, setTextoBusqueda] = useState("");
   const [generoActivo, setGeneroActivo] = useState(""); 
   const [orden, setOrden] = useState("relevance"); 
   const [pagina, setPagina] = useState(1); 
+  
+  // Estados de datos
   const [tusGeneros, setTusGeneros] = useState([]); 
   const [listaMaestraGeneros, setListaMaestraGeneros] = useState([]);
 
+  // Carga inicial de géneros
   useEffect(() => {
     const sesion = localStorage.getItem("usuario");
     const token = localStorage.getItem("token");
@@ -21,69 +25,73 @@ const BuscadorLibros = () => {
       const userObj = JSON.parse(sesion);
       
       axios.get(`http://localhost:8080/api/usuarios/${userObj.idUsuario}`, {
-        headers: {
-          Authorization: `Bearer ${token}` 
-        }
+        headers: { Authorization: `Bearer ${token}` }
       })
       .then(res => {
         if (res.data.generosFavoritos) {
-          // Sincronizamos los géneros reales de la base de datos
           setTusGeneros(res.data.generosFavoritos.map(g => g.nombre));
         }
       })
       .catch(err => {
-        console.error("Error al sincronizar géneros del usuario:", err);
+        console.error("Error al sincronizar géneros:", err);
         if (userObj.generosFavoritos) {
           setTusGeneros(userObj.generosFavoritos.map(g => g.nombre));
         }
       });
     }
 
-    // La lista maestra suele ser pública, así que no suele necesitar token
     axios.get("http://localhost:8080/api/generos")
       .then(res => setListaMaestraGeneros(res.data))
-      .catch(err => console.error("Error cargando géneros maestros:", err));
+      .catch(err => console.error("Error cargando géneros:", err));
   }, []);
 
+  // Función principal de búsqueda
   const obtenerLibros = async (busqueda, generoNombre, ordenSeleccionado, paginaActual) => {
     let query = "";
     
     if (generoNombre) {
-      const generoObj = listaMaestraGeneros.find(g => g.nombre === generoNombre);
-      const terminoBusqueda = generoObj ? generoObj.nombreIngles : generoNombre;
-      query = `subject:${terminoBusqueda}`;
+      query = generoNombre; 
     } else if (busqueda) {
-      query = busqueda.trim();
+      query = busqueda.trim(); 
     }
 
-    if (!query) return;
+    if (!query) {
+      setLibros([]);
+      return;
+    }
 
     try {
-      // El backend ahora nos devuelve la lista ya filtrada y única por ISBN
-      const response = await axios.get(
-        `http://localhost:8080/api/libros/buscar?q=${query}&orderBy=${ordenSeleccionado === 'rating' ? 'relevance' : ordenSeleccionado}&pagina=${paginaActual}`
-      );
+      // 1. Enviamos "orderBy" al backend para que la ordenación sea global
+      const response = await axios.get(`http://localhost:8080/api/libros/buscar`, {
+        params: {
+          q: query,
+          pagina: paginaActual,
+          isGenero: !!generoNombre,
+          orderBy: ordenSeleccionado // Pasamos 'relevance' o 'rating'
+        }
+      });
       
-      let resultados = response.data;
-
-      // Ordenación local por rating si es necesario
-      if (ordenSeleccionado === "rating") {
-        resultados = [...resultados].sort((a, b) => (b.valoracion || 0) - (a.valoracion || 0));
-      }
-
-      setLibros(resultados);
+      // 2. El backend ya nos devuelve la página de 12 libros 
+      // filtrada, ordenada y paginada correctamente.
+      setLibros(response.data);
+      
     } catch (error) {
       console.error("Error al obtener libros:", error);
+      setLibros([]);
     }
   };
 
+  // Disparador de búsqueda por texto
   const ejecutarBusqueda = (e) => {
     e.preventDefault();
+    if (!textoBusqueda.trim()) return;
+
     setGeneroActivo(""); 
     setPagina(1);
     obtenerLibros(textoBusqueda, "", orden, 1);
   };
 
+  // Disparador de búsqueda por botón de género
   const buscarPorGenero = (generoEspanol) => {
     setTextoBusqueda(""); 
     setGeneroActivo(generoEspanol);
@@ -91,6 +99,7 @@ const BuscadorLibros = () => {
     obtenerLibros("", generoEspanol, orden, 1);
   };
 
+  // Selector de ordenación
   const cambiarOrden = (e) => {
     const nuevoOrden = e.target.value;
     setOrden(nuevoOrden);
@@ -98,12 +107,14 @@ const BuscadorLibros = () => {
     obtenerLibros(textoBusqueda, generoActivo, nuevoOrden, 1);
   };
 
+  // Paginación
   const cambiarPagina = (nuevaPagina) => {
     setPagina(nuevaPagina);
     obtenerLibros(textoBusqueda, generoActivo, orden, nuevaPagina);
     window.scrollTo({ top: 0, behavior: 'smooth' }); 
   };
 
+  // Renderizado de botones de paginación
   const renderNumerosPagina = () => {
     const paginas = [];
     const maxPaginasVisibles = 5;
@@ -168,13 +179,14 @@ const BuscadorLibros = () => {
 
             <div className="libros-grid">
               {libros.length > 0 ? (
-                libros.map((libro) => (
-                  <LibroCard key={libro.isbn} libro={libro} />
+                // Añadido idLibro como respaldo para la key
+                libros.map((libro, index) => (
+                  <LibroCard key={libro.idLibro || libro.isbn || index} libro={libro} />
                 ))
               ) : (
                 <p className="libros-grid__mensaje">
                   {textoBusqueda || generoActivo 
-                    ? "No se encontraron libros con ISBN disponible." 
+                    ? "No se encontraron libros." 
                     : "Usa el buscador para encontrar tus libros favoritos."}
                 </p>
               )}
@@ -197,7 +209,8 @@ const BuscadorLibros = () => {
                 <button 
                   className="btn btn-outline-success" 
                   onClick={() => cambiarPagina(pagina + 1)}
-                  disabled={libros.length < 5} 
+                  // Límite ajustado a 12 según backend
+                  disabled={libros.length < 12} 
                 >
                   <i className="bi bi-chevron-right"></i>
                 </button>
