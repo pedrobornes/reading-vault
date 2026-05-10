@@ -46,6 +46,20 @@ export default function DetalleLibro() {
     return estrellas;
   };
 
+  const borrarResena = async () => {
+    try {
+      await axios.post('http://localhost:8080/api/reviews/borrar-comentario', {
+        idUsuario: usuarioSesion.idUsuario,
+        idLibro: libro.idLibro
+      });
+      setTextoResena("");
+      mostrarNotificacion("Reseña eliminada", "success");
+      cargarDatosYVoto();
+    } catch (err) {
+      mostrarNotificacion("Error al borrar", "error");
+    }
+  };
+
   const cargarDatosYVoto = async () => {
     try {
       const res = await axios.get(
@@ -56,6 +70,14 @@ export default function DetalleLibro() {
 
       if (libroData) {
         setLibro(libroData); 
+
+        // Se ejecuta en segundo plano (sin 'await') para no frenar la carga de la pantalla
+        if (libroData.isbn) {
+          axios.post('http://localhost:8080/api/libros/sincronizar', libroData)
+               .catch(err => console.log("El libro ya existe o hubo un fallo silencioso"));
+        }
+        // ----------------------------------
+
       } else {
         libroData = libro;
       }
@@ -213,7 +235,7 @@ export default function DetalleLibro() {
   const descripcionCompleta = libro.descripcion || "Sin descripción disponible.";
   const sinopsisCorta = descripcionCompleta.length > 300 ? descripcionCompleta.substring(0, 300) + "..." : descripcionCompleta;
 
-  return (
+return (
     <>
       {mensaje.texto && (
         <div className={`vault-toast vault-toast--${mensaje.tipo}`}>
@@ -221,6 +243,8 @@ export default function DetalleLibro() {
           {mensaje.texto}
         </div>
       )}
+
+      {/* --- SECCIÓN SUPERIOR --- */}
       <section className="detalle-top-bg py-5">
         <div className="container-custom">
           <div className="row">
@@ -231,48 +255,41 @@ export default function DetalleLibro() {
                 className="detalle-portada shadow-lg mb-4 img-fluid" 
               />
               
-              {/* MENU DESPLEGABLE ESTILO LIBRO CARD */}
               <div className="libro-card__acciones acciones-detalle mb-4">
-              <button
-                className={`btn-add-vault w-100 ${getClaseBoton()}`}
-                onClick={(e) => {
-                  e.stopPropagation(); // Evita que el evento cierre el menú al instante
-                  setShowMenuVault(!showMenuVault);
-                }}
-              >
-                {estanteriaActual ? estanteriaActual : "Añadir a mi Vault"}
-                <i className={`bi bi-chevron-${showMenuVault ? "up" : "down"} ms-2`}></i>
-              </button>
+                <button
+                  className={`btn-add-vault w-100 ${getClaseBoton()}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMenuVault(!showMenuVault);
+                  }}
+                >
+                  {estanteriaActual ? estanteriaActual : "Añadir a mi Vault"}
+                  <i className={`bi bi-chevron-${showMenuVault ? "up" : "down"} ms-2`}></i>
+                </button>
 
-              {showMenuVault && (
-                <div className="menu-desplegable" style={{ display: 'block' }}>
-                  <div className="menu-desplegable__item" onClick={() => manejarCambioVault("Pendiente")}>
-                    <i className="bi bi-clock me-2 text-warning"></i> Pendiente
-                    {estanteriaActual === "Pendiente" && <i className="bi bi-check ms-auto"></i>}
-                  </div>
-
-                  <div className="menu-desplegable__item" onClick={() => manejarCambioVault("Leyendo")}>
-                    <i className="bi bi-book-half me-2 text-primary"></i> Leyendo
-                    {estanteriaActual === "Leyendo" && <i className="bi bi-check ms-auto"></i>}
-                  </div>
-
-                  <div className="menu-desplegable__item" onClick={() => manejarCambioVault("Leído")}>
-                    <i className="bi bi-check-circle-fill me-2 text-success"></i> Leído
-                    {estanteriaActual === "Leído" && <i className="bi bi-check ms-auto"></i>}
-                  </div>
-
-                  {estanteriaActual && (
-                    <div className="menu-desplegable__item menu-desplegable__item--eliminar" onClick={eliminarDeBiblioteca}>
-                      <i className="bi bi-trash3 me-2"></i> Eliminar del Vault
+                {showMenuVault && (
+                  <div className="menu-desplegable" style={{ display: 'block' }}>
+                    <div className="menu-desplegable__item" onClick={() => manejarCambioVault("Pendiente")}>
+                      <i className="bi bi-clock me-2 text-warning"></i> Pendiente
                     </div>
-                  )}
-                </div>
-              )}
-            </div>
+                    <div className="menu-desplegable__item" onClick={() => manejarCambioVault("Leyendo")}>
+                      <i className="bi bi-book-half me-2 text-primary"></i> Leyendo
+                    </div>
+                    <div className="menu-desplegable__item" onClick={() => manejarCambioVault("Leído")}>
+                      <i className="bi bi-check-circle-fill me-2 text-success"></i> Leído
+                    </div>
+                    {estanteriaActual && (
+                      <div className="menu-desplegable__item menu-desplegable__item--eliminar" onClick={eliminarDeBiblioteca}>
+                        <i className="bi bi-trash3 me-2"></i> Eliminar del Vault
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
 
               <div className="voto-interactivo-card">
                 <p>Tu puntuación</p>
-                <div className="estrellas-selector d-flex justify-content-center mb-4">
+                <div className="estrellas-selector d-flex justify-content-center mb-2">
                   {[1, 2, 3, 4, 5].map((num) => (
                     <i
                       key={num}
@@ -283,43 +300,12 @@ export default function DetalleLibro() {
                     ></i>
                   ))}
                 </div>
-
-                {!escribiendo ? (
-                  <button 
-                    className="btn-escribir-vault"
-                    onClick={() => setEscribiendo(true)}
-                    disabled={miVoto === 0}
-                  >
-                    <i className="bi bi-pencil-square"></i>
-                    <span>{textoResena ? "Editar reseña" : "Escribir reseña"}</span>
-                  </button>
-                ) : (
-                  <div className="resena-editor">
-                    <textarea
-                      className="form-control mb-2"
-                      placeholder="¿Qué te pareció el libro?"
-                      rows="3"
-                      value={textoResena}
-                      onChange={(e) => setTextoResena(e.target.value)}
-                      autoFocus
-                    ></textarea>
-                    <div className="d-flex gap-2">
-                      <button className="btn btn-success btn-sm flex-grow-1 py-2" onClick={enviarResena}>
-                        Publicar
-                      </button>
-                      <button className="btn btn-light btn-sm px-3" onClick={() => setEscribiendo(false)}>
-                        <i className="bi bi-x"></i>
-                      </button>
-                    </div>
-                  </div>
-                )}
+                {miVoto === 0 && <p className="small text-muted mb-0" style={{fontSize: '0.7rem'}}>Vota para habilitar la reseña</p>}
               </div>
 
               <div className="detalle-rating text-muted mt-4">
                 <p className="mb-1 small">Valoración global</p>
-                <div className="estrellas mb-1">
-                  {renderEstrellas(libro.valoracion || 0)}
-                </div>
+                <div className="estrellas mb-1">{renderEstrellas(libro.valoracion || 0)}</div>
                 <div className="small">
                   <strong>{(libro.valoracion || 0).toFixed(1)}</strong> / 5
                   <br />
@@ -356,24 +342,64 @@ export default function DetalleLibro() {
         </div>
       </section>
 
+      {/* --- SECCIÓN RESEÑAS --- */}
       <section className="detalle-reviews-bg py-5">
         <div className="container-custom" style={{ maxWidth: '800px' }}>
+          
+          {/* EDITOR INTEGRADO: Desaparece si hay reseña y no estamos editando */}
+          {usuarioSesion && miVoto > 0 && (escribiendo || !resenasComunidad.some(r => r.usuario.idUsuario === usuarioSesion.idUsuario && r.contenido)) && (
+            <div className="seccion-escribir-resena mb-5">
+              <h4>{escribiendo ? "Actualizar mi opinión" : "Escribe una reseña"}</h4>
+              <textarea 
+                className="steam-textarea"
+                placeholder="Dinos qué te ha parecido..."
+                value={textoResena}
+                onChange={(e) => setTextoResena(e.target.value)}
+                autoFocus={escribiendo}
+              />
+              <div className="steam-acciones">
+                {escribiendo && (
+                   <button className="btn-steam" style={{backgroundColor: '#6c757d', color: 'white'}} onClick={() => setEscribiendo(false)}>
+                     Cancelar
+                   </button>
+                )}
+                <button className="btn-steam btn-steam-publicar" onClick={enviarResena}>
+                  {escribiendo ? "Guardar cambios" : "Publicar reseña"}
+                </button>
+              </div>
+            </div>
+          )}
+
           <h2 className="text-center mb-5 detalle-titulo-seccion">Opiniones de la comunidad</h2>
+          
           <div className="d-flex flex-column gap-4">
-            {resenasComunidad.some(r => r.contenido) ? (
-              resenasComunidad.map((resena) => (
-                resena.contenido && (
-                  <div key={resena.idReview} className="review-card p-4 shadow-sm border-0 bg-white">
+            
+            {/* TU RESEÑA DESTACADA */}
+            {resenasComunidad
+              .filter(r => r.usuario.idUsuario === usuarioSesion?.idUsuario && r.contenido)
+              .map(resena => (
+                !escribiendo && (
+                  <div key={resena.idReview} className="review-card review-card--propia p-4 shadow-sm border-0 bg-white">
+                    
+                    <div className="mis-acciones-review">
+                        <button className="btn-accion-steam" onClick={() => setEscribiendo(true)} title="Editar">
+                            <i className="bi bi-pencil-square"></i>
+                        </button>
+                        <button className="btn-accion-steam" onClick={borrarResena} title="Borrar">
+                            <i className="bi bi-trash3"></i>
+                        </button>
+                    </div>
+
                     <div className="review-user text-center">
+                      <span className="badge-tu-resena mb-2 d-inline-block">Tu opinión</span>
                       {resena.usuario.fotoPerfil ? (
-                        <img src={resena.usuario.fotoPerfil} alt={resena.usuario.nombre} className="review-avatar mb-2" />
+                        <img src={resena.usuario.fotoPerfil} alt="Tú" className="review-avatar mb-2" />
                       ) : (
-                        <div className="avatar-placeholder mb-2">
-                          {resena.usuario.nombre.charAt(0).toUpperCase()}
-                        </div>
+                        <div className="avatar-placeholder mb-2">{resena.usuario.nombre.charAt(0).toUpperCase()}</div>
                       )}
                       <h5 className="mb-0">{resena.usuario.nombre}</h5>
                     </div>
+
                     <div className="review-content p-3">
                       <div className="estrellas mb-2">{renderEstrellas(resena.puntuacion)}</div>
                       <p className="mb-0 text-muted">{resena.contenido}</p>
@@ -381,10 +407,32 @@ export default function DetalleLibro() {
                     </div>
                   </div>
                 )
-              ))
-            ) : (
+              ))}
+
+            {/* RESEÑAS DE OTROS */}
+            {resenasComunidad
+              .filter(r => r.usuario.idUsuario !== usuarioSesion?.idUsuario && r.contenido)
+              .map((resena) => (
+                <div key={resena.idReview} className="review-card p-4 shadow-sm border-0 bg-white">
+                  <div className="review-user text-center">
+                    {resena.usuario.fotoPerfil ? (
+                      <img src={resena.usuario.fotoPerfil} alt={resena.usuario.nombre} className="review-avatar mb-2" />
+                    ) : (
+                      <div className="avatar-placeholder mb-2">{resena.usuario.nombre.charAt(0).toUpperCase()}</div>
+                    )}
+                    <h5 className="mb-0">{resena.usuario.nombre}</h5>
+                  </div>
+                  <div className="review-content p-3">
+                    <div className="estrellas mb-2">{renderEstrellas(resena.puntuacion)}</div>
+                    <p className="mb-0 text-muted">{resena.contenido}</p>
+                    <small className="text-muted d-block mt-2">{resena.fecha}</small>
+                  </div>
+                </div>
+              ))}
+
+            {!resenasComunidad.some(r => r.contenido) && !escribiendo && (
               <div className="text-center p-5 bg-white rounded-pill shadow-sm">
-                <p className="text-muted mb-0">Nadie ha escrito una reseña todavía. ¡Inaugura el muro!</p>
+                <p className="text-muted mb-0">Nadie ha escrito una reseña todavía.</p>
               </div>
             )}
           </div>

@@ -45,6 +45,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/bibliotecas/**").authenticated()
                 .requestMatchers("/api/reviews/**").permitAll()
                 .requestMatchers("/api/usuarios/**").permitAll()
+                .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

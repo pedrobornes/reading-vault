@@ -23,12 +23,20 @@ public class GoogleBooksService {
     public List<LibroExternoDTO> buscarLibros(String query, int pagina, String orderBy) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(GOOGLE_BOOKS_URL);
 
-        builder.queryParam("q", query);
+        // Si la query es un subject, nos aseguramos de que el término vaya entre comillas
+        // Ejemplo: subject:Fiction / Horror -> subject:"Fiction / Horror"
+        String queryFinal = query;
+        if (query.startsWith("subject:")) {
+            String genero = query.replace("subject:", "");
+            queryFinal = "subject:\"" + genero + "\"";
+        }
+
+        builder.queryParam("q", queryFinal);
         builder.queryParam("maxResults", 40); 
         builder.queryParam("startIndex", (pagina - 1) * 12); 
         
-        // Idioma
-        builder.queryParam("langRestrict", "es"); // Restringe o prioriza resultados en español
+        // Priorizar español
+        builder.queryParam("langRestrict", "es"); 
         builder.queryParam("hl", "es");
 
         if (orderBy != null && !orderBy.isEmpty()) {
@@ -47,53 +55,44 @@ public class GoogleBooksService {
                 Map<String, Object> volumeInfo = (Map<String, Object>) item.get("volumeInfo");
                 LibroExternoDTO dto = new LibroExternoDTO();
 
-                // Título y Autores
                 dto.setTitle(String.valueOf(volumeInfo.getOrDefault("title", "Sin título")));
                 if (volumeInfo.containsKey("authors")) {
                     dto.setAuthorNames((List<String>) volumeInfo.get("authors"));
                 }
 
-                // Valoración
-                if (volumeInfo.containsKey("averageRating")) {
-                    dto.setAverageRating(Double.parseDouble(volumeInfo.get("averageRating").toString()));
-                } else {
-                    dto.setAverageRating(0.0);
-                }
+                dto.setAverageRating(volumeInfo.containsKey("averageRating") 
+                    ? Double.parseDouble(volumeInfo.get("averageRating").toString()) : 0.0);
+                
+                dto.setRatingsCount(volumeInfo.containsKey("ratingsCount") 
+                    ? (Integer) volumeInfo.get("ratingsCount") : 0);
 
-                // Votos
-                if (volumeInfo.containsKey("ratingsCount")) {
-                    dto.setRatingsCount((Integer) volumeInfo.get("ratingsCount"));
-                } else {
-                    dto.setRatingsCount(0);
-                }
-
-                // Descripción
                 dto.setDescription(String.valueOf(volumeInfo.getOrDefault("description", "Sin descripción disponible.")));
 
-                // Número de páginas
                 if (volumeInfo.containsKey("pageCount")) {
                     dto.setPageCount((Integer) volumeInfo.get("pageCount"));
                 }
 
-                // Fecha de publicación
                 dto.setPublishedDate(String.valueOf(volumeInfo.getOrDefault("publishedDate", "Fecha desconocida")));
 
-                // Categorías / Géneros
                 if (volumeInfo.containsKey("categories")) {
                     dto.setCategories((List<String>) volumeInfo.get("categories"));
                 }
 
-                // ISBN
+                // Mejora en la captura de ISBN
                 if (volumeInfo.containsKey("industryIdentifiers")) {
                     List<Map<String, String>> ids = (List<Map<String, String>>) volumeInfo.get("industryIdentifiers");
                     for (Map<String, String> id : ids) {
-                        if ("ISBN_13".equals(id.get("type"))) {
+                        String type = id.get("type");
+                        // Priorizamos ISBN_13, pero aceptamos ISBN_10 si no hay otro
+                        if ("ISBN_13".equals(type)) {
+                            dto.setIsbn(id.get("identifier"));
+                            break; 
+                        } else if ("ISBN_10".equals(type)) {
                             dto.setIsbn(id.get("identifier"));
                         }
                     }
                 }
 
-                // Portada
                 if (volumeInfo.containsKey("imageLinks")) {
                     Map<String, String> images = (Map<String, String>) volumeInfo.get("imageLinks");
                     String coverUrl = images.get("thumbnail");

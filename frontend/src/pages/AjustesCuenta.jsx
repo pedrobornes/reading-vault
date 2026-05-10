@@ -7,6 +7,9 @@ import AjustesGeneros from "../components/AjustesGeneros";
 export default function AjustesCuenta() {
   const [pestañaActiva, setPestañaActiva] = useState("perfil");
   const [usuario, setUsuario] = useState(null); 
+  const actualizarEstadoUsuario = (nuevosDatos) => {
+    setUsuario(nuevosDatos);
+  };
 
   useEffect(() => {
     // Saca ID de sesión
@@ -69,9 +72,15 @@ export default function AjustesCuenta() {
 
       {/* Renderizado condicional de componentes */}
       <div className="perfil-card p-4">
-        {pestañaActiva === "perfil" && <EditarPerfilForm user={usuario} />}
-        {pestañaActiva === "generos" && <AjustesGeneros user={usuario} />}
-        {pestañaActiva === "cuenta" && <AjustesPrivacidad user={usuario} />}
+        {pestañaActiva === "perfil" && (
+          <EditarPerfilForm user={usuario} onUpdate={actualizarEstadoUsuario} />
+        )}
+        {pestañaActiva === "generos" && (
+          <AjustesGeneros user={usuario} onUpdate={actualizarEstadoUsuario} />
+        )}
+        {pestañaActiva === "cuenta" && (
+          <AjustesPrivacidad user={usuario} onUpdate={actualizarEstadoUsuario} />
+        )}
       </div>
     </main>
   );

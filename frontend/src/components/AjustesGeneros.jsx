@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import "../assets/css/ajustes.css"; 
 
-export default function AjustesGeneros({ user }) {
+// Recibimos onUpdate para sincronizar el estado con el componente padre
+export default function AjustesGeneros({ user, onUpdate }) {
   // Estados
   const [generosDisponibles, setGenerosDisponibles] = useState([]);
   const [generosSeleccionados, setGenerosSeleccionados] = useState([]);
@@ -20,7 +21,7 @@ export default function AjustesGeneros({ user }) {
       const nombres = user.generosFavoritos.map(g => g.nombre);
       setGenerosSeleccionados(nombres);
     }
-  }, [user]);
+  }, [user]); // Al depender de user, se refresca si el padre actualiza los datos
 
   // Toast de notificación
   const mostrarNotificacion = (texto, tipo) => {
@@ -54,8 +55,14 @@ export default function AjustesGeneros({ user }) {
 
       if (response.ok) {
         const usuarioActualizado = await response.json();
+        
         // Actualizamos el localStorage para que el Buscador lo lea al instante
         localStorage.setItem("usuario", JSON.stringify(usuarioActualizado));
+
+        if (onUpdate) {
+          onUpdate(usuarioActualizado);
+        }
+
         mostrarNotificacion("¡Tus géneros favoritos han sido guardados!", "success");
       } else {
         mostrarNotificacion("Error al guardar los géneros", "error");

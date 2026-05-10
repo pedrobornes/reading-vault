@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.readingvault.dto.LibroExternoDTO;
 import com.readingvault.models.LibroEstanteria;
 import com.readingvault.repositories.LibroEstanteriaRepository;
 import com.readingvault.services.EstanteriaService;
@@ -32,6 +31,7 @@ public class BibliotecaController {
     @Autowired
     private LibroEstanteriaRepository libroEstanteriaRepository;
 
+    // Obtiene en qué estantería está un libro para un usuario
     @GetMapping("/estado")
     public ResponseEntity<?> obtenerEstadoLibro(
             @RequestParam Long idUsuario,
@@ -46,21 +46,19 @@ public class BibliotecaController {
         }
     }
 
+    // Guarda un libro en la biblioteca (y en la BD local si no existe)
     @PostMapping("/add")
     public ResponseEntity<?> añadirLibro(@RequestBody Map<String, Object> payload) {
         try {
             Long idUsuario = Long.valueOf(payload.get("idUsuario").toString());
             String nombreEstanteria = payload.get("nombreEstanteria").toString();
 
-            // Mapeamos los datos que vienen del frontend al DTO que espera tu service
+            // Extraemos todo el objeto libro (incluyendo ISBN, géneros, etc.)
+            @SuppressWarnings("unchecked")
             Map<String, Object> libroData = (Map<String, Object>) payload.get("libro");
 
-            LibroExternoDTO dto = new LibroExternoDTO();
-            dto.setTitle(libroData.get("titulo").toString());
-            dto.setNombrePrimerAutor(libroData.get("autor").toString());
-            dto.setCoverId(libroData.get("portada") != null ? libroData.get("portada").toString() : null);
-
-            estanteriaService.agregarLibroAEstanteria(dto, idUsuario, nombreEstanteria);
+            // Pasamos el mapa completo al servicio
+            estanteriaService.agregarLibroAEstanteria(libroData, idUsuario, nombreEstanteria);
 
             return ResponseEntity.ok(Map.of("mensaje", "¡Libro guardado en " + nombreEstanteria + "!"));
         } catch (Exception e) {
@@ -68,11 +66,11 @@ public class BibliotecaController {
         }
     }
 
+    // Elimina la relación del libro con el usuario
     @DeleteMapping("/remove")
     public ResponseEntity<?> eliminarLibro(@RequestParam Long idUsuario, @RequestParam String titulo,
             @RequestParam String autor) {
         try {
-            // Buscamos todas las estanterías del usuario y borramos ese libro de donde esté
             estanteriaService.eliminarLibroDeUsuario(idUsuario, titulo, autor);
             return ResponseEntity.ok(Map.of("mensaje", "Libro eliminado de tu Vault"));
         } catch (Exception e) {
@@ -80,12 +78,10 @@ public class BibliotecaController {
         }
     }
 
+    // Obtiene toda la biblioteca de un usuario
     @GetMapping("/usuario/{idUsuario}/completa")
     public ResponseEntity<List<LibroEstanteria>> obtenerTodaLaBiblioteca(@PathVariable Long idUsuario) {
-        // Esto devuelve la lista de LibroEstanteria, que incluye el objeto Libro y el
-        // objeto Estanteria
         List<LibroEstanteria> biblioteca = libroEstanteriaRepository.findByEstanteria_Usuario_IdUsuario(idUsuario);
         return ResponseEntity.ok(biblioteca);
     }
-
 }
