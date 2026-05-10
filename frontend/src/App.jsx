@@ -49,7 +49,7 @@ function App() {
           <Route path="/registro" element={<Registro />} />
           <Route path="/buscador" element={<BuscadorLibros />} />
           <Route path="/home" element={<Home />} />
-          <Route path="/perfilUsuario" element={<PerfilUsuario />} />
+          <Route path="/perfil/:idUsuario" element={<PerfilUsuario />} />
           <Route path="/ajustesCuenta" element={<AjustesCuenta />} />
           <Route path="/reto" element={<Reto />} />
           <Route path="/libro/:isbn" element={<DetalleLibro />} />

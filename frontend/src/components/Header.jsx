@@ -64,7 +64,11 @@ export default function Header() {
           ) : (
             /* LOGUEADO */
             <div className="d-flex align-items-center gap-3">
-              <Link to="/perfilUsuario" className="navbar-custom__link d-flex align-items-center gap-2">
+              {/* CAMBIO CLAVE: Ahora apunta a la ruta dinámica usando el ID de la sesión */}
+              <Link 
+                to={`/perfil/${usuarioSesion.idUsuario}`} 
+                className="navbar-custom__link d-flex align-items-center gap-2"
+              >
                 <img 
                   src={usuarioSesion.fotoPerfil || FOTO_DEFAULT} 
                   alt="Mi perfil" 

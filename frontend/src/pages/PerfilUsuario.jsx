@@ -1,79 +1,95 @@
 import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import HeaderUsuario from "../sections/HeaderUsuario";
 import ActividadUsuario from "../sections/ActividadUsuario";
 import { SidebarUsuario } from "../components/SidebarUsuario";
 import "../assets/css/perfil.css";
 
 export default function PerfilUsuario() {
+    const { idUsuario } = useParams(); 
+    const navigate = useNavigate();
+
     const [usuario, setUsuario] = useState(null);
-    const [stats, setStats] = useState({
-        leidos: 0,
-        resenas: 0,
-        objetivoReto: 20 // Valor por defecto
-    });
+    const [estadoRelacion, setEstadoRelacion] = useState("NINGUNA");
+    const [stats, setStats] = useState({ leidos: 0, resenas: 0, objetivoReto: 20 });
+    const [cargando, setCargando] = useState(true);
 
     useEffect(() => {
-        const sesion = localStorage.getItem("usuario");
-        const token = localStorage.getItem("token");
+        window.scrollTo(0, 0);
+        setUsuario(null);
+        setCargando(true);
 
-        // 1. Validación de seguridad inicial
-        if (!sesion || !token) {
-            window.location.href = "/login";
+        const token = localStorage.getItem("token");
+        const sesion = localStorage.getItem("usuario");
+
+        if (!token || !sesion) {
+            navigate("/login");
             return;
         }
 
         const userObj = JSON.parse(sesion);
         const headers = { 'Authorization': `Bearer ${token}` };
 
-        // 2. Petición de datos del Usuario con manejo de errores de Token
-        fetch(`http://localhost:8080/api/usuarios/${userObj.idUsuario}`, { headers })
-            .then(res => {
-                if (!res.ok) {
-                    if (res.status === 401 || res.status === 403) {
-                        localStorage.clear();
-                        window.location.href = "/login";
-                    }
-                    throw new Error("Error en la respuesta del servidor");
-                }
-                return res.json();
+        // 1. Datos del Usuario
+        fetch(`http://localhost:8080/api/usuarios/${idUsuario}`, { headers })
+            .then(res => res.ok ? res.json() : Promise.reject())
+            .then(data => {
+                setUsuario(data);
+                setCargando(false);
             })
-            .then(data => setUsuario(data))
-            .catch(err => {
-                console.error("Error cargando perfil:", err);
-                window.location.href = "/login";
-            });
+            .catch(() => navigate("/"));
 
-        // 3. Petición de Biblioteca (Estadísticas de Libros)
-        fetch(`http://localhost:8080/api/bibliotecas/usuario/${userObj.idUsuario}/completa`, { headers })
+        // 2. Verificar Relación
+        if (userObj.idUsuario !== parseInt(idUsuario)) {
+            fetch(`http://localhost:8080/api/amistades/estado/${userObj.idUsuario}/${idUsuario}`, { headers })
+                .then(res => res.ok ? res.text() : "NINGUNA")
+                .then(estado => setEstadoRelacion(estado))
+                .catch(() => setEstadoRelacion("NINGUNA"));
+        } else {
+            setEstadoRelacion("PROPIO");
+        }
+
+        // 3. Stats
+        fetch(`http://localhost:8080/api/bibliotecas/usuario/${idUsuario}/completa`, { headers })
             .then(res => res.ok ? res.json() : [])
             .then(items => {
-                const totalLeidos = items.filter(
-                    (item) => item.estanteria && item.estanteria.nombre === "Leído"
-                ).length;
+                const totalLeidos = items.filter(i => i.estanteria?.nombre === "Leído").length;
                 setStats(prev => ({ ...prev, leidos: totalLeidos }));
-            })
-            .catch(err => console.error("Error biblioteca:", err));
+            });
 
-        // 4. Petición de Reseñas
-        fetch(`http://localhost:8080/api/reviews/usuario/${userObj.idUsuario}/total`, { headers })
+        fetch(`http://localhost:8080/api/reviews/usuario/${idUsuario}/total`, { headers })
             .then(res => res.ok ? res.json() : [])
             .then(reviews => {
-                const totalResenas = reviews.filter(
-                    (r) => r.contenido && r.contenido.trim() !== ""
-                ).length;
+                const totalResenas = reviews.filter(r => r.contenido?.trim()).length;
                 setStats(prev => ({ ...prev, resenas: totalResenas }));
+            });
+
+    }, [idUsuario, navigate]);
+
+    const manejarSolicitudAmistad = () => {
+        const token = localStorage.getItem("token");
+        const miSesion = JSON.parse(localStorage.getItem("usuario"));
+
+        fetch(`http://localhost:8080/api/amistades/enviar`, {
+            method: 'POST',
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                idRemitente: miSesion.idUsuario,
+                idDestinatario: idUsuario
             })
-            .catch(err => console.error("Error reviews:", err));
+        }).then(res => {
+            if(res.ok) setEstadoRelacion("PENDIENTE");
+        });
+    };
 
-    }, []);
-
-    // Loader mientras el usuario principal no llega
-    if (!usuario) {
+    if (cargando || !usuario) {
         return (
-            <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
-                <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Cargando...</span>
-                </div>
+            <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: '80vh' }}>
+                <div className="spinner-grow text-success" role="status"></div>
+                <p className="mt-3 text-muted">Abriendo bóveda de lectura...</p>
             </div>
         );
     }
@@ -81,15 +97,17 @@ export default function PerfilUsuario() {
     return (
         <main className="container-custom py-5">
             <div className="row g-4">
-                {/* COLUMNA IZQUIERDA (Sidebar con estadísticas) */}
                 <div className="col-lg-3">
-                    <SidebarUsuario user={usuario} stats={stats} />
+                    <SidebarUsuario 
+                        user={usuario} 
+                        stats={stats} 
+                        estadoRelacion={estadoRelacion}
+                        onAccionAmigo={manejarSolicitudAmistad}
+                    />
                 </div>
-
-                {/* COLUMNA DERECHA (Contenido Principal) */}
                 <div className="col-lg-9">
-                    <HeaderUsuario user={usuario} />
-                    <ActividadUsuario user={usuario} />
+                    <HeaderUsuario user={usuario} sonAmigos={estadoRelacion === "ACEPTADA"} />
+                    <ActividadUsuario user={usuario} sonAmigos={estadoRelacion === "ACEPTADA"} />
                 </div>
             </div>
         </main>

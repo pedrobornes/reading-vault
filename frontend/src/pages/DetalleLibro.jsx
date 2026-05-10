@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../assets/css/detalleLibro.css'; 
 
@@ -344,9 +344,9 @@ return (
 
       {/* --- SECCIÓN RESEÑAS --- */}
       <section className="detalle-reviews-bg py-5">
-        <div className="container-custom" style={{ maxWidth: '800px' }}>
+        <div className="container-custom" style={{ maxWidth: '900px' }}>
           
-          {/* EDITOR INTEGRADO: Desaparece si hay reseña y no estamos editando */}
+          {/* EDITOR INTEGRADO */}
           {usuarioSesion && miVoto > 0 && (escribiendo || !resenasComunidad.some(r => r.usuario.idUsuario === usuarioSesion.idUsuario && r.contenido)) && (
             <div className="seccion-escribir-resena mb-5">
               <h4>{escribiendo ? "Actualizar mi opinión" : "Escribe una reseña"}</h4>
@@ -359,9 +359,9 @@ return (
               />
               <div className="steam-acciones">
                 {escribiendo && (
-                   <button className="btn-steam" style={{backgroundColor: '#6c757d', color: 'white'}} onClick={() => setEscribiendo(false)}>
-                     Cancelar
-                   </button>
+                  <button className="btn-steam" style={{backgroundColor: '#6c757d', color: 'white'}} onClick={() => setEscribiendo(false)}>
+                    Cancelar
+                  </button>
                 )}
                 <button className="btn-steam btn-steam-publicar" onClick={enviarResena}>
                   {escribiendo ? "Guardar cambios" : "Publicar reseña"}
@@ -370,16 +370,16 @@ return (
             </div>
           )}
 
-          <h2 className="text-center mb-5 detalle-titulo-seccion">Opiniones de la comunidad</h2>
+          <h2 className="text-center mb-5 detalle-titulo-seccion">Valoraciones y reseñas</h2>
           
           <div className="d-flex flex-column gap-4">
             
-            {/* TU RESEÑA DESTACADA */}
+            {/* 1. TU RESEÑA DESTACADA */}
             {resenasComunidad
               .filter(r => r.usuario.idUsuario === usuarioSesion?.idUsuario && r.contenido)
               .map(resena => (
                 !escribiendo && (
-                  <div key={resena.idReview} className="review-card review-card--propia p-4 shadow-sm border-0 bg-white">
+                  <div key={resena.idReview} className="review-card">
                     
                     <div className="mis-acciones-review">
                         <button className="btn-accion-steam" onClick={() => setEscribiendo(true)} title="Editar">
@@ -390,50 +390,63 @@ return (
                         </button>
                     </div>
 
-                    <div className="review-user text-center">
-                      <span className="badge-tu-resena mb-2 d-inline-block">Tu opinión</span>
-                      {resena.usuario.fotoPerfil ? (
-                        <img src={resena.usuario.fotoPerfil} alt="Tú" className="review-avatar mb-2" />
-                      ) : (
-                        <div className="avatar-placeholder mb-2">{resena.usuario.nombre.charAt(0).toUpperCase()}</div>
-                      )}
-                      <h5 className="mb-0">{resena.usuario.nombre}</h5>
+                    {/* Columna Usuario con LINK a tu propio perfil */}
+                    <div className="review-user">
+                      <Link to={`/perfil/${resena.usuario.idUsuario}`} className="review-user-link">
+                        <span className="badge-tu-resena mb-2 d-inline-block">Tú</span>
+                        {resena.usuario.fotoPerfil ? (
+                          <img src={resena.usuario.fotoPerfil} alt="Tú" className="review-avatar" />
+                        ) : (
+                          <div className="avatar-placeholder">{resena.usuario.nombre.charAt(0).toUpperCase()}</div>
+                        )}
+                        <h5>{resena.usuario.nombre}</h5>
+                      </Link>
                     </div>
 
-                    <div className="review-content p-3">
+                    <div className="review-content">
                       <div className="estrellas mb-2">{renderEstrellas(resena.puntuacion)}</div>
-                      <p className="mb-0 text-muted">{resena.contenido}</p>
+                      <p className="mb-0">"{resena.contenido}"</p>
                       <small className="text-muted d-block mt-2">{resena.fecha}</small>
                     </div>
                   </div>
                 )
               ))}
 
-            {/* RESEÑAS DE OTROS */}
+            {/* 2. RESEÑAS DE OTROS */}
             {resenasComunidad
               .filter(r => r.usuario.idUsuario !== usuarioSesion?.idUsuario && r.contenido)
               .map((resena) => (
-                <div key={resena.idReview} className="review-card p-4 shadow-sm border-0 bg-white">
-                  <div className="review-user text-center">
-                    {resena.usuario.fotoPerfil ? (
-                      <img src={resena.usuario.fotoPerfil} alt={resena.usuario.nombre} className="review-avatar mb-2" />
-                    ) : (
-                      <div className="avatar-placeholder mb-2">{resena.usuario.nombre.charAt(0).toUpperCase()}</div>
-                    )}
-                    <h5 className="mb-0">{resena.usuario.nombre}</h5>
+                <div key={resena.idReview} className="review-card">
+                  
+                  {/* Columna Usuario con LINK al perfil dinámico */}
+                  <div className="review-user">
+                    <Link to={`/perfil/${resena.usuario.idUsuario}`} className="review-user-link">
+                      {resena.usuario.fotoPerfil ? (
+                        <img src={resena.usuario.fotoPerfil} alt={resena.usuario.nombre} className="review-avatar" />
+                      ) : (
+                        <div className="avatar-placeholder">{resena.usuario.nombre.charAt(0).toUpperCase()}</div>
+                      )}
+                      <h5>{resena.usuario.nombre}</h5>
+                    </Link>
                   </div>
-                  <div className="review-content p-3">
+
+                  <div className="review-content">
                     <div className="estrellas mb-2">{renderEstrellas(resena.puntuacion)}</div>
-                    <p className="mb-0 text-muted">{resena.contenido}</p>
+                    <p className="mb-0">"{resena.contenido}"</p>
                     <small className="text-muted d-block mt-2">{resena.fecha}</small>
                   </div>
                 </div>
               ))}
 
-            {!resenasComunidad.some(r => r.contenido) && !escribiendo && (
-              <div className="text-center p-5 bg-white rounded-pill shadow-sm">
-                <p className="text-muted mb-0">Nadie ha escrito una reseña todavía.</p>
-              </div>
+            {/* BOTÓN VER MÁS */}
+            {resenasComunidad.some(r => r.contenido) ? (
+              <button className="btn-ver-mas shadow-sm">Ver más</button>
+            ) : (
+              !escribiendo && (
+                <div className="text-center p-5 bg-white rounded-pill shadow-sm">
+                  <p className="text-muted mb-0">Nadie ha escrito una reseña todavía.</p>
+                </div>
+              )
             )}
           </div>
         </div>

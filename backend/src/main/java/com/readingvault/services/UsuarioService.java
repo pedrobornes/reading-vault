@@ -94,15 +94,25 @@ public class UsuarioService {
         return usuarioRepository.save(u);
     }
 
+    @Transactional
     public Usuario actualizarPrivacidad(Long id, Map<String, String> ajustes) throws Exception {
-        Usuario user = usuarioRepository.findById(id).orElseThrow();
+        Usuario user = usuarioRepository.findById(id)
+                .orElseThrow(() -> new Exception("Usuario no encontrado"));
 
-        user.setPrivacidadPerfil(ajustes.get("perfil"));
-        user.setPrivacidadLibros(ajustes.get("libros"));
-        user.setPrivacidadAmigos(ajustes.get("amigos"));
-        user.setPrivacidadDatos(ajustes.get("datosPersonales"));
+        if (ajustes.containsKey("perfil")) {
+            user.setPrivacidadPerfil(ajustes.get("perfil"));
+        }
+        if (ajustes.containsKey("libros")) {
+            user.setPrivacidadLibros(ajustes.get("libros"));
+        }
+        if (ajustes.containsKey("amigos")) {
+            user.setPrivacidadAmigos(ajustes.get("amigos"));
+        }
+        if (ajustes.containsKey("datosPersonales")) {
+            user.setPrivacidadDatos(ajustes.get("datosPersonales"));
+        }
 
-        return usuarioRepository.save(user);
+        return usuarioRepository.saveAndFlush(user);
     }
 
     public void actualizarRacha(Usuario usuario) {

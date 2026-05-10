@@ -1,5 +1,6 @@
 package com.readingvault.models;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,6 +25,7 @@ public class Review {
     @JoinColumn(name = "id_libro")
     private Libro libro;
 
+    @Column(columnDefinition = "TEXT")
     private String contenido;
     private int puntuacion; //entre 1 y 5
     private String fecha;

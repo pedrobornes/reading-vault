@@ -1,26 +1,62 @@
 import { useNavigate } from "react-router-dom";
 
-export function SidebarUsuario({ user, stats, sonAmigos }) {
-  const navigate = useNavigate(); //
-  // Recuperamos la sesion
+export function SidebarUsuario({ user, stats, estadoRelacion, onAccionAmigo }) {
+  const navigate = useNavigate();
+  
+  // Recuperamos la sesión actual para comparar IDs
   const miSesion = JSON.parse(localStorage.getItem("usuario"));
   const miId = miSesion ? miSesion.idUsuario : null;
+
+  // Comprobamos los estados de la relación
+  const esMiPropioPerfil = miId && user?.idUsuario === miId;
+  const sonAmigos = estadoRelacion === "ACEPTADA";
+  const solicitudPendiente = estadoRelacion === "PENDIENTE";
 
   const leidos = stats?.leidos || 0;
   const resenas = stats?.resenas || 0;
   const objetivo = stats?.objetivoReto || 20;
-
-  // Calculo para el porcentaje del reto
   const porcentaje = Math.round((leidos / objetivo) * 100);
+
   if (!user) return null;
 
   const FOTO_DEFAULT = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
+  // Lógica de privacidad simplificada
   const puedeVer = (nivelPrivacidad) => {
-    if (miId && user.idUsuario === miId) return true;
+    if (esMiPropioPerfil) return true;
     if (nivelPrivacidad === "Público") return true;
     if (nivelPrivacidad === "Solo Amigos" && sonAmigos) return true;
     return false;
+  };
+
+  // Función para renderizar el botón de amistad según el estado
+  const renderBotonAmistad = () => {
+    if (esMiPropioPerfil) return null; // No sale nada en mi propio perfil
+
+    if (sonAmigos) {
+      return (
+        <button className="btn btn-outline-success w-100 rounded-pill disabled mt-2">
+          <i className="bi bi-check-lg me-2"></i>Amigo
+        </button>
+      );
+    }
+
+    if (solicitudPendiente) {
+      return (
+        <button className="btn btn-light w-100 rounded-pill disabled mt-2 border">
+          <i className="bi bi-clock-history me-2"></i>Pendiente
+        </button>
+      );
+    }
+
+    return (
+      <button 
+        className="btn btn-vault w-100 rounded-pill mt-2" 
+        onClick={onAccionAmigo}
+      >
+        <i className="bi bi-person-plus-fill me-2"></i>Añadir amigo
+      </button>
+    );
   };
 
   return (
@@ -31,6 +67,9 @@ export function SidebarUsuario({ user, stats, sonAmigos }) {
           className="foto-perfil-circulo"
           alt="Perfil"
         />
+        
+        {/* Renderizamos el botón de amistad debajo de la foto si no es mi perfil */}
+        {renderBotonAmistad()}
       </div>
 
       {/* Bloque Resumen */}
@@ -69,7 +108,7 @@ export function SidebarUsuario({ user, stats, sonAmigos }) {
         {puedeVer(user.privacidadLibros) ? (
           <>
             <p className="small text-center mb-2">
-              Has leído <strong>{leidos}</strong> de {objetivo} libros
+              {esMiPropioPerfil ? "Has leído" : `${user.nombre} ha leído`} <strong>{leidos}</strong> de {objetivo} libros
             </p>
             <div
               className="progress mb-3"
@@ -82,19 +121,22 @@ export function SidebarUsuario({ user, stats, sonAmigos }) {
               <div
                 className="progress-bar"
                 style={{
-                  width: `${porcentaje}%`,
+                  width: `${Math.min(porcentaje, 100)}%`,
                   backgroundColor: "var(--color-amarillo)",
                   borderRadius: "10px",
                   transition: "width 1s ease-in-out",
                 }}
               ></div>
             </div>
-            <button
-              className="btn btn-vault w-100"
-              onClick={() => navigate("/reto")} 
-            >
-              Ver mi reto
-            </button>
+            
+            {esMiPropioPerfil && (
+              <button
+                className="btn btn-vault w-100"
+                onClick={() => navigate("/reto")} 
+              >
+                Ver mi reto
+              </button>
+            )}
           </>
         ) : (
           <p className="text-muted small text-center mb-0">Actividad privada</p>
