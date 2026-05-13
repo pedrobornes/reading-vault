@@ -1,36 +1,115 @@
-export default function ActividadUsuario({ user }) {
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom"; // Importamos Link
+import "../assets/css/actividadUsuario.css";
+
+export default function ActividadUsuario({ libros, idUsuario }) {
+    const [resenas, setResenas] = useState([]);
+    const [visibles, setVisibles] = useState(2);
+    const [cargando, setCargando] = useState(true);
+
+    useEffect(() => {
+        if (!idUsuario || idUsuario === "undefined") return;
+
+        const token = localStorage.getItem("token");
+        fetch(`http://localhost:8080/api/reviews/usuario/${idUsuario}/total`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.ok ? res.json() : [])
+        .then(data => {
+            const filtradas = data
+                .filter(r => r.contenido?.trim())
+                .sort((a, b) => b.idReview - a.idReview);
+            setResenas(filtradas);
+            setCargando(false);
+        });
+    }, [idUsuario]);
+
+    const renderEstrellas = (puntuacion) => {
+        return [...Array(5)].map((_, i) => (
+            <i 
+                key={i} 
+                className={`bi ${i < puntuacion ? 'bi-star-fill' : 'bi-star'} me-1`} 
+                style={{ color: 'var(--color-amarillo)', fontSize: '0.9rem' }}
+            ></i>
+        ));
+    };
+
     return (
-        <div className="perfil-card">
-            <h3 className="mb-4" style={{fontSize: '1.5rem'}}>Actividad reciente</h3>
+        <div className="actividad-container">
+            <h3 className="mb-4">Actividad reciente</h3>
             
-            <div className="row g-3 mb-5">
-                {/* Datos falsos temporales para que no de error */}
-                <div className="col-md-4">
-                    <div className="p-3 text-center bg-light rounded">Libro 1</div>
-                </div>
-                <div className="col-md-4">
-                    <div className="p-3 text-center bg-light rounded">Libro 2</div>
-                </div>
-                <div className="col-md-4">
-                    <div className="p-3 text-center bg-light rounded">Libro 3</div>
-                </div>
+            <div className="row g-4 mb-5">
+                {libros && libros.length > 0 ? (
+                    libros.map((item) => (
+                        <div className="col-md-4" key={item.id}>
+                            {/* Envolvemos la card en un Link hacia la ruta de detalle */}
+                            <Link 
+                                to={`/libro/${item.libro?.isbn}`} 
+                                state={{ libro: item.libro }} 
+                                style={{ textDecoration: 'none', color: 'inherit' }}
+                            >
+                                <div className="libro-resumen-card">
+                                    <img 
+                                        src={item.libro?.fotoPortada || "/img/default-book.png"} 
+                                        alt={item.libro?.titulo} 
+                                        className="portada-resumen"
+                                    />
+                                    <div className="text-center w-100">
+                                        <strong className="titulo-resumen d-block text-truncate">
+                                            {item.libro?.titulo}
+                                        </strong>
+                                        <p className="fecha-resumen mb-2">
+                                            {item.fecha ? `Añadido el ${item.fecha}` : 'Añadido recientemente'}
+                                        </p>
+                                        <span className="badge rounded-pill px-3 py-2" style={{ 
+                                            backgroundColor: item.estanteria?.nombre === 'Leído' ? '#68c768' : 
+                                                            item.estanteria?.nombre === 'Leyendo' ? '#5d8cca' : 'var(--accent)',
+                                            fontSize: '0.65rem'
+                                        }}>
+                                            {item.estanteria?.nombre.toUpperCase()}
+                                        </span>
+                                    </div>
+                                </div>
+                            </Link>
+                        </div>
+                    ))
+                ) : (
+                    <div className="col-12"><p className="text-muted small ps-2">No hay libros recientes.</p></div>
+                )}
             </div>
 
-            <div className="list-group list-group-flush">
-                <div className="list-group-item d-flex justify-content-between align-items-center py-3 px-0 border-top">
-                    <div>
-                        <strong style={{color: 'var(--color-verde-oscuro)'}}>Nacidos de la Bruma: El Imperio Final</strong>
-                        <p className="small mb-0 text-muted mt-1">Terminé este libro hace unos días...</p>
+            <h5 className="resenas-header mb-4">Últimas reseñas</h5>
+            <div className="list-group list-group-flush gap-3">
+                {resenas.slice(0, visibles).map((r) => (
+                    <div key={r.idReview} className="list-group-item resena-item shadow-sm">
+                        <div className="d-flex justify-content-between align-items-start">
+                            <div>
+                                {/* También podemos hacer clicable el título en las reseñas */}
+                                <Link 
+                                    to={`/libro/${r.libro?.isbn}`} 
+                                    state={{ libro: r.libro }}
+                                    style={{ textDecoration: 'none' }}
+                                >
+                                    <h6 className="resena-libro-titulo">{r.libro?.titulo}</h6>
+                                </Link>
+                                <div className="mb-1">
+                                    {renderEstrellas(r.puntuacion)}
+                                </div>
+                            </div>
+                            <small className="text-muted fw-bold">{r.fecha}</small>
+                        </div>
+                        <p className="resena-texto mb-0">"{r.contenido}"</p>
                     </div>
-                    <span className="small text-muted">11-03-2025</span>
-                </div>
+                ))}
             </div>
 
-            <div className="text-center mt-4">
-                <button className="btn" style={{ backgroundColor: 'var(--color-amarillo)', borderRadius: '20px', padding: '5px 30px' }}> 
-                    Ver más 
-                </button>
-            </div>
+            {resenas.length > visibles && (
+                <div className="btn-cargar-mas-wrapper">
+                    <button className="btn-cargar-mas" onClick={() => setVisibles(prev => prev + 3)}> 
+                        Cargar más reseñas 
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

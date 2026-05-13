@@ -79,4 +79,14 @@ public class AmistadController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @DeleteMapping("/eliminar/{idUsuario1}/{idUsuario2}")
+    public ResponseEntity<?> eliminarAmistad(
+        @PathVariable Long idUsuario1, 
+        @PathVariable Long idUsuario2
+    ) {
+        // Tu lógica de borrado aquí
+        amistadService.eliminarAmistad(idUsuario1, idUsuario2);
+        return ResponseEntity.ok().build();
+    }
 }

@@ -1,0 +1,89 @@
+/* SidebarUsuario.css */
+
+.sidebar-perfil {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.foto-perfil-circulo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid white;
+    box-shadow: var(--shadow);
+}
+
+.sidebar-nombre-usuario {
+    color: var(--color-marron-oscuro);
+    font-weight: bold;
+    font-family: var(--font-titulos);
+}
+
+.stat-clicable {
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    border-radius: 8px;
+}
+
+.stat-clicable:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.stat-clicable:active {
+    transform: scale(0.95);
+}
+
+/* CARDS DEL SIDEBAR */
+.perfil-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.2rem;
+    box-shadow: var(--shadow);
+}
+
+.sidebar-titulo {
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--color-marron-medio);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+
+/* BOTÓN AMISTAD INTERACTIVO */
+.btn-amigo-status {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-amigo-status:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+    border-color: #dc3545 !important;
+}
+
+.btn-amigo-status:hover .icon-check {
+    display: none !important;
+}
+
+.btn-amigo-status:hover .icon-x {
+    display: inline-block !important;
+}
+
+.btn-amigo-status:hover .btn-text::before {
+    content: "Eliminar ";
+}
+
+/* RETO ANUAL */
+.progress-reto-container {
+    height: 12px;
+    background-color: #e9ecef;
+    border-radius: 10px;
+}
+
+.progress-reto-bar {
+    background-color: var(--color-amarillo);
+    border-radius: 10px;
+    transition: width 1s ease-in-out;
+}

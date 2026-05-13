@@ -108,4 +108,12 @@ public class AmistadService {
         return amistadRepository.findMisAmigos(idUsuario).size();
     }
 
+    @Transactional
+    public void eliminarAmistad(Long id1, Long id2) {
+        Optional<Amistad> amistad = amistadRepository.encontrarCualquierRelacion(id1, id2);
+        
+        // Si la relación existe (sea pendiente o aceptada), la borramos
+        amistad.ifPresent(a -> amistadRepository.delete(a));
+    }
+
 }

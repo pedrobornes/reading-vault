@@ -1,14 +1,12 @@
 import { useState } from "react";
-// Asumimos que reutilizas el mismo CSS para mantener consistencia
-// import "../styles/Ajustes.css";
+import Swal from 'sweetalert2';
 
 export default function AjustesPrivacidad({ user }) {
-  // Estado para controlar los selectores (lo ideal sería cargarlo de la DB)
   const [privacidad, setPrivacidad] = useState({
-    perfil: "Público",
-    libros: "Público",
-    amigos: "Público",
-    datosPersonales: "Privado", // Por defecto, datos sensibles privados
+    perfil: user.privacidadPerfil || "Público",
+    actividad: user.privacidadActividad || "Público",
+    libros: user.privacidadLibros || "Público",
+    datosPersonales: user.privacidadDatos || "Privado",
   });
 
   const handleChange = (e) => {
@@ -31,14 +29,21 @@ export default function AjustesPrivacidad({ user }) {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(privacidad), // Enviamos el objeto con los 4 ajustes
-        },
+          body: JSON.stringify(privacidad),
+        }
       );
 
       if (response.ok) {
         const actualizado = await response.json();
         localStorage.setItem("usuario", JSON.stringify(actualizado));
-        alert("Preferencias de privacidad actualizadas");
+        
+        Swal.fire({
+          title: '¡Actualizado!',
+          text: 'Preferencias de privacidad guardadas en la Bóveda.',
+          icon: 'success',
+          confirmButtonColor: 'var(--color-azul-footer)',
+          borderRadius: '15px'
+        });
       }
     } catch (error) {
       console.error("Error:", error);
@@ -46,74 +51,81 @@ export default function AjustesPrivacidad({ user }) {
   };
 
   const handleBorrarCuenta = async () => {
-    // Primera confirmación
-    const confirmar = window.confirm(
-      "¿ESTÁS SEGURO? Esta acción es irreversible y perderás todos tus libros, reseñas y seguidores.",
-    );
+    const result = await Swal.fire({
+      title: '¿ESTÁS SEGURO?',
+      text: "Esta acción es irreversible y perderás todos tus libros, reseñas y conexiones.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sí, borrar cuenta',
+      cancelButtonText: 'Cancelar',
+      borderRadius: '15px'
+    });
 
-    if (!confirmar) return;
+    if (result.isConfirmed) {
+      const { value: palabraClave } = await Swal.fire({
+        title: 'Confirmación final',
+        text: 'Para confirmar, escribe ELIMINAR en el campo de abajo:',
+        input: 'text',
+        inputPlaceholder: 'ELIMINAR',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'ELIMINAR DEFINITIVAMENTE',
+        cancelButtonText: 'Mejor no',
+        borderRadius: '15px',
+        inputValidator: (value) => {
+          if (value !== 'ELIMINAR') {
+            return 'Debes escribir la palabra exacta para continuar';
+          }
+        }
+      });
 
-    // Segunda confirmación (escribir palabra clave para evitar accidentes)
-    const palabraClave = window.prompt("Para confirmar, escribe ELIMINAR:");
+      if (palabraClave === "ELIMINAR") {
+        const token = localStorage.getItem("token");
+        try {
+          const response = await fetch(
+            `http://localhost:8080/api/usuarios/${user.idUsuario}/eliminar`,
+            {
+              method: "DELETE",
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
 
-    if (palabraClave !== "ELIMINAR") {
-      alert("La palabra clave no coincide. Acción cancelada.");
-      return;
-    }
-
-    const token = localStorage.getItem("token");
-
-    try {
-      const response = await fetch(
-        `http://localhost:8080/api/usuarios/${user.idUsuario}/eliminar`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      if (response.ok) {
-        alert("Tu cuenta ha sido eliminada. Lamentamos verte partir.");
-
-        // 1. Limpiamos toda la sesión del navegador
-        localStorage.clear();
-
-        // 2. Redirigimos al inicio o registro
-        window.location.href = "/";
-      } else {
-        const error = await response.text();
-        alert("Error al eliminar la cuenta: " + error);
+          if (response.ok) {
+            Swal.fire({
+              title: 'Cuenta eliminada',
+              text: 'Tu rastro en la Bóveda ha sido borrado.',
+              icon: 'success',
+              showConfirmButton: false,
+              timer: 2000
+            }).then(() => {
+              localStorage.clear();
+              window.location.href = "/";
+            });
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        }
       }
-    } catch (error) {
-      console.error("Error de red:", error);
-      alert("Error de conexión con el servidor.");
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="row g-4">
-      {/* COLUMNA IZQUIERDA: CONFIGURACIÓN */}
       <div className="col-lg-8">
         <div className="ajustes-form-container h-100">
-          <h4
-            className="mb-2 fw-bold"
-            style={{ fontFamily: "var(--font-titulos)" }}
-          >
-            Privacidad
+          <h4 className="mb-2 fw-bold" style={{ fontFamily: "var(--font-titulos)" }}>
+            Privacidad de la Bóveda
           </h4>
           <p className="text-muted small mb-4">
-            Controla quién puede ver tu actividad y datos en la comunidad.
+            Configura quién tiene permiso para explorar el contenido de tu biblioteca y perfil.
           </p>
 
           <div className="row g-4">
-            {/* 1. Mi Perfil */}
             <div className="col-12">
               <div className="d-flex justify-content-between align-items-center mb-2">
-                <label className="label-ajustes mb-0">
-                  Visibilidad del perfil
-                </label>
+                <label className="label-ajustes mb-0">Visibilidad del perfil</label>
                 <select
                   name="perfil"
                   className="form-select form-select-sm w-auto shadow-sm"
@@ -127,17 +139,33 @@ export default function AjustesPrivacidad({ user }) {
                 </select>
               </div>
               <p className="small text-muted ps-1">
-                Tu perfil de la comunidad incluye tu lista de amigos, los
-                logros, las estanterías y los comentarios.
+                Ajuste maestro. Si es privado, nadie podrá encontrar tu perfil ni ver tu contenido.
               </p>
             </div>
 
-            {/* 2. Mis Libros */}
             <div className="col-12">
               <div className="d-flex justify-content-between align-items-center mb-2">
-                <label className="label-ajustes mb-0">
-                  Mis libros y estanterías
-                </label>
+                <label className="label-ajustes mb-0">Actividad reciente y Reseñas</label>
+                <select
+                  name="actividad"
+                  className="form-select form-select-sm w-auto shadow-sm"
+                  value={privacidad.actividad}
+                  onChange={handleChange}
+                  style={{ borderColor: "var(--accent)" }}
+                >
+                  <option>Público</option>
+                  <option>Solo Amigos</option>
+                  <option>Privado</option>
+                </select>
+              </div>
+              <p className="small text-muted ps-1">
+                Controla quién ve tus últimos libros añadidos y los comentarios que escribes.
+              </p>
+            </div>
+
+            <div className="col-12">
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <label className="label-ajustes mb-0">Resumen y Reto Anual</label>
                 <select
                   name="libros"
                   className="form-select form-select-sm w-auto shadow-sm"
@@ -151,38 +179,13 @@ export default function AjustesPrivacidad({ user }) {
                 </select>
               </div>
               <p className="small text-muted ps-1">
-                Esta categoría incluye la lista de todos tus libros y tus
-                estanterías de tu cuenta de ReadingVault.
+                Oculta las estadísticas de tus lecturas (Leídos, Amigos, Grupos) y tu progreso del reto anual.
               </p>
             </div>
 
-            {/* 3. Lista de Amigos */}
             <div className="col-12">
               <div className="d-flex justify-content-between align-items-center mb-2">
-                <label className="label-ajustes mb-0">Lista de amigos</label>
-                <select
-                  name="amigos"
-                  className="form-select form-select-sm w-auto shadow-sm"
-                  value={privacidad.amigos}
-                  onChange={handleChange}
-                  style={{ borderColor: "var(--accent)" }}
-                >
-                  <option>Público</option>
-                  <option>Solo Amigos</option>
-                  <option>Privado</option>
-                </select>
-              </div>
-              <p className="small text-muted ps-1">
-                Esto controla quién puede ver tu lista de amigos en tu perfil.
-              </p>
-            </div>
-
-            {/* 4. Datos Personales */}
-            <div className="col-12">
-              <div className="d-flex justify-content-between align-items-center mb-2">
-                <label className="label-ajustes mb-0">
-                  Datos personales sensibles
-                </label>
+                <label className="label-ajustes mb-0">Información personal</label>
                 <select
                   name="datosPersonales"
                   className="form-select form-select-sm w-auto shadow-sm"
@@ -196,50 +199,42 @@ export default function AjustesPrivacidad({ user }) {
                 </select>
               </div>
               <p className="small text-muted ps-1">
-                Incluye tu nombre real, apellidos, ciudad y fecha de nacimiento
-                completa.
+                Privatiza tu descripción biográfica, localidad, edad y género literario favorito.
               </p>
             </div>
           </div>
 
           <div className="text-center mt-5">
-            <button type="submit" className="btn-vault px-5 py-2 shadow">
-              Guardar preferencias de privacidad
+            <button type="submit" className="btn-add-vault px-5 py-2">
+              Guardar preferencias
             </button>
           </div>
         </div>
       </div>
 
-      {/* COLUMNA DERECHA: INFO Y ZONA DE PELIGRO */}
       <div className="col-lg-4 text-center">
         <div className="perfil-card p-4 h-100 d-flex flex-column align-items-center justify-content-between">
           <div>
-            <h5 className="sidebar-titulo-ajustes mb-3">Tu Cuenta</h5>
+            <h5 className="mb-3" style={{ fontFamily: "var(--font-titulos)" }}>Seguridad</h5>
             <div
-              className="foto-perfil-circulo mb-3 bg-light d-flex align-items-center justify-content-center shadow-sm mx-auto"
-              style={{ width: "120px", height: "120px" }}
+              className="mb-3 bg-light d-flex align-items-center justify-content-center shadow-sm mx-auto"
+              style={{ width: "100px", height: "100px", borderRadius: "50%" }}
             >
-              <i
-                className="bi bi-shield-lock-fill text-muted"
-                style={{ fontSize: "3rem" }}
-              ></i>
+              <i className="bi bi-shield-check text-success" style={{ fontSize: "2.5rem" }}></i>
             </div>
             <p className="small text-muted mt-3">
-              Recuerda que estas configuraciones son reversibles en cualquier
-              momento. ReadingVault se compromete a proteger tus datos.
+              En ReadingVault, tú decides qué partes de tu viaje literario quieres compartir con el mundo.
             </p>
           </div>
 
-          {/* Mover Borrar Cuenta aquí */}
-          <div className="zona-peligro w-100">
-            <p className="small text-muted">Gestión avanzada de la cuenta</p>
+          <div className="zona-peligro w-100 p-3 rounded" style={{ backgroundColor: "#fff5f5" }}>
+            <p className="small fw-bold text-danger mb-2">Zona Crítica</p>
             <button
               type="button"
-              className="btn btn-danger btn-sm w-100 shadow-sm fw-bold"
+              className="btn btn-outline-danger btn-sm w-100 fw-bold"
               onClick={handleBorrarCuenta}
             >
-              <i className="bi bi-trash3-fill me-2"></i>
-              Borrar mi cuenta definitivamente
+              Borrar cuenta definitivamente
             </button>
           </div>
         </div>

@@ -1,30 +1,48 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import "../assets/css/tusAmigos.css";
+import { Link, useParams } from "react-router-dom";
+import "../assets/css/listaAmigos.css";
 
 export default function TusAmigos() {
+  // Extraemos el idUsuario de la URL
+  const { idUsuario } = useParams(); 
+  
   const [seccion, setSeccion] = useState("amigos"); 
   const [pendientes, setPendientes] = useState([]);
   const [amigos, setAmigos] = useState([]);
+  const [usuarioPerfil, setUsuarioPerfil] = useState(null); // Para saber de quién es la lista
   const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(true);
 
-  const sesion = JSON.parse(localStorage.getItem("usuario"));
+  const miSesion = JSON.parse(localStorage.getItem("usuario"));
   const token = localStorage.getItem("token");
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
+  // Lógica para determinar si es mi propia lista o la de otro
+  const esMiPropiaLista = !idUsuario || parseInt(idUsuario) === miSesion.idUsuario;
+  const idABuscar = idUsuario || miSesion.idUsuario;
+
   useEffect(() => {
     cargarDatosSociales();
-  }, []);
+    // Si no es mi lista, cargamos los datos del dueño para el título
+    if (!esMiPropiaLista) {
+        fetch(`http://localhost:8080/api/usuarios/${idABuscar}`, { headers })
+            .then(res => res.json())
+            .then(data => setUsuarioPerfil(data));
+    }
+  }, [idUsuario]); // Recargar si cambia el ID en la URL
 
   const cargarDatosSociales = async () => {
     setCargando(true);
     try {
-      const resPen = await fetch(`http://localhost:8080/api/amistades/pendientes/${sesion.idUsuario}`, { headers });
-      const dataPen = await resPen.json();
-      setPendientes(dataPen);
+      // Las solicitudes solo se cargan si es MI lista
+      if (esMiPropiaLista) {
+        const resPen = await fetch(`http://localhost:8080/api/amistades/pendientes/${miSesion.idUsuario}`, { headers });
+        const dataPen = await resPen.json();
+        setPendientes(dataPen);
+      }
 
-      const resAmi = await fetch(`http://localhost:8080/api/amistades/lista/${sesion.idUsuario}`, { headers });
+      // La lista de amigos se carga para cualquier ID
+      const resAmi = await fetch(`http://localhost:8080/api/amistades/lista/${idABuscar}`, { headers });
       const dataAmi = await resAmi.json();
       setAmigos(dataAmi);
     } catch (err) {
@@ -34,34 +52,19 @@ export default function TusAmigos() {
     }
   };
 
-  // Función para calcular el estado de conexión humano
   const obtenerEstadoConexion = (ultimaConexion) => {
     if (!ultimaConexion) return { online: false, texto: "Desconectado" };
-
     const ultima = new Date(ultimaConexion);
     const ahora = new Date();
-    const diferenciaMs = ahora - ultima;
-    const diferenciaMinutos = Math.floor(diferenciaMs / (1000 * 60));
+    const diferenciaMinutos = Math.floor((ahora - ultima) / (1000 * 60));
 
-    // EN LÍNEA: Menos de 5 minutos
-    if (diferenciaMinutos < 5) {
-      return { online: true, texto: "● En línea ahora" };
-    }
-
-    // HOY: Si la fecha es la misma
-    const esHoy = ultima.toDateString() === ahora.toDateString();
-    if (esHoy) {
-      return { online: false, texto: "Última conexión hoy" };
-    }
-
-    // AYER
+    if (diferenciaMinutos < 5) return { online: true, texto: "● En línea ahora" };
+    if (ultima.toDateString() === ahora.toDateString()) return { online: false, texto: "Última conexión hoy" };
+    
     const ayer = new Date();
     ayer.setDate(ahora.getDate() - 1);
-    if (ultima.toDateString() === ayer.toDateString()) {
-      return { online: false, texto: "Última conexión ayer" };
-    }
+    if (ultima.toDateString() === ayer.toDateString()) return { online: false, texto: "Última conexión ayer" };
 
-    // MÁS TIEMPO
     return { online: false, texto: `Última conexión el ${ultima.toLocaleDateString()}` };
   };
 
@@ -74,9 +77,7 @@ export default function TusAmigos() {
       headers: headers
     });
 
-    if (res.ok) {
-      cargarDatosSociales();
-    }
+    if (res.ok) cargarDatosSociales();
   };
 
   const amigosFiltrados = amigos.filter(a => 
@@ -90,23 +91,34 @@ export default function TusAmigos() {
           
           <div className="col-lg-3">
             <div className="social-sidebar">
-              <h5 className="mb-4">Tu Bóveda Social</h5>
+              <h5 className="mb-4">
+                {esMiPropiaLista ? "Tu Bóveda Social" : `Bóveda de ${usuarioPerfil?.nombreUsuario}`}
+              </h5>
+              
               <button 
                 className={`nav-social-link ${seccion === 'amigos' ? 'active' : ''}`}
                 onClick={() => setSeccion('amigos')}
               >
-                <i className="bi bi-people-fill me-2"></i> Mis Amigos
+                <i className="bi bi-people-fill me-2"></i> {esMiPropiaLista ? "Mis Amigos" : "Sus Amigos"}
                 <span className="badge bg-light text-dark ms-auto">{amigos.length}</span>
               </button>
-              <button 
-                className={`nav-social-link ${seccion === 'solicitudes' ? 'active' : ''}`}
-                onClick={() => setSeccion('solicitudes')}
-              >
-                <i className="bi bi-envelope-heart-fill me-2"></i> Solicitudes
-                {pendientes.length > 0 && (
-                  <span className="badge rounded-pill bg-danger ms-auto">{pendientes.length}</span>
-                )}
-              </button>
+
+              {/* Solo mostramos la pestaña de solicitudes si es nuestra propia lista */}
+              {esMiPropiaLista && (
+                <button 
+                  className={`nav-social-link ${seccion === 'solicitudes' ? 'active' : ''}`}
+                  onClick={() => setSeccion('solicitudes')}
+                >
+                  <i className="bi bi-envelope-heart-fill me-2"></i> Solicitudes
+                  {pendientes.length > 0 && (
+                    <span className="badge rounded-pill bg-danger ms-auto">{pendientes.length}</span>
+                  )}
+                </button>
+              )}
+
+              <Link to={esMiPropiaLista ? `/perfil/${miSesion.idUsuario}` : `/perfil/${idUsuario}`} className="btn btn-outline-secondary w-100 rounded-pill mt-4 btn-sm">
+                <i className="bi bi-arrow-left me-2"></i> Volver al perfil
+              </Link>
             </div>
           </div>
 
@@ -117,20 +129,20 @@ export default function TusAmigos() {
                 <input 
                   type="text" 
                   className="search-amigos-input" 
-                  placeholder="Buscar amigos por nombre..." 
+                  placeholder="Buscar en esta lista..." 
                   value={busqueda}
                   onChange={(e) => setBusqueda(e.target.value)}
                 />
               </div>
             )}
 
-            {seccion === 'solicitudes' ? (
+            {seccion === 'solicitudes' && esMiPropiaLista ? (
               <section>
                 <h3>Solicitudes Pendientes</h3>
                 <hr className="mb-4" />
                 {pendientes.length === 0 ? (
                   <div className="detalle-card p-5 text-center">
-                    <p className="text-muted mb-0">No tienes peticiones de lectura conjunta por ahora.</p>
+                    <p className="text-muted mb-0">No tienes peticiones por ahora.</p>
                   </div>
                 ) : (
                   pendientes.map(sol => (
@@ -151,13 +163,13 @@ export default function TusAmigos() {
             ) : (
               <section>
                 <div className="d-flex justify-content-between align-items-center mb-4">
-                  <h3>Mis Amigos</h3>
-                  <span className="badge-tu-resena">Lectores: {amigos.length}</span>
+                  <h3>{esMiPropiaLista ? "Mis Amigos" : `Amigos de ${usuarioPerfil?.nombreUsuario}`}</h3>
+                  <span className="badge-tu-resena">Total: {amigos.length}</span>
                 </div>
                 
                 {amigosFiltrados.length === 0 ? (
                   <div className="detalle-card p-5 text-center">
-                    <p className="text-muted">Aún no has añadido amigos.</p>
+                    <p className="text-muted">No se han encontrado lectores en esta lista.</p>
                   </div>
                 ) : (
                   amigosFiltrados.map(amigo => {

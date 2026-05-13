@@ -98,20 +98,23 @@ public class UsuarioService {
     public Usuario actualizarPrivacidad(Long id, Map<String, String> ajustes) throws Exception {
         Usuario user = usuarioRepository.findById(id)
                 .orElseThrow(() -> new Exception("Usuario no encontrado"));
-
+        // Visibilidad Global del Perfil
         if (ajustes.containsKey("perfil")) {
             user.setPrivacidadPerfil(ajustes.get("perfil"));
         }
+        // Libros y Retos (Resumen)
         if (ajustes.containsKey("libros")) {
             user.setPrivacidadLibros(ajustes.get("libros"));
         }
-        if (ajustes.containsKey("amigos")) {
-            user.setPrivacidadAmigos(ajustes.get("amigos"));
+        // Actividad Reciente y Reseñas
+        if (ajustes.containsKey("actividad")) {
+            user.setPrivacidadActividad(ajustes.get("actividad"));
         }
+        // Datos Personales (Edad, Localidad, Bio)
         if (ajustes.containsKey("datosPersonales")) {
             user.setPrivacidadDatos(ajustes.get("datosPersonales"));
         }
-
+        // Guardamos y forzamos el refresco para que el Front reciba los cambios al instante
         return usuarioRepository.saveAndFlush(user);
     }
 

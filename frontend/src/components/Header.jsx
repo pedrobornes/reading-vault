@@ -10,7 +10,7 @@ export default function Header() {
   const usuarioSesion = JSON.parse(localStorage.getItem("usuario"));
   const estaLogueado = !!usuarioSesion; 
 
-  // Efecto para cargar el número de solicitudes pendientes si está logueado
+  // Cargar solicitudes pendientes
   useEffect(() => {
     if (estaLogueado) {
       const token = localStorage.getItem("token");
@@ -23,7 +23,6 @@ export default function Header() {
     }
   }, [estaLogueado, usuarioSesion?.idUsuario]);
 
-  // Cierra sesión
   const handleLogout = () => {
     localStorage.clear(); 
     navigate("/login");    
@@ -40,7 +39,10 @@ export default function Header() {
           <div className="navbar-custom__logo-circle">
             <img src="/img/logo-vault.png" alt="Logo" className="navbar-custom__logo-img" />
           </div>
-          <h3><span className="navbar-custom__brand--reading">Reading</span><span className="navbar-custom__brand--vault">Vault</span></h3>
+          <h3>
+            <span className="navbar-custom__brand--reading">Reading</span>
+            <span className="navbar-custom__brand--vault">Vault</span>
+          </h3>
         </Link>
 
         {/* MENÚ */}
@@ -58,15 +60,14 @@ export default function Header() {
             Explorar
           </Link>
           
-          {/* Solo aparece si está logueado */}
           {estaLogueado && (
-            <Link to="/tusamigos" className="navbar-custom__link d-flex align-items-center text-nowrap">
+            <Link to="/mis-amigos" className="navbar-custom__link d-flex align-items-center text-nowrap">
               Amigos
               {numPendientes > 0 && (
                 <span className="badge rounded-pill bg-danger ms-2" style={{ 
                     fontSize: '0.7rem', 
                     padding: '4px 8px',
-                    lineHeight: '1' // Evita que el badge sea más alto que el texto
+                    lineHeight: '1' 
                   }}>
                   {numPendientes}
                 </span>
@@ -76,14 +77,13 @@ export default function Header() {
 
           <div className="navbar-custom__divider"></div>
 
-          {/* SIN LOGUEAR */}
+          {/* ESTADO DE AUTENTICACIÓN */}
           {!estaLogueado ? (
             <>
               <Link to="/registro" className="navbar-custom__link">Registro</Link>
               <Link to="/login" className="navbar-custom__auth-btn">Log In</Link>
             </>
           ) : (
-            /* LOGUEADO */
             <div className="d-flex align-items-center gap-3">
               <Link 
                 to={`/perfil/${usuarioSesion.idUsuario}`} 
