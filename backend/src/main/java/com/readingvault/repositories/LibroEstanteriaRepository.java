@@ -38,6 +38,7 @@ public interface LibroEstanteriaRepository extends JpaRepository<LibroEstanteria
 
     List<LibroEstanteria> findByEstanteria_Usuario_IdUsuario(Long idUsuario);
 
+   List<LibroEstanteria> findByEstanteriaUsuarioIdUsuario(Long idUsuario);
 
 }
 

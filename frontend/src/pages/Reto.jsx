@@ -32,58 +32,32 @@ const Reto = () => {
       const token = localStorage.getItem("token");
       const headers = { Authorization: `Bearer ${token}` };
 
-      // Primero inicializamos el estado con lo que ya tenemos guardado localmente
-      // para evitar el flash de pantalla de "no tienes reto" mientras carga la API
-      setDatosReto((prev) => ({
-        ...prev,
-        objetivo: sesion.objetivoLectura || 0,
-        diasSeguidos: sesion.rachaActual || 0,
-      }));
-
-      fetch(
-        `http://localhost:8080/api/bibliotecas/usuario/${sesion.idUsuario}/completa`,
-        { headers },
-      )
+      // 1. Llamamos a tu tabla reto_lectura para sacar el objetivo del año actual
+      fetch(`http://localhost:8080/api/retos/usuario/${sesion.idUsuario}/actual`, { headers })
         .then((res) => res.json())
-        .then((items) => {
-          const sesionActualizada = JSON.parse(localStorage.getItem("usuario"));
-
-          const librosLeidos = items.filter(
-            (item) => item.estanteria?.nombre === "Leído",
-          );
-          const sumaPaginas = librosLeidos.reduce(
-            (acc, item) => acc + (item.libro?.paginas || 0),
-            0,
-          );
-          const librosActivos = items.filter(
-            (item) => item.estanteria?.nombre === "Leyendo",
-          );
-
-          const pendientes = items.filter(
-            (item) => item.estanteria?.nombre === "Pendiente",
-          );
-
-          setLibrosLeyendo(librosActivos);
-          setLibrosPendientes(pendientes);
+        .then((retoData) => {
           
-          setDatosReto((prev) => ({
-            ...prev,
-            leidos: librosLeidos.length,
-            paginasTotales: sumaPaginas,
-            // Si la API del backend o la sesión actualizada traen el objetivo lo usamos, 
-            // si no, mantenemos el que rescatamos del localStorage al principio
-            objetivo: sesionActualizada?.objetivoLectura || prev.objetivo,
-            diasSeguidos: sesionActualizada?.rachaActual || prev.diasSeguidos,
-          }));
+          // 2. Cargamos el resto de libros de las estanterías del usuario
+          return fetch(`http://localhost:8080/api/bibliotecas/usuario/${sesion.idUsuario}/completa`, { headers })
+            .then((res) => res.json())
+            .then((items) => {
+              const librosLeidos = items.filter(item => item.estanteria?.nombre === "Leído");
+              const sumaPaginas = librosLeidos.reduce((acc, item) => acc + (item.libro?.paginas || 0), 0);
+              const librosActivos = items.filter(item => item.estanteria?.nombre === "Leyendo");
+              const pendientes = items.filter(item => item.estanteria?.nombre === "Pendiente");
+
+              setLibrosLeyendo(librosActivos);
+              setLibrosPendientes(pendientes);
+              
+              setDatosReto({
+                leidos: librosLeidos.length,
+                paginasTotales: sumaPaginas,
+                objetivo: retoData.objetivoLibros || 0, 
+                diasSeguidos: sesion?.rachaActual || 0,
+              });
+            });
         })
-          .catch((err) => {
-            console.error("Error cargando reto:", err);
-            // Si el backend falla por red, aseguramos que el objetivo de la sesión local se mantenga
-            const sesionRespaldo = JSON.parse(localStorage.getItem("usuario"));
-            if (sesionRespaldo?.objetivoLectura) {
-              setDatosReto(prev => ({ ...prev, objetivo: sesionRespaldo.objetivoLectura }));
-            }
-          });
+        .catch((err) => console.error("Error cargando reto histórico:", err));
     }
   }, []);
 
@@ -97,43 +71,31 @@ const Reto = () => {
     }
 
     const token = localStorage.getItem("token");
-    // Leemos la sesión fresca del localStorage en el momento del click
-    const sesionActual = JSON.parse(localStorage.getItem("usuario")) || {};
+    const sesion = JSON.parse(localStorage.getItem("usuario"));
 
-    fetch(
-      `http://localhost:8080/api/usuarios/${sesionActual.idUsuario}/actualizar-reto`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ objetivoLectura: num }),
+    // Hacemos la petición a tu RetoLecturaController
+    fetch(`http://localhost:8080/api/retos/usuario/${sesion.idUsuario}`, {
+      method: "POST", // Mandamos un POST para crear o actualizar el registro
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
-    )
-      .then((res) => {
-        if (res.ok) {
-          // ¡JUGADA MAESTRA! Copiamos TODO tu objeto de la captura y le metemos el objetivoLectura
-          const sesionActualizada = { 
-            ...sesionActual, 
-            objetivoLectura: num 
-          };
-          
-          // Lo guardamos en el localStorage bien masticado
-          localStorage.setItem("usuario", JSON.stringify(sesionActualizada));
+      body: JSON.stringify({ objetivoLibros: num }),
+    })
+      .then((res) => res.json())
+      .then((retoGuardado) => {
+        // Actualizamos el estado visual al instante
+        setDatosReto((prev) => ({
+          ...prev,
+          objetivo: retoGuardado.objetivoLibros,
+        }));
 
-          // Actualizamos el estado para que React esconda el trofeo al instante
-          setDatosReto((prev) => ({
-            ...prev,
-            objetivo: num,
-          }));
-
-          mostrarNotificacion("¡Reto anual configurado con éxito!", "success");
-        } else {
-          mostrarNotificacion("No se pudo guardar el reto", "error");
-        }
+        mostrarNotificacion("¡Reto anual guardado en el histórico!", "success");
       })
-      .catch((err) => console.error("Error al crear reto:", err));
+      .catch((err) => {
+        console.error("Error al crear reto histórico:", err);
+        mostrarNotificacion("No se pudo guardar el reto", "error");
+      });
   };
 
   const finalizarLibro = () => {
@@ -242,7 +204,6 @@ const Reto = () => {
                 value={nuevoObjetivo}
                 onChange={(e) => setNuevoObjetivo(e.target.value)}
               />
-              {/* Le quitamos la clase ms-3 👇 */}
               <button className="btn-progreso" onClick={crearRetoAnual}>
                 <span>Empezar Desafío</span>
               </button>
