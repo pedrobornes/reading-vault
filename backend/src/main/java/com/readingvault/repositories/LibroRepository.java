@@ -25,8 +25,7 @@ public interface LibroRepository extends JpaRepository<Libro, Long> {
 
     // Búsqueda híbrida: busca en el título, autor o en los géneros (ignora mayúsculas)
     List<Libro> findByTituloContainingIgnoreCaseOrAutorContainingIgnoreCaseOrGenerosContainingIgnoreCase(
-    String titulo, String autor, String generos
-    );
+    String titulo, String autor, String generos);
 
     // Recupera el libro que tenga la bandera de destacado activa
     Optional<Libro> findByDestacadoAnio(Boolean destacadoAnio);

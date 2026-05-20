@@ -20,6 +20,7 @@ export default function Home() {
 
   // --- ESTADOS COLUMNA DERECHA ---
   const [libroAmigo, setLibroAmigo] = useState(null);
+  const [nombreRecomendador, setNombreRecomendador] = useState("ReadingVault"); // Estado dinámico para el texto
   const [libroAnio, setLibroAnio] = useState(null);
   const [cargandoDerecha, setCargandoDerecha] = useState(true);
 
@@ -66,38 +67,75 @@ export default function Home() {
       return;
     }
 
-    // 1. Cargar columna Izquierda (Progreso del usuario)
+    // 1. Cargar columna Izquierda (Progreso del usuario y Reto Anual seguro)
     fetch(`http://localhost:8080/api/bibliotecas/usuario/${miSesion.idUsuario}/completa`, { headers })
       .then((res) => (res.ok ? res.json() : []))
       .then((items) => {
         const actualmenteLeyendo = items.find((i) => i.estanteria?.nombre === "Leyendo");
-        setItemBiblioteca(actualmenteLeyendo || null);
+        setItemBiblioteca(currentlyReading => actualmenteLeyendo || null);
 
-        const totalLeidos = items.filter((i) => i.estanteria?.nombre === "Leído").length;
-        setStats({
-          leidos: totalLeidos,
-          objetivoReto: miSesion.objetivoReto || 20,
-        });
-        setCargandoIzquierda(false);
+        const totalLeidosManual = items.filter((i) => i.estanteria?.nombre?.toUpperCase() === "LEÍDO").length;
+
+        return fetch(`http://localhost:8080/api/retos/usuario/${miSesion.idUsuario}`, { headers })
+          .then((resReto) => {
+            if (!resReto.ok) throw new Error("Reto no creado en base de datos todavía");
+            return resReto.json();
+          })
+          .then((retoData) => {
+            setStats({
+              leidos: retoData.completados !== undefined ? retoData.completados : totalLeidosManual,
+              objetivoReto: retoData.objetivoLibros || miSesion.objetivoLectura || miSesion.objetivoReto || 20,
+            });
+            setCargandoIzquierda(false);
+          })
+          .catch(() => {
+            setStats({
+              leidos: totalLeidosManual,
+              objetivoReto: miSesion.objetivoLectura || miSesion.objetivoReto || 20,
+            });
+            setCargandoIzquierda(false);
+          });
       })
       .catch((err) => {
-        console.error("Error en columna izquierda:", err);
+        console.error("Error crítico en columna izquierda:", err);
         setCargandoIzquierda(false);
       });
 
     // 2. Cargar columna Central
     cargarNoticiasReales();
 
-    // 3. Cargar columna Derecha: Recomendación aleatoria
+    // 3. LÓGICA MEJORADA: Sistema de recomendaciones Inteligente (Amigos -> Global)
     fetch("http://localhost:8080/api/libros/buscar?q=libros&isGenero=false", { headers })
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         if (data.length > 0) {
-          const aleatorios = [...data].sort(() => 0.5 - Math.random());
-          setLibroAmigo(aleatorios[0]);
+          // Intentamos buscar libros que contengan valoraciones o reseñas de amigos
+          // Nota: Ajusta 'valoracionesAmigos' o 'resenas' según la estructura exacta de tu objeto Libro
+          const conResenasAmigos = data.filter(libro => 
+            libro.valoracionesAmigos?.length > 0 || libro.comentariosAmigos?.length > 0
+          );
+
+          if (conResenasAmigos.length > 0) {
+            // Plan A: Elegimos un libro puntuado por un amigo al azar
+            const randomLibroAmigo = conResenasAmigos[Math.floor(Math.random() * conResenasAmigos.length)];
+            setLibroAmigo(randomLibroAmigo);
+            
+            // Sacamos el nombre del amigo (si está disponible, si no ponemos genérico)
+            const nombreAmigo = randomLibroAmigo.valoracionesAmigos?.[0]?.nombreUsuario || "un amigo";
+            setNombreRecomendador(`tu amigo ${nombreAmigo}`);
+          } else {
+            // Plan B: No hay amigos o no tienen reseñas. Filtramos los mejores libros globales de la plataforma
+            // Ordenamos por puntuación media de mayor a menor y barajamos los mejores
+            const buenosGlobales = data.filter(libro => (libro.puntuacionMedia || libro.puntuacion || 0) >= 4);
+            const poolSeleccion = buenosGlobales.length > 0 ? buenosGlobales : data;
+            
+            const aleatorioGlobal = [...poolSeleccion].sort(() => 0.5 - Math.random())[0];
+            setLibroAmigo(aleatorioGlobal);
+            setNombreRecomendador("ReadingVault");
+          }
         }
       })
-      .catch((err) => console.error("Error al cargar recomendación:", err));
+      .catch((err) => console.error("Error al procesar el motor de recomendaciones:", err));
 
     // 4. Cargar columna Derecha: Recuperar el libro del año estático
     cargarLibroDelAnioFijo();
@@ -144,7 +182,6 @@ export default function Home() {
         if (idSeleccionado) {
           const objetoLibro = librosEncontrados.find(l => (l.idLibro || l.isbn) === idSeleccionado);
           
-          // Sincronizamos preventivamente si el libro fue extraído directo de Google Books
           if (!objetoLibro.idLibro) {
             await fetch("http://localhost:8080/api/libros/sincronizar", {
               method: "POST",
@@ -153,11 +190,9 @@ export default function Home() {
             });
           }
 
-          // Recuperamos el ID autoincremental asignado en nuestra base de datos local
           fetch(`http://localhost:8080/api/libros/buscar-unico?isbn=${objetoLibro.isbn}`, { headers })
             .then(res => res.json())
             .then(libroLocalizado => {
-              // Marcamos el registro local con la bandera de destacado activo
               fetch(`http://localhost:8080/api/libros/${libroLocalizado.idLibro}/marcar-libro-anio`, {
                 method: "PUT",
                 headers: headers
@@ -182,7 +217,7 @@ export default function Home() {
       title: 'Actualizar progreso',
       text: `¿Por qué página vas? (Total: ${paginasTotales})`,
       input: 'number',
-      inputValue: itemBiblioteca.paginaActual || 0,
+      inputValue: itemBiblioteca.paginaActual || itemBiblioteca.progresoActual || 0,
       inputPlaceholder: 'Introduce la página actual',
       showCancelButton: true,
       confirmButtonColor: '#4B5043',
@@ -198,18 +233,39 @@ export default function Home() {
 
     if (nuevaPagina !== undefined) {
       try {
-        const response = await fetch(`http://localhost:8080/api/bibliotecas/progreso/${itemBiblioteca.id}`, {
+        const response = await fetch(`http://localhost:8080/api/bibliotecas/actualizar-progreso`, {
           method: 'PUT',
           headers: headers,
-          body: JSON.stringify({ paginaActual: parseInt(nuevaPagina) })
+          body: JSON.stringify({ 
+            idLibroEstanteria: itemBiblioteca.id,
+            paginaActual: parseInt(nuevaPagina) 
+          })
         });
 
         if (response.ok) {
           Swal.fire({ title: '¡Progreso guardado!', icon: 'success', timer: 1500, showConfirmButton: false });
-          const res = await fetch(`http://localhost:8080/api/bibliotecas/usuario/${miSesion.idUsuario}/completa`, { headers });
-          const items = res.ok ? await res.json() : [];
-          const actualmenteLeyendo = items.find((i) => i.estanteria?.nombre === "Leyendo");
-          setItemBiblioteca(currently => actualmenteLeyendo || null);
+          
+          const resLibros = await fetch(`http://localhost:8080/api/bibliotecas/usuario/${miSesion.idUsuario}/completa`, { headers });
+          const items = resLibros.ok ? await resLibros.json() : [];
+          const libroActualizado = items.find((i) => i.id === itemBiblioteca.id);
+          setItemBiblioteca(libroActualizado || null);
+
+          const totalLeidosManual = items.filter((i) => i.estanteria?.nombre?.toUpperCase() === "LEÍDO").length;
+
+          try {
+            const resReto = await fetch(`http://localhost:8080/api/retos/usuario/${miSesion.idUsuario}`, { headers });
+            if (resReto.ok) {
+              const retoData = await resReto.json();
+              setStats({
+                leidos: retoData.completados !== undefined ? retoData.completados : totalLeidosManual,
+                offsetObjetivo: retoData.objetivoLibros || miSesion.objetivoLectura || miSesion.objetivoReto || 20
+              });
+            } else {
+              setStats({ leidos: totalLeidosManual, objetivoReto: miSesion.objetivoLectura || miSesion.objetivoReto || 20 });
+            }
+          } catch (e) {
+            setStats({ leidos: totalLeidosManual, objetivoReto: miSesion.objetivoLectura || miSesion.objetivoReto || 20 });
+          }
         }
       } catch (error) {
         console.error("Error al actualizar el progreso:", error);
@@ -222,10 +278,10 @@ export default function Home() {
   }
 
   const libroLeyendo = itemBiblioteca?.libro;
-  const pagActual = itemBiblioteca?.paginaActual || 0;
+  const pagActual = itemBiblioteca?.paginaActual || itemBiblioteca?.progresoActual || 0;
   const pagTotales = libroLeyendo?.paginas || 1;
   const porcentajeLibro = Math.round((pagActual / pagTotales) * 100);
-  const porcentajeReto = Math.round((stats.leidos / stats.objectiveReto || stats.objetivoReto) * 100);
+  const porcentajeReto = stats.objetivoReto > 0 ? Math.round((stats.leidos / stats.objetivoReto) * 100) : 0;
 
   return (
     <div className="container-custom py-5">
@@ -312,7 +368,7 @@ export default function Home() {
           <section className="recomendaciones">
             {libroAmigo && (
               <div className="recomendacion">
-                <h3 className="recomendacion__titulo">Te recomendamos!</h3>
+                <h3 className="recomendacion__titulo">¡Te recomendamos!</h3>
                 <div className="recomendacion__bloque-info">
                   <picture className="recomendacion__picture">
                     <img src={libroAmigo.portada || libroAmigo.fotoPortada || "https://via.placeholder.com/150x200?text=Sin+Portada"} alt={libroAmigo.titulo} className="recomendacion__portada" />
@@ -322,7 +378,8 @@ export default function Home() {
                     <h4 className="recomendacion__autor">{libroAmigo.autor || "Autor Desconocido"}</h4>
                   </div>
                 </div>
-                <p className="recomendacion__amigo">Valoración de tu amigo Pedro</p>
+                {/* Imprime de forma limpia la procedencia de la valoración sin harcodear */}
+                <p className="recomendacion__amigo">Selección de {nombreRecomendador}</p>
                 <div className="recomendacion__boton">
                   <Link to={`/libro/${libroAmigo.isbn}`} className="recomendacion__enlace">Recomendaciones de tus amigos</Link>
                 </div>
@@ -332,8 +389,7 @@ export default function Home() {
             {libroAnio && (
               <div className="libroAño">
                 <div className="d-flex justify-content-between align-items-center mb-2">
-                  <h3 className="recomendacion__titulo m-0">¡ Libro del año !</h3>
-                  {/* Botón de control exclusivo para abrir el buscador del libro del año */}
+                  <h3 className="recomendacion__titulo m-0">¡Libro del año!</h3>
                   {esAdmin && (
                     <button 
                       onClick={handleCambiarLibroAnioAdmin}

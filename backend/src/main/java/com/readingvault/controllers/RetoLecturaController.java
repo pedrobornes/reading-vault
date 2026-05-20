@@ -3,6 +3,7 @@ package com.readingvault.controllers;
 import java.time.LocalDate;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,14 +26,20 @@ public class RetoLecturaController {
 
     // Obtiene el reto del usuario para el año actual
     @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<RetoLectura> obtenerRetoActual(@PathVariable Long usuarioId) {
+    public ResponseEntity<?> obtenerRetoActual(@PathVariable Long usuarioId) {
         int yearActual = LocalDate.now().getYear();
         
-        // Actualizamos el progreso para asegurar que los datos son reales
-        retoService.actualizarProgreso(usuarioId, yearActual);
-        
-        // Buscamos el reto
-        return ResponseEntity.ok(retoService.obtenerRetoPorUsuarioYAnio(usuarioId, yearActual));
+        try {
+            // Actualizamos el progreso para asegurar que los datos son reales
+            retoService.actualizarProgreso(usuarioId, yearActual);
+            
+            // Buscamos el reto
+            RetoLectura reto = retoService.obtenerRetoPorUsuarioYAnio(usuarioId, yearActual);
+            return ResponseEntity.ok(reto);
+            
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     // Establece o actualizar el num de libros q el usuario quiere leer
