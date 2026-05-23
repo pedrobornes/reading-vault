@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // Importado para navegación interna
+import { Link, useNavigate } from 'react-router-dom'; // Importado para navegación interna
 import AuthService from '../services/Auth.service';
 import '../assets/css/registro.css'; 
 import '../assets/css/login.css'; // Importamos el CSS de login para usar los estilos del enlace
 
 const Registro = () => {
+    const navigate = useNavigate();
     // Estado inicial
     const [formData, setFormData] = useState({
         nombre: '', apellidos: '', fechaNacimiento: '',
@@ -79,7 +80,7 @@ const Registro = () => {
                 window.location.href = "/home";
             } else {
                 // Fallback: si no hay token automático, enviamos al login manual
-                window.location.href = "/login"; 
+               window.location.href = "/login";
             }
         } catch (error) {
             setErrorMessage("Error al conectar con el servidor o el usuario ya existe.");
