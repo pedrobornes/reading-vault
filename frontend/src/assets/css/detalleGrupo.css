@@ -3,6 +3,8 @@
     min-height: 100vh;
 }
 
+
+
 .grupo-header {
     height: 350px;
     background-size: cover;
@@ -56,8 +58,14 @@
     border-right: 8px solid #f8f9fa;
 }
 
+
+.mensaje-usuario{
+    color: var(--color-verde-oscuro)
+}
+
+
 .detalle-grupo-bg {
-    background-color: #f0fdf4; /* Fondo verde muy clarito para que contraste con las tarjetas blancas */
+    background-color: var(--color-azul-claro); /* Fondo verde muy clarito para que contraste con las tarjetas blancas */
     min-height: 100vh;
 }
 

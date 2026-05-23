@@ -356,7 +356,7 @@ export default function Home() {
               <h3 className="reto__titulo">Reto del año</h3>
               <p className="reto__progreso-texto">{stats.leidos} de {stats.objetivoReto} libros leídos</p>
               <div className="progress-container-reto">
-                <div className="progress-bar-fill" style={{ width: `${Math.min(porcentajeReto, 100)}%` }}></div>
+                <div className="progress-bar-fill-reto" style={{ width: `${Math.min(porcentajeReto, 100)}%` }}></div>
                 <span className="reto__porcentaje">{porcentajeReto}%</span>
               </div>
             </div>

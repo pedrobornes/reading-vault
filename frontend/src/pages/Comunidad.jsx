@@ -142,7 +142,7 @@ export default function Comunidad() {
                     </div>
                     
                     <div className="card-body p-4 text-center d-flex flex-column flex-grow-1">
-                      <h5 className="fw-bold mb-1 text-dark">{grupo.nombre}</h5>
+                      <h5 className="fw-bold mb-1 grupo-nombre-comunidad">{grupo.nombre}</h5>
                       <p className="text-muted small mb-3">
                         <i className="bi bi-person-hearts me-1 text-danger"></i> 
                         {grupo.miembros ? grupo.miembros.length : 0} miembros

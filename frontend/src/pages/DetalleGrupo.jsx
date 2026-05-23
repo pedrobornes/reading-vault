@@ -99,7 +99,6 @@ export default function DetalleGrupo() {
     }
 
     try {
-      // 1. Llamamos a TU nuevo endpoint
       const response = await fetch(
         `http://localhost:8080/api/comunidades/buscar-libro-externo?q=${encodeURIComponent(texto)}`,
         {
@@ -108,16 +107,14 @@ export default function DetalleGrupo() {
       );
       
       if (response.ok) {
-        // 2. Recibimos el JSON gigante de Google Books
         const dataGoogle = await response.json();
         
-        // 3. Si hay resultados, los "mapeamos" para que tengan el formato que nos gusta
         if (dataGoogle.items) {
           const librosLimpios = dataGoogle.items.map(item => {
             const info = item.volumeInfo;
             return {
               titulo: info.title || "Título desconocido",
-              // Google devuelve un array de autores, cogemos el primero o ponemos "Desconocido"
+              
               autor: info.authors ? info.authors[0] : "Autor desconocido", 
               portada: info.imageLinks ? info.imageLinks.thumbnail : "https://via.placeholder.com/40x60?text=Sin+Foto",
               paginas: info.pageCount || 0
@@ -144,7 +141,7 @@ export default function DetalleGrupo() {
           tituloLibro: libroElegido.titulo,
           autorLibro: libroElegido.autor,
           portadaLibro: libroElegido.portada || libroElegido.fotoPortada,
-          paginasLibro: totalPaginas // <-- ¡Enviamos las páginas aquí!
+          paginasLibro: totalPaginas 
         };
 
     try {
@@ -215,13 +212,13 @@ export default function DetalleGrupo() {
       text: "Esta acción no se puede deshacer.",
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#d33',       // Rojo para la acción peligrosa (borrar)
-      cancelButtonColor: '#7c4d3a',     // Marrón de tu tema para cancelar
+      confirmButtonColor: '#d33',       
+      cancelButtonColor: '#7c4d3a',     
       confirmButtonText: 'Sí, borrar',
       cancelButtonText: 'Cancelar',
-      reverseButtons: true              // Pone el botón de cancelar a la izquierda (mejor UX)
+      reverseButtons: true              
     }).then(async (result) => {
-      // Si el usuario ha hecho clic en "Sí, borrar"
+      
       if (result.isConfirmed) {
         try {
           const res = await fetch(`http://localhost:8080/api/comunidades/mensajes/${idMensaje}`, {
@@ -233,7 +230,7 @@ export default function DetalleGrupo() {
             // Lo eliminamos de la lista en React
             setMensajes(mensajes.filter(m => m.idMensaje !== idMensaje));
             
-            // Opcional: Un mini alert de éxito que desaparece solo en 1.5 segundos
+            //  mini alert de éxito que desaparece solo en 1.5 segundos
             Swal.fire({
               title: '¡Borrado!',
               text: 'Tu comentario ha desaparecido.',
@@ -310,7 +307,6 @@ export default function DetalleGrupo() {
       <header
         className="grupo-header"
         style={{
-          // Hemos subido la opacidad de rgba(0,0,0,0.5) hasta rgba(0,0,0,0.95)
           backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.95)), url(${grupo.foto})`,
         }}
       >
@@ -331,7 +327,7 @@ export default function DetalleGrupo() {
               className={`btn-membresia ${estaUnido ? "btn-salir" : "btn-unirse"}`}
               onClick={manejarMembresia}
             >
-              {estaUnido ? "Salir del Grupo" : "¡Unirme!"}
+              {estaUnido ? "Salir del grupo" : "¡Unirme!"}
             </button>
           </div>
         </div>
@@ -343,7 +339,7 @@ export default function DetalleGrupo() {
           <div className="col-lg-4">
             <div className="card-lectura p-4 shadow-sm">
               <h5 className="fw-bold mb-4">
-                <i className="bi bi-book me-2"></i>Lectura Actual
+                <i className="bi bi-book me-2"></i>Lectura actual
               </h5>
               
               {grupo.libro ? (
@@ -370,13 +366,13 @@ export default function DetalleGrupo() {
                     </h6>
                     <div className="mt-2 mb-3 p-2 border-start border-3 border-warning bg-light rounded-end">
                       <span className="small text-muted fst-italic d-block">
-                        {grupo.notaProgreso ? `"${grupo.notaProgreso}"` : "📖 Sin anotaciones en este capítulo todavía."}
+                        {grupo.notaProgreso ? `"${grupo.notaProgreso}"` : "Sin anotaciones en este capítulo todavía."}
                       </span>
                     </div>
-                    {/* ... barra de progreso ... */}
+                    
                   </div>
 
-                  {/* BOTÓN 1 PROTEGER: Cuando SÍ hay un libro leyendo */}
+                  {/* BOTÓN 1: Cuando SÍ hay un libro leyendo */}
                   {soyAdmin && (
                     <button className="btn-nueva-lectura w-100 mt-3" onClick={() => setShowModalLibro(true)}>
                       <i className="bi bi-journal-plus me-2"></i>Cambiar Lectura
@@ -387,7 +383,7 @@ export default function DetalleGrupo() {
                 <div className="text-center py-4">
                   <p className="text-muted">No hay lectura activa.</p>
                   
-                  {/* BOTÓN 2 PROTEGER: Cuando NO hay ningún libro (¡Este se suele olvidar!) */}
+                  {/* BOTÓN 2: Cuando NO hay ningún libro (¡Este se suele olvidar!) */}
                   {soyAdmin && (
                     <button className="btn-nueva-lectura w-100" onClick={() => setShowModalLibro(true)}>
                       Elegir Libro
@@ -401,7 +397,7 @@ export default function DetalleGrupo() {
           {/* Columna Derecha: Chat / Muro */}
           <div className="col-lg-8">
             <div className="card-chat p-4 shadow-sm">
-              <h5 className="fw-bold mb-4">💬 Muro de la Comunidad</h5>
+              <h5 className="fw-bold mb-4">Muro de la comunidad</h5>
 
               {/* Formulario de mensaje */}
               {estaUnido ? (
@@ -454,7 +450,7 @@ export default function DetalleGrupo() {
                         <div className="mensaje-contenido p-3 rounded-4 bg-light flex-grow-1">
                           <div className="d-flex justify-content-between align-items-center mb-2">
                             <div>
-                              <span className="fw-bold text-dark me-2">
+                              <span className="fw-bold me-2 mensaje-usuario">
                                 {msg.usuario.nombreUsuario}
                               </span>
                               <small className="text-muted">{msg.fecha}</small>
@@ -521,7 +517,7 @@ export default function DetalleGrupo() {
         <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div className="bg-white p-4 rounded-4 shadow-lg" style={{ width: '100%', maxWidth: '500px' }}>
             <div className="d-flex justify-content-between mb-3">
-              <h5 className="fw-bold m-0">Elegir Nueva Lectura</h5>
+              <h5 className="fw-bold m-0">Elegir nueva lectura</h5>
               <button className="btn-close" onClick={() => setShowModalLibro(false)}></button>
             </div>
             
@@ -569,7 +565,7 @@ export default function DetalleGrupo() {
         <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div className="bg-white p-4 rounded-4 shadow-lg" style={{ width: '100%', maxWidth: '400px' }}>
             <div className="d-flex justify-content-between mb-3">
-              <h5 className="fw-bold m-0">Actualizar Progreso</h5>
+              <h5 className="fw-bold m-0">Actualizar progreso</h5>
               <button className="btn-close" onClick={() => setShowModalProgreso(false)}></button>
             </div>
             
@@ -600,7 +596,7 @@ export default function DetalleGrupo() {
             </div>
             
             <button className="btn w-100 text-white fw-bold" style={{ backgroundColor: '#7c4d3a' }} onClick={guardarProgreso}>
-              Guardar Progreso
+              Guardar progreso
             </button>
           </div>
         </div>
