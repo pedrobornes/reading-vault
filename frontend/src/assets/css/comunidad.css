@@ -9,7 +9,7 @@
 .comunidad-titulo {
     font-family: var(--font-titulos), serif;
     font-size: 3rem;
-    color: var(--color-marron-oscuro);
+    color: var(--color-verde-oscuro);
 }
 
 /* Caja del buscador */
@@ -36,7 +36,7 @@
     border: none;
     padding: 8px 15px;
     border-radius: 8px;
-    color: var(--color-marron-medio);
+    color: var(--color-verde-oscuro);
     font-weight: 600;
     transition: all 0.2s;
     font-family: var(--font-body);
@@ -44,8 +44,20 @@
 
 .btn-tab.active {
     background-color: white;
-    color: var(--color-marron-oscuro);
+    color: var(--color-verde-oscuro);
     box-shadow: var(--shadow);
+}
+
+.btn-tab:hover {
+    background-color: var(--color-amarillo);
+    color: var(--color-verde-oscuro); 
+    transform: translateY(-2px); 
+}
+
+.btn-tab:not(.active):hover {
+    background-color: var(--color-amarillo);
+    color: var(--color-verde-oscuro);
+    transform: translateY(-2px);
 }
 
 /* Tarjetas */
@@ -89,11 +101,15 @@
 
 .libro-leyendo-titulo {
     font-size: 0.95rem;
-    color: #212529;
+    color: var(--color-verde-oscuro);
     display: -webkit-box;
     -webkit-line-clamp: 1; /* Corta el título si es larguísimo para no deformar la tarjeta */
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+.grupo-nombre-comunidad{
+    color: var(--color-verde-oscuro);
 }
 
 /* Elementos de Grupo */
@@ -131,7 +147,7 @@
 
 .btn-crear-grupo:hover {
     background-color: var(--color-amarillo); 
-    color: #333; 
+    color: var(--color-verde-oscuro); 
     transform: translateY(-2px); 
 }
 

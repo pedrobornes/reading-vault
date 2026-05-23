@@ -34,7 +34,7 @@
 }
 
 .modal-title-custom {
-    color: var(--color-marron-oscuro);
+    color: var(--color-verde-oscuro);
     font-family: var(--font-titulos);
     margin: 0;
     font-size: 1.5rem;
@@ -110,8 +110,13 @@
 }
 
 .btn-crear:hover {
-    filter: brightness(1.1);
     transform: translateY(-2px);
+    background-color:  var(--color-amarillo);
+    color: var(--color-verde-oscuro);
+}
+
+.form-label{
+    color: var(--color-verde-oscuro);
 }
 
 @keyframes fadeIn {
