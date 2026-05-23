@@ -103,7 +103,7 @@ public class AuthController {
         Usuario nuevoUsuario = usuarioService.registrarUsuario(usuario);
 
         // Generamos el token JWT inmediatamente para el nuevo usuario
-        final String token = jwtUtil.generateToken(nuevoUsuario.getNombreUsuario());
+        final String token = jwtUtil.generateToken(nuevoUsuario.getEmail());
 
         // Actualizamos la última conexión
         nuevoUsuario.setUltimaConexion(LocalDateTime.now());
