@@ -11,7 +11,6 @@
   width: 100%;
   max-width: var(--container-width);
   margin: 0 auto;
-  /* Reducimos la altura mínima para que no sobre tanto espacio */
   min-height: 550px; 
   display: flex;
   justify-content: center;
@@ -25,11 +24,11 @@
 position: absolute; 
   background-color: var(--color-azul-claro);
   width: 90%;
-  max-width: 750px;    /* Antes 1000px */
-  height: 400px;   /* Antes 520px */
+  max-width: 750px; 
+  height: 400px;  
   border-radius: 12px 30px 30px 12px;
   
-  border-left: 15px solid var(--color-verde-oscuro); /* Lomo un poco más fino */
+  border-left: 15px solid var(--color-verde-oscuro); 
   border-top: 1px solid rgba(255,255,255,0.8);
   
   box-shadow: 
@@ -47,7 +46,7 @@ position: absolute;
   flex-direction: column;
   justify-content: center;
   height: 100%;
-  gap: 10px; /* Espacio entre los dos textos */
+  gap: 10px; 
 }
 
 .texto-principal {
@@ -87,12 +86,12 @@ display: flex;
   flex-direction: row-reverse; 
   align-items: center;
   justify-content: space-between;
-  padding: 20px 60px ; /* Padding reducido */
+  padding: 20px 60px ; 
   
 }
 
 .reto-setup-card {
-    background-color: var(--color-azul-claro, #eef2f3); /* Fondo suave combinado con tu app */
+    background-color: var(--color-azul-claro, #eef2f3); 
     width: 90%;
     max-width: 600px;
     margin: 40px auto;
@@ -109,7 +108,7 @@ display: flex;
 .reto-setup-card .reto-card__icon-circle {
     background-color: white;
     border: 3px solid var(--color-amarillo);
-    border-radius: 50%; /* Lo hacemos completamente redondo para el setup */
+    border-radius: 50%; 
     display: flex;
     align-items: center;
     justify-content: center;
@@ -139,7 +138,6 @@ display: flex;
     max-width: 400px;
 }
 
-/* El input de número ajustado para que no se coma la pantalla */
 .reto-setup-card .modal-input-num {
     width: 100px;
     height: 55px;
@@ -160,7 +158,7 @@ display: flex;
     box-shadow: 0 0 10px rgba(214, 122, 110, 0.2);
 }
 
-/* Botón de Empezar Desafío con el Hover a Amarillo y letras oscuras */
+/* Botón de Empezar Desafío  */
 .reto-setup-card .btn-progreso {
     flex: 1;
     height: 55px;
@@ -179,7 +177,7 @@ display: flex;
 
 .reto-setup-card .btn-progreso:hover {
     background-color: var(--color-amarillo);
-    color: var(--color-verde-oscuro); /* Cambia a texto oscuro para leerse bien */
+    color: var(--color-verde-oscuro);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(255, 193, 7, 0.3);
 }
@@ -195,10 +193,10 @@ display: flex;
 .reto-card::after {
   content: "SIGUE LEYENDO";
   position: absolute;
-  top: -5px;
+  top: -4px;
   right: -8px;
   width: 55px;  
-  height: 120px;  
+  height: 150px;  
   background-color: var(--color-amarillo);
   color: var(--color-verde-oscuro);
   font-family: var(--font-titulos);
@@ -209,7 +207,7 @@ display: flex;
   justify-content: center;
   padding-bottom: 15px;
   writing-mode: vertical-rl;
-  
+  border-top: 4px solid var(--color-salmon);
   white-space: nowrap;
   clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 50% 88%, 0% 100%);
   box-shadow: -5px 5px 15px rgba(0,0,0,0.2);
@@ -219,14 +217,15 @@ display: flex;
 
 .reto-card:hover::after {
   background-color: var(--color-salmon); 
+  border-top: 4px solid var(--color-amarillo);
   color: #FFFFFF; 
-  transform: translateY(4px); 
+  transform: translateY(0px); 
   height: 150px;
 }
 
 .reto-card__icon-circle {
-width: 110px;        /* Antes 160px */
-  height: 110px;       /* Antes 160px */
+width: 110px;       
+  height: 110px;       
   background-color: white;
   border: 3px solid var(--color-amarillo);
   color: var(--color-verde-oscuro);
@@ -234,14 +233,14 @@ width: 110px;        /* Antes 160px */
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 3rem;     /* Antes 4.5rem */
+  font-size: 3rem;   
   box-shadow: 0 8px 20px rgba(0,0,0,0.05);
 }
 
 .reto-progress-bar {
 background-color: white; 
 background-color: white; 
-  height: 25px;        /* Antes 35px */
+  height: 25px;        
   border-radius: 15px;
   width: 100%;
   margin-top: 15px;
@@ -262,11 +261,11 @@ background-color: white;
 }
 
 .reto-card__body h4 {
-    font-size: 2rem !important; /* Para que "47" y "1" no se vean gigantes */
+    font-size: 2rem !important;
 }
 
 .reto-card__body p {
-    font-size: 1rem; /* Texto descriptivo "Días seguidos", etc. */
+    font-size: 1rem; 
 }
 
 .reto-card.ultima-hoja {
@@ -351,22 +350,20 @@ background-color: white;
   transform: translateY(-3px);
 }
 
-/* El fondo oscuro de detrás */
+/* El fondo oscuro */
 .modal-overlay {
   position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7); /* Oscurece el fondo */
+    background: rgba(0, 0, 0, 0.7); 
     backdrop-filter: blur(5px);
-    
-    /* ESTO ES LO QUE LO CENTRA SÍ O SÍ */
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     
-    z-index: 99999; /* Por encima de todo */
+    z-index: 99999; 
 }
 
 /* La tarjeta del modal */
@@ -377,8 +374,6 @@ background-color: white;
     padding: 35px;
     border-radius: 25px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    
-    /* Quitamos cualquier posición absoluta que pueda tener por error */
     position: relative; 
     margin: auto; 
     
@@ -505,7 +500,7 @@ background-color: white;
 .btn-finalizar-directo:hover {
     background-color: var(--color-amarillo);
     border-color: var(--color-amarillo);
-    color: var(--color-verde-oscuro); /* El texto cambia a oscuro para que se lea bien */
+    color: var(--color-verde-oscuro); 
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
 }
@@ -532,11 +527,10 @@ background-color: white;
     font-size: 1.1rem;
 }
 
-/* Arreglo para poder escribir en el input */
 .modal-input-num {
     background: white !important;
     color: black !important;
-    -moz-appearance: textfield; /* Quita flechas en Firefox */
+    -moz-appearance: textfield; 
 }
 
 .modal-input-num::-webkit-outer-spin-button,
@@ -549,7 +543,7 @@ background-color: white;
 /* Contenedor principal del Toast */
 .custom-toast {
     position: fixed;
-    bottom: -100px; /* Empieza fuera de la pantalla */
+    bottom: -100px; 
     left: 50%;
     transform: translateX(-50%);
     color: white;
@@ -561,14 +555,11 @@ background-color: white;
     align-items: center;
     font-weight: bold;
     font-family: var(--font-cuerpo);
-    
-    /* Animación suave de entrada y salida */
     transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-/* Clase que activa la visibilidad (la añade React) */
 .custom-toast.show {
-    bottom: 40px; /* Sube hasta esta posición */
+    bottom: 40px; 
 }
 
 /* Contenido interno del Toast */
@@ -583,7 +574,6 @@ background-color: white;
     font-size: 1.2rem;
 }
 
-/* Opcional: Pequeña animación de pulso al aparecer */
 .custom-toast.show {
     animation: bounceToast 0.5s ease-out;
 }
@@ -658,7 +648,7 @@ background-color: white;
 
 .analysis-layout {
     display: flex;
-    flex-direction: row !important; /* Icono a un lado, datos al otro */
+    flex-direction: row !important; 
     align-items: center;
     justify-content: space-around;
     padding: 20px 50px !important;
@@ -681,7 +671,7 @@ background-color: white;
 }
 
 .analysis-value {
-    font-size: 2.8rem; /* ¡Números grandes y potentes! */
+    font-size: 2.8rem;
     font-weight: bold;
     font-family: var(--font-titulos);
     color: var(--color-verde-oscuro);
@@ -711,4 +701,30 @@ background-color: white;
     height: 120px;
     font-size: 3.5rem;
     flex-shrink: 0; /* Que no se encoja */
+}
+
+.btn-editar-objetivo {
+    background: none;
+    border: none;
+    color: var(--color-salmon);
+    font-family: var(--font-cuerpo);
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-top: 15px;
+    padding: 5px 10px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-editar-objetivo:hover {
+    background: var(--color-amarillo);
+    color: var(--color-verde-oscuro);
+    transform: translateX(3px); /* Un leve desplazamiento hacia la derecha */
+}
+
+.btn-editar-objetivo i {
+    font-size: 1.05rem;
 }

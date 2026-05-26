@@ -351,6 +351,17 @@ const Reto = () => {
                     Te quedan sólo <strong>{librosRestantes} libros</strong>{" "}
                     para el desafío de este año.
                   </p>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation(); 
+                      setNuevoObjetivo(datosReto.objetivo); 
+                      setDatosReto((prev) => ({ ...prev, objetivo: 0 })); 
+                    }}
+                    className="btn-editar-objetivo"
+                  >
+                    <i className="bi bi-pencil-square me-2"></i> Cambiar objetivo anual
+                  </button>
                 </div>
               </div>
             </section>
