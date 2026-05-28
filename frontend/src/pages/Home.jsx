@@ -659,14 +659,26 @@ fetch(`http://localhost:8080/api/reviews/recomendacion-amigo/${miSesion.idUsuari
                 onClick={() => navigate(`/libro/${libroAnio.isbn}`)}
                 style={{ cursor: "pointer" }}
               >
-                <div className="libro-anio-titulo-admin" onClick={(e) => e.stopPropagation()}>
-                  <h3 className="recomendacion__titulo m-0" style={{ background: 'none', padding: 0, margin: 0 }}>¡Libro del año!</h3>
+                <div 
+                  className="libro-anio-titulo-admin d-flex align-items-center justify-content-center flex-nowrap gap-2" 
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <h3 className="recomendacion__titulo m-0" style={{ background: 'none', padding: 0 }}>
+                    ¡Libro del año!
+                  </h3>
+                  
                   {esAdmin && (
                     <button 
                       onClick={handleCambiarLibroAnioAdmin}
                       className="btn btn-sm btn-light text-warning border-0 shadow-sm d-flex align-items-center justify-content-center"
                       title="Cambiar Libro del Año"
-                      style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: "rgba(255, 193, 7, 0.1)" }}
+                      style={{ 
+                        width: "32px", 
+                        height: "32px", 
+                        borderRadius: "50%", 
+                        backgroundColor: "rgba(255, 193, 7, 0.1)",
+                        flexShrink: 0
+                      }}
                     >
                       <i className="bi bi-trophy-fill" style={{ color: "#ffc107" }}></i>
                     </button>
