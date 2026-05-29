@@ -131,12 +131,23 @@ const BuscadorLibros = () => {
 
   // Renderizado de botones de paginación
   const renderNumerosPagina = () => {
-    const paginas = [];
-    const maxPaginasVisibles = 5;
-    let inicio = Math.max(1, pagina - 2);
-    let fin = inicio + maxPaginasVisibles - 1;
+    // Si tenemos menos de 12 libros, es que estamos en la última página.
+    // Solo mostramos hasta la página actual.
+    const esUltimaPagina = libros.length < 12;
+    
+    // Si estamos en la página 1 y hay menos de 12 libros, solo mostramos la página 1.
+    if (pagina === 1 && esUltimaPagina) {
+        return <button className="btn btn-success mx-1">1</button>;
+    }
 
-    for (let i = inicio; i <= fin; i++) {
+    const paginas = [];
+    // Calculamos el límite: si es la última página, el límite es la página actual
+    const limite = esUltimaPagina ? pagina : pagina + 2; 
+
+    // Empezamos desde 1 o desde (pagina - 1) para que siempre se vea la actual
+    let inicio = Math.max(1, pagina - 1);
+
+    for (let i = inicio; i <= limite; i++) {
       paginas.push(
         <button
           key={i}
@@ -144,7 +155,7 @@ const BuscadorLibros = () => {
           onClick={() => cambiarPagina(i)}
         >
           {i}
-        </button>,
+        </button>
       );
     }
     return paginas;
@@ -214,19 +225,15 @@ const BuscadorLibros = () => {
                     <div className="middle"></div>
                     <div className="right"></div>
                   </div>
-                  <ul>
-                    {/* Dibujamos 18 páginas (li) automáticamente */}
-                    {[...Array(18)].map((_, i) => (
-                      <li key={i}></li>
-                    ))}
-                  </ul>
+                  <ul>{[...Array(18)].map((_, i) => <li key={i}></li>)}</ul>
                 </div>
                 <h4 className="loader-texto mt-5">Cargando biblioteca...</h4>
               </div>
             ) : (
               <>
                 <div className="libros-grid">
-                  {libros.length > 0 ? (
+                  {/* PROTECCIÓN: Usamos Array.isArray para evitar que explote si no es un array */}
+                  {Array.isArray(libros) && libros.length > 0 ? (
                     libros.map((libro, index) => (
                       <LibroCard
                         key={libro.idLibro || libro.isbn || index}
@@ -242,7 +249,8 @@ const BuscadorLibros = () => {
                   )}
                 </div>
 
-                {libros.length > 0 && (
+                {/* Solo mostramos paginación si tenemos libros y el array es válido */}
+                {Array.isArray(libros) && libros.length > 0 && (
                   <div className="pagination-wrapper d-flex justify-content-center align-items-center mt-5 mb-5 gap-2">
                     <button
                       className="btn btn-outline-success"
@@ -259,7 +267,8 @@ const BuscadorLibros = () => {
                     <button
                       className="btn btn-outline-success"
                       onClick={() => cambiarPagina(pagina + 1)}
-                      disabled={libros.length < 12}
+                      // Si el servidor devuelve menos de 12, es que ya no hay más páginas
+                      disabled={libros.length < 12} 
                     >
                       <i className="bi bi-chevron-right"></i>
                     </button>
