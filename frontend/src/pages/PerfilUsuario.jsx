@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import HeaderUsuario from "../sections/HeaderUsuario";
 import ActividadUsuario from "../sections/ActividadUsuario";
 import { SidebarUsuario } from "../components/SidebarUsuario";
+import { API_BASE_URL } from '../apiConfig';
 import "../assets/css/perfil.css";
 
 export default function PerfilUsuario() {

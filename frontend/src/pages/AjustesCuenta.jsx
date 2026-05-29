@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"; 
 import EditarPerfilForm from "../components/EditarPerfilForm";
 import AjustesPrivacidad from "../components/AjustesPrivacidad"; 
-// 1. Importa el nuevo componente
+import { API_BASE_URL } from '../apiConfig';
 import AjustesGeneros from "../components/AjustesGeneros"; 
 
 export default function AjustesCuenta() {

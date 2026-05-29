@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../apiConfig';
 import '../assets/css/comunidad.css';
 import Swal from 'sweetalert2';
 import CrearGrupoModal from '../components/CrearGrupoModal';

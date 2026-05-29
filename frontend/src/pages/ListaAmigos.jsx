@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
+import { API_BASE_URL } from '../apiConfig';
 import "../assets/css/listaAmigos.css";
 
 export default function TusAmigos() {

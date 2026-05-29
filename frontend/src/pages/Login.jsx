@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom'; // Importante para la navegación SPA
 import AuthService from '../services/Auth.service';
+import { API_BASE_URL } from '../apiConfig';
 import '../assets/css/login.css';
 
 const Login = () => {

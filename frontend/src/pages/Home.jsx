@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import NoticiaCard from "../components/NoticiaCard";
 import CrearNoticiaAdmin from "../components/CrearNoticiaAdmin";
+import { API_BASE_URL } from '../apiConfig';
 import "../assets/css/home.css";
 
 export default function Home() {

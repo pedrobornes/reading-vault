@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthService from '../services/Auth.service';
+import { API_BASE_URL } from '../apiConfig';
 import '../assets/css/registro.css'; 
 import '../assets/css/login.css';
 import Loader from '../components/Loader';

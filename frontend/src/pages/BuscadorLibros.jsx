@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import LibroCard from "../components/LibroCard";
 import SidebarGeneros from "../components/SidebarGeneros";
+import { API_BASE_URL } from '../apiConfig';
 import "../assets/css/buscador.css";
 
 const BuscadorLibros = () => {

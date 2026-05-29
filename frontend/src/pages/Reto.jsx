@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import RetoHeader from "../components/RetoHeader";
 import "../assets/css/paginaReto.css";
 import Confetti from 'react-confetti';
+import { API_BASE_URL } from '../apiConfig';
 
 const Reto = () => {
   const [paginasPasadas, setPaginasPasadas] = useState([]);

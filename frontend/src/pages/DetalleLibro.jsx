@@ -3,6 +3,7 @@ import { useParams, useLocation, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import '../assets/css/detalleLibro.css'; 
+import { API_BASE_URL } from '../apiConfig';
 
 // RENDERIZAR EL TEXTO DE LA RESEÑA CON "LEER MÁS"
 function TextoResenaTruncado({ texto }) {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import SideBarBiblioteca from "../components/SideBarBiblioteca";
 import EstanteriaSeccion from "../sections/EstanteriaSeccion";
 import LibroCard from "../components/LibroCard";
+import { API_BASE_URL } from '../apiConfig';
 import "../assets/css/misLibros.css";
 
 const MisLibros = () => {

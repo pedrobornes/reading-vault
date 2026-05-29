@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { API_BASE_URL } from '../apiConfig';
 import Swal from 'sweetalert2';
 import "../assets/css/detalleGrupo.css";
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Swal from 'sweetalert2';
+import { API_BASE_URL } from '../apiConfig';
 import "../assets/css/listaAmigos.css";
 
 export default function MiembrosGrupo() {
