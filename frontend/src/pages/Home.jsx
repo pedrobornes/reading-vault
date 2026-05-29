@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import NoticiaCard from "../components/NoticiaCard";
@@ -7,7 +7,9 @@ import "../assets/css/home.css";
 
 export default function Home() {
   const navigate = useNavigate();
-
+  const [busquedaLibro, setBusquedaLibro] = useState('');
+  const [resultadosLibros, setResultadosLibros] = useState([]);
+  const [isBuscando, setIsBuscando] = useState(false);
   // --- ESTADOS COLUMNA IZQUIERDA ---
   //const [itemBiblioteca, setItemBiblioteca] = useState(null);
   const [stats, setStats] = useState({ leidos: 0, objetivoReto: 0 });
@@ -32,6 +34,7 @@ export default function Home() {
   const [paso, setPaso] = useState(1);
   const [nuevaPagina, setNuevaPagina] = useState(0);
   const [puntuacion, setPuntuacion] = useState(0);
+  const [isEditando, setIsEditando] = useState(false);
 
   // --- CONTROL DE SESIÓN ---
   const sesion = localStorage.getItem("usuario");
@@ -41,6 +44,58 @@ export default function Home() {
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
   };
+
+  // Toast
+  const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
+  const toastTimeoutRef = useRef(null);
+  const mostrarNotificacion = (texto, tipo) => {
+    // Si ya había una notificación a punto de borrarse, cancelamos su temporizador
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    
+    // Mostramos el mensaje nuevo
+    setMensaje({ texto, tipo });
+    
+    // 3 segundos
+    toastTimeoutRef.current = setTimeout(() => {
+      setMensaje({ texto: "", tipo: "" });
+    }, 3000);
+  };
+  
+  const handleBuscarLibroDinamico = (e) => {
+    setBusquedaLibro(e.target.value);
+  };
+
+  useEffect(() => {
+    const buscar = async () => {
+      if (busquedaLibro.trim().length < 3) {
+        setResultadosLibros([]);
+        return;
+      }
+
+      setIsBuscando(true);
+
+      try {
+        const res = await fetch(
+          `http://localhost:8080/api/libros/buscar?q=${encodeURIComponent(busquedaLibro.trim())}`,
+          { headers }
+        );
+        const data = await res.json();
+        setResultadosLibros(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsBuscando(false);
+      }
+    };
+
+    const timeout = setTimeout(() => {
+      buscar();
+    }, 400);
+
+    return () => clearTimeout(timeout);
+  }, [busquedaLibro, token]);
 
   // Comprobación de privilegios de administrador
   const esAdmin = miSesion?.rol === "ADMIN";
@@ -79,7 +134,7 @@ export default function Home() {
       return;
     }
 
-    // 1. CARGA COLUMNA IZQUIERDA: Progreso de lectura y Reto Anual seguro
+    // CARGA COLUMNA IZQUIERDA: Progreso de lectura y Reto Anual seguro
     fetch(
       `http://localhost:8080/api/bibliotecas/usuario/${miSesion.idUsuario}/completa`,
       { headers },
@@ -128,10 +183,10 @@ export default function Home() {
         setCargandoIzquierda(false);
       });
 
-    // 2. CARGA COLUMNA CENTRAL: Noticias
+    // CARGA COLUMNA CENTRAL: Noticias
     cargarNoticiasReales();
 
-    // 3. MOTOR DE RECOMENDACIONES: Llamada limpia al método específico del backend
+    // MOTOR DE RECOMENDACIONES
     fetch(`http://localhost:8080/api/reviews/recomendacion-amigo/${miSesion.idUsuario}`, { headers })
       .then((res) => {
         if (!res.ok) throw new Error("Sin recomendaciones de amigos");
@@ -147,7 +202,6 @@ export default function Home() {
         setNombreRecomendador(`tu amigo ${data.nombreAmigo || "un amigo"}`);
       })
       .catch(() => {
-        // --- Entra ReadingVault (VERSIÓN OPTIMIZADA) ---
         fetch("http://localhost:8080/api/libros/recomendacion-aleatoria", { headers })
           .then((res) => {
             if (!res.ok) throw new Error("No hay libros destacados en el servidor");
@@ -171,107 +225,58 @@ export default function Home() {
         setCargandoDerecha(false);
       });
 
-    // 4. CARGA COLUMNA DERECHA: Libro del año
+    // CARGA COLUMNA DERECHA: Libro del año
     cargarLibroDelAnioFijo();
   }, [navigate]);
 
-  // MANEJADOR EXCLUSIVO: Cambiar el libro del año (Solo Administradores)
-  const handleCambiarLibroAnioAdmin = async () => {
-    const { value: textoBusqueda } = await Swal.fire({
-      title: "🏆 Seleccionar Libro del Año",
-      text: "Introduce el título para buscar en el catálogo:",
-      input: "text",
-      inputPlaceholder: "Ej: El Imperio Final...",
-      showCancelButton: true,
-      confirmButtonColor: "#4B5043",
-      cancelButtonText: "Cancelar",
-    });
-
-    if (!textoBusqueda || !textoBusqueda.trim()) return;
-
+  // Cambiar el libro del año (Solo Administradores)
+  const asignarLibroAnio = async (objetoLibro) => {
     try {
-      const resBusqueda = await fetch(
-        `http://localhost:8080/api/libros/buscar?q=${textoBusqueda.trim()}&isGenero=false`,
-        { headers },
-      );
-      const librosEncontrados = await resBusqueda.json();
-
-      if (librosEncontrados.length === 0) {
-        Swal.fire("Sin resultados", "No se encontró ningún libro.", "info");
-        return;
+      // SINCRONIZAR SI NO EXISTE EN LOCAL
+      if (!objetoLibro.idLibro) {
+        await fetch("http://localhost:8080/api/libros/sincronizar", {
+          method: "POST",
+          headers: {
+            ...headers,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(objetoLibro),
+        });
       }
 
-      const opciones = {};
-      librosEncontrados.forEach((lib) => {
-        opciones[lib.idLibro || lib.isbn] = `${lib.titulo} - ${lib.autor}`;
-      });
+      // RECUPERAR LIBRO LOCAL
+      const params = new URLSearchParams();
+      if (objetoLibro.isbn) params.append("isbn", objetoLibro.isbn);
+      if (objetoLibro.titulo) params.append("titulo", objetoLibro.titulo);
+      if (objetoLibro.autor) params.append("autor", objetoLibro.autor);
 
-      const { value: idSeleccionado } = await Swal.fire({
-        title: "Selecciona el ejemplar",
-        input: "select",
-        inputOptions: opciones,
-        inputPlaceholder: "Selecciona un libro...",
-        showCancelButton: true,
-        confirmButtonColor: "#4B5043",
-        cancelButtonText: "Cancelar",
-      });
+      const resLocal = await fetch(
+        `http://localhost:8080/api/libros/buscar-unico?${params.toString()}`,
+        { headers }
+      );
+      const libroLocalizado = await resLocal.json();
 
-      if (idSeleccionado) {
-        const objetoLibro = librosEncontrados.find(
-          (l) => (l.idLibro || l.isbn) === idSeleccionado,
-        );
-
-        // 1. SINCRONIZAR (Con el Content-Type obligatorio)
-        if (!objetoLibro.idLibro) {
-          await fetch("http://localhost:8080/api/libros/sincronizar", {
-            method: "POST",
-            headers: {
-              ...headers,
-              "Content-Type": "application/json", // ¡CRÍTICO para que Spring lo acepte!
-            },
-            body: JSON.stringify(objetoLibro),
-          });
+      // MARCAR LIBRO DEL AÑO
+      const resMarcar = await fetch(
+        `http://localhost:8080/api/libros/${libroLocalizado.idLibro}/marcar-libro-anio`,
+        {
+          method: "PUT",
+          headers,
         }
+      );
 
-        // 2. RECUPERAR ID LOCAL (Pasamos más datos por si no tiene ISBN)
-        const params = new URLSearchParams();
-        if (objetoLibro.isbn) params.append("isbn", objetoLibro.isbn);
-        if (objetoLibro.titulo) params.append("titulo", objetoLibro.titulo);
-        if (objetoLibro.autor) params.append("autor", objetoLibro.autor);
-
-        const resLocal = await fetch(
-          `http://localhost:8080/api/libros/buscar-unico?${params.toString()}`,
-          { headers },
-        );
-        const libroLocalizado = await resLocal.json();
-
-        // 3. MARCAR COMO LIBRO DEL AÑO
-        const resMarcar = await fetch(
-          `http://localhost:8080/api/libros/${libroLocalizado.idLibro}/marcar-libro-anio`,
-          {
-            method: "PUT",
-            headers: headers, // Aquí no hace falta Content-Type porque no hay body
-          },
-        );
-
-        if (resMarcar.ok) {
-          Swal.fire(
-            "¡Fijado!",
-            "El libro del año ha sido modificado con éxito.",
-            "success",
-          );
-          cargarLibroDelAnioFijo();
-        } else {
-          Swal.fire(
-            "Error",
-            "No se pudo actualizar. Comprueba tus permisos de Admin.",
-            "error",
-          );
-        }
+      if (resMarcar.ok) {
+        mostrarNotificacion("Libro del año actualizado con éxito", "success");
+        setLibroAnio(libroLocalizado);
+        setBusquedaLibro('');
+        setResultadosLibros([]);
+        setIsEditando(false);
+      } else {
+        mostrarNotificacion("Error al actualizar el libro", "error");
       }
     } catch (err) {
-      console.error("Error en flujo de asignación destacado:", err);
-      Swal.fire("Error", "Hubo un fallo de conexión.", "error");
+      console.error(err);
+      mostrarNotificacion("Error de conexión", "error");
     }
   };
 
@@ -347,7 +352,7 @@ export default function Home() {
                   retoData.completados !== undefined
                     ? retoData.completados
                     : totalLeidosManual,
-                objectiveReto:
+                objetivoReto:
                   retoData.objetivoLibros || miSesion.objetivoLectura || 20,
               });
             } else {
@@ -428,14 +433,12 @@ export default function Home() {
   };
 
   const guardarProgresoParcial = () => {
-    // Si llegó al final, pasamos directamente a la pantalla de estrellas
     if (nuevaPagina >= pagTotales) {
       setNuevaPagina(pagTotales);
       setPaso(2);
       return;
     }
 
-    // Si no, guardamos el progreso parcial
     fetch(`http://localhost:8080/api/bibliotecas/actualizar-progreso`, {
       method: "PUT",
       headers: { ...headers, "Content-Type": "application/json" },
@@ -455,7 +458,6 @@ export default function Home() {
   };
 
   const guardarLibroTerminado = () => {
-    // Primero movemos el libro a la estantería de "Leído"
     fetch(`http://localhost:8080/api/bibliotecas/actualizar-estanteria`, {
       method: "PUT",
       headers: { ...headers, "Content-Type": "application/json" },
@@ -465,7 +467,6 @@ export default function Home() {
       }),
     }).then((res) => {
       if (res.ok) {
-        // Guardamos la puntuación de estrellas en la tabla de reviews
         fetch(`http://localhost:8080/api/reviews`, {
           method: "POST",
           headers: { ...headers, "Content-Type": "application/json" },
@@ -473,18 +474,16 @@ export default function Home() {
             idUsuario: miSesion.idUsuario,
             idLibro: libroLeyendo.idLibro,
             puntuacion: puntuacion,
-            //comentario: "Lectura completada desde el panel principal."
           }),
         })
           .then((resReview) => {
-            // Una vez guardado todo con éxito, limpiamos el estado y cerramos el modal
             const librosRestantes = librosLeyendo.filter(
               (_, index) => index !== indiceLibro,
             );
             setLibrosLeyendo(librosRestantes);
             setIndiceLibro(0);
             setIsModalOpen(false);
-            setPuntuacion(0); // Reiniciamos las estrellas para el próximo libro
+            setPuntuacion(0); 
           })
           .catch((err) =>
             console.error("Error al guardar la valoración:", err),
@@ -495,6 +494,16 @@ export default function Home() {
 
   return (
     <div className="container-custom py-5">
+      {mensaje.texto && (
+        <div className={`vault-toast vault-toast--${mensaje.tipo}`}>
+          {mensaje.tipo === "success" ? (
+            <i className="bi bi-check-circle-fill me-2"></i>
+          ) : (
+            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+          )}
+          {mensaje.texto}
+        </div>
+      )}
       <div className="home-grid">
         {/* --- COLUMNA IZQUIERDA --- */}
         <aside className="home-grid__sidebar-left">
@@ -596,7 +605,7 @@ export default function Home() {
                       className="libro__progreso mt-auto"
                       onClick={(e) => {
                         e.stopPropagation();
-                        abrirModalProgreso(); // Llama al nuevo modal
+                        abrirModalProgreso(); 
                       }}
                       style={{ cursor: "pointer" }}
                       title="Haga clic para actualizar su página actual"
@@ -622,7 +631,7 @@ export default function Home() {
               )}
             </div>
 
-            {/* --- MODAL FLOTANTE (Ponlo al final de tu HTML principal) --- */}
+            {/* --- MODAL FLOTANTE DE PROGRESO --- */}
             {isModalOpen && (
               <div className="modal-overlay">
                 <div className="modal-progreso-nuevo">
@@ -751,7 +760,10 @@ export default function Home() {
             </div>
 
             {esAdmin && (
-              <CrearNoticiaAdmin onNoticiaCreada={cargarNoticiasReales} />
+              <CrearNoticiaAdmin 
+                onNoticiaCreada={cargarNoticiasReales} 
+                mostrarNotificacion={mostrarNotificacion} 
+              />
             )}
 
             <h1 className="noticias__titulo">NOTICIAS</h1>
@@ -765,6 +777,7 @@ export default function Home() {
                       noticia={noticia}
                       esAdmin={esAdmin}
                       onNoticiaModificada={cargarNoticiasReales}
+                      mostrarNotificacion={mostrarNotificacion}
                     />
                   ))
               ) : (
@@ -830,57 +843,24 @@ export default function Home() {
             {libroAnio && (
               <div
                 className="libroAño text-center"
-                onClick={() => navigate(`/libro/${libroAnio.isbn}`)}
                 style={{ cursor: "pointer" }}
+                onClick={() => navigate(`/libro/${libroAnio.isbn}`)}
               >
-                <div 
-                  className="libro-anio-titulo-admin d-flex align-items-center justify-content-center flex-nowrap gap-2" 
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <h3 className="recomendacion__titulo m-0" style={{ background: 'none', padding: 0 }}>
-                    ¡Libro del año!
-                  </h3>
-                  
+                <div className="libro-anio-titulo-admin d-flex align-items-center justify-content-center flex-nowrap gap-2" onClick={(e) => e.stopPropagation()}>
+                  <h3 className="recomendacion__titulo m-0" style={{ background: 'none', padding: 0 }}>¡Libro del año!</h3>
                   {esAdmin && (
-                    <button
-                      onClick={handleCambiarLibroAnioAdmin}
-                      className="btn btn-sm btn-light text-warning border-0 shadow-sm d-flex align-items-center justify-content-center"
-                      title="Cambiar Libro del Año"
-                      style={{ 
-                        width: "32px", 
-                        height: "32px", 
-                        borderRadius: "50%", 
-                        backgroundColor: "rgba(255, 193, 7, 0.1)",
-                        flexShrink: 0
-                      }}
-                    >
-                      <i
-                        className="bi bi-trophy-fill"
-                        style={{ color: "#ffc107" }}
-                      ></i>
+                    <button onClick={() => setIsEditando(true)} className="btn btn-sm btn-light text-warning border-0 shadow-sm" title="Cambiar Libro del Año">
+                      <i className="bi bi-trophy-fill" style={{ color: "#ffc107" }}></i>
                     </button>
                   )}
                 </div>
-
                 <div className="d-flex flex-column align-items-center mt-3">
                   <picture className="recomendacion__picture mb-3">
-                    <img
-                      src={
-                        libroAnio.portada ||
-                        libroAnio.fotoPortada ||
-                        "https://via.placeholder.com/150x200?text=Sin+Portada"
-                      }
-                      alt={libroAnio.titulo}
-                      className="recomendacion__portada"
-                    />
+                    <img src={libroAnio.portada || libroAnio.fotoPortada || "https://via.placeholder.com/150x200?text=Sin+Portada"} alt={libroAnio.titulo} className="recomendacion__portada" />
                   </picture>
                   <div className="recomendacion__textos w-100">
-                    <h4 className="recomendacion__libro mb-1">
-                      {libroAnio.titulo}
-                    </h4>
-                    <h4 className="recomendacion__autor m-0">
-                      {libroAnio.autor || "Autor Desconocido"}
-                    </h4>
+                    <h4 className="recomendacion__libro mb-1">{libroAnio.titulo}</h4>
+                    <h4 className="recomendacion__autor m-0">{libroAnio.autor || "Autor Desconocido"}</h4>
                   </div>
                 </div>
               </div>
@@ -888,6 +868,66 @@ export default function Home() {
           </section>
         </aside>
       </div>
+
+      {/* --- MODAL FLOTANTE PARA CAMBIAR LIBRO DEL AÑO (CENTRAL) --- */}
+      {isEditando && (
+        <div className="modal-overlay">
+          <div className="modal-custom" style={{ maxWidth: '500px', width: '90%', padding: '24px', borderRadius: '12px', backgroundColor: '#fff' }}>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h4 className="m-0 fw-bold">🏆 Buscar nuevo Libro del Año</h4>
+              <button className="btn btn-sm btn-outline-danger border-0" onClick={() => {
+                setIsEditando(false);
+                setBusquedaLibro('');
+                setResultadosLibros([]);
+              }}>
+                <i className="bi bi-x-lg"></i>
+              </button>
+            </div>
+
+            {/* Input del buscador */}
+            <input
+              type="text"
+              className="form-control input-vault mb-3"
+              placeholder="Escribe el título del libro..."
+              value={busquedaLibro}
+              onChange={handleBuscarLibroDinamico}
+              autoFocus
+            />
+
+            {/* Indicador de carga */}
+            {isBuscando && <div className="text-center text-muted small my-3">Buscando libros...</div>}
+
+            {/* Lista de resultados con portada, título y autor */}
+            {resultadosLibros.length > 0 && (
+              <ul className="list-group shadow-sm" style={{ maxHeight: '350px', overflowY: 'auto' }}>
+                {resultadosLibros.map((lib) => (
+                  <li
+                    key={lib.idLibro || lib.isbn}
+                    className="list-group-item list-group-item-action d-flex align-items-center gap-3 py-2"
+                    onClick={() => asignarLibroAnio(lib)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <img
+                      src={lib.portada || lib.fotoPortada || "https://via.placeholder.com/50x75?text=Sin+Portada"}
+                      alt={lib.titulo}
+                      style={{ width: '50px', height: '75px', objectFit: 'cover', borderRadius: '5px' }}
+                    />
+                    <div className="d-flex flex-column text-start">
+                      <span className="fw-bold text-dark">{lib.titulo}</span>
+                      <span className="text-muted small">{lib.autor || "Autor Desconocido"}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {/* Mensaje de sin resultados */}
+            {busquedaLibro.trim().length >= 3 && resultadosLibros.length === 0 && !isBuscando && (
+              <div className="text-center text-muted small my-3">No se encontró ningún libro.</div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

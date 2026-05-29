@@ -100,25 +100,25 @@
 }
 
 .btn-unirse {
-    background-color: rgba(155, 196, 188, 0.25);
-    color: var(--color-verde-oscuro);
+    background-color: var(--color-salmon);
+    color: #ffff;
 }
 
 .btn-unirse:hover {
-    background-color: var(--color-verde-oscuro);
-    color: white;
+    background-color: var(--color-amarillo);
+    color: var(--color-verde-oscuro);
 }
 
 .btn-salir {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
+    background-color: var(--color-salmon);
+    color: #ffff;
     backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .btn-salir:hover {
-    background-color: #fee2e2;
-    color: #991b1b;
+    background-color: var(--color-amarillo);
+    color: var(--color-verde-oscuro);
 }
 
 /* TARJETAS, LECTURA ACTUAL Y NUEVOS HOVERS */

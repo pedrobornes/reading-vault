@@ -102,8 +102,8 @@
 }
 
 .btn-cargar-mas {
-    background-color: var(--color-amarillo);
-    color: var(--color-verde-oscuro);
+    background-color: var(--color-salmon);
+    color: #ffff;
     border: none;
     padding: 10px 40px;
     border-radius: 30px;
@@ -116,5 +116,6 @@
 .btn-cargar-mas:hover {
     filter: brightness(1.05);
     transform: scale(1.03);
-    background-color: var(--color-salmon);
+    background-color: var(--color-amarillo);
+    color: var(--color-verde-oscuro);
 }

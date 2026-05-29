@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Swal from 'sweetalert2';
 import "../assets/css/detalleGrupo.css";
@@ -29,6 +29,18 @@ export default function DetalleGrupo() {
 
   const sesion = JSON.parse(localStorage.getItem("usuario"));
   const token = localStorage.getItem("token");
+
+  // Toast
+  const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
+  const toastTimeoutRef = useRef(null);
+
+  const mostrarNotificacion = (texto, tipo) => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    setMensaje({ texto, tipo });
+    toastTimeoutRef.current = setTimeout(() => {
+      setMensaje({ texto: "", tipo: "" });
+    }, 3000);
+  };
 
   // Imagen de avatar por defecto si el usuario no tiene una establecida
   const FOTO_DEFECTO = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
@@ -302,11 +314,11 @@ export default function DetalleGrupo() {
       text: "Esta acción no se puede deshacer.",
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#d33',       
-      cancelButtonColor: '#7c4d3a',     
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#7c4d3a',
       confirmButtonText: 'Sí, borrar',
       cancelButtonText: 'Cancelar',
-      reverseButtons: true              
+      reverseButtons: true
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
@@ -317,17 +329,13 @@ export default function DetalleGrupo() {
           
           if (res.ok) {
             setMensajes(mensajes.filter(m => m.idMensaje !== idMensaje));
-            Swal.fire({
-              title: '¡Borrado!',
-              text: 'Tu comentario ha desaparecido.',
-              icon: 'success',
-              timer: 1500,
-              showConfirmButton: false
-            });
+            mostrarNotificacion("Comentario eliminado correctamente.", "success");
+          } else {
+            mostrarNotificacion("Error al eliminar el comentario.", "error");
           }
         } catch (error) {
           console.error("Error al borrar el mensaje:", error);
-          Swal.fire('Error', 'Hubo un problema de conexión al borrar.', 'error');
+          mostrarNotificacion("Hubo un problema de conexión.", "error");
         }
       }
     });
@@ -388,42 +396,36 @@ export default function DetalleGrupo() {
     setProgreso({ ...progreso, nota: texto });
   };
 
-  // Guardar progreso validado con Toast de notificación elegante
+  // Guardar progreso validado con Toast
   const guardarProgreso = async () => {
     if (errorProgreso || progreso.pagina === "") return;
 
-    const res = await fetch(
-      `http://localhost:8080/api/comunidades/${id}/actualizar-progreso`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/comunidades/${id}/actualizar-progreso`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(progreso),
         },
-        body: JSON.stringify(progreso),
-      },
-    );
-    if (res.ok) {
-      const data = await res.json();
-      setGrupo(data);
-      setShowModalProgreso(false);
+      );
 
-      const Toast = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 2000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-          toast.addEventListener('mouseenter', Swal.stopTimer);
-          toast.addEventListener('mouseleave', Swal.resumeTimer);
-        }
-      });
+      if (res.ok) {
+        const data = await res.json();
+        setGrupo(data);
+        setShowModalProgreso(false);
 
-      Toast.fire({
-        icon: 'success',
-        title: 'Progreso guardado correctamente'
-      });
+        // --- CAMBIO AQUÍ: Sustituimos el Swal.mixin por tu mostrarNotificacion ---
+        mostrarNotificacion("Progreso guardado correctamente", "success");
+      } else {
+        mostrarNotificacion("Error al guardar el progreso", "error");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      mostrarNotificacion("Error de conexión con el servidor", "error");
     }
   };
 
@@ -462,6 +464,11 @@ export default function DetalleGrupo() {
 
   return (
     <div className="detalle-grupo-bg">
+      {mensaje.texto && (
+        <div className={`vault-toast vault-toast--${mensaje.tipo}`} style={{ zIndex: 9999 }}>
+          {mensaje.texto}
+        </div>
+      )}
       {/* Cabecera Hero */}
       <header
         className="grupo-header"

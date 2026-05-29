@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom"; 
 import Swal from "sweetalert2";
 
-export default function NoticiaCard({ noticia, esAdmin, onNoticiaModificada }) {
+// Añadimos mostrarNotificacion a los props recibidos
+export default function NoticiaCard({ noticia, esAdmin, onNoticiaModificada, mostrarNotificacion }) {
   const token = localStorage.getItem("token");
 
   // --- ESTADOS PARA LA EDICIÓN INTERNA ---
@@ -71,16 +72,27 @@ export default function NoticiaCard({ noticia, esAdmin, onNoticiaModificada }) {
       body: JSON.stringify(noticiaActualizada)
     }).then((res) => {
       if (res.ok) {
-        Swal.fire("¡Actualizada!", "La noticia se ha modificado correctamente.", "success");
+        if (mostrarNotificacion) {
+          mostrarNotificacion("La noticia se ha modificado correctamente.", "success");
+        }
         setEditando(false);
         setBusqueda("");
         if (onNoticiaModificada) onNoticiaModificada();
+      } else {
+        if (mostrarNotificacion) {
+          mostrarNotificacion("Error al modificar la noticia.", "error");
+        }
+      }
+    }).catch(() => {
+      if (mostrarNotificacion) {
+        mostrarNotificacion("Error de conexión.", "error");
       }
     });
   };
 
   // Lógica para eliminar la noticia
   const handleEliminar = () => {
+    // Swal para la pregunta de confirmación (Sí/Cancelar)
     Swal.fire({
       title: "¿Estás seguro?",
       text: "Esta acción no se puede deshacer",
@@ -97,8 +109,18 @@ export default function NoticiaCard({ noticia, esAdmin, onNoticiaModificada }) {
           headers: { Authorization: `Bearer ${token}` }
         }).then((res) => {
           if (res.ok) {
-            Swal.fire("¡Borrada!", "La noticia ha sido eliminada.", "success");
+            if (mostrarNotificacion) {
+              mostrarNotificacion("La noticia ha sido eliminada.", "success");
+            }
             if (onNoticiaModificada) onNoticiaModificada();
+          } else {
+            if (mostrarNotificacion) {
+              mostrarNotificacion("Error al eliminar la noticia.", "error");
+            }
+          }
+        }).catch(() => {
+          if (mostrarNotificacion) {
+            mostrarNotificacion("Error de conexión.", "error");
           }
         });
       }
@@ -137,7 +159,7 @@ export default function NoticiaCard({ noticia, esAdmin, onNoticiaModificada }) {
                 />
                 {/* Desplegable de resultados flotantes */}
                 {librosFiltrados.length > 0 && (
-                  <ul className="position-absolute w-100 bg-white border rounded shadow-sm p-0 m-0 custom-dropdown-list" style={{ zIndex: 100, maxStatus: "200px", overflowY: "auto", listStyle: "none" }}>
+                  <ul className="position-absolute w-100 bg-white border rounded shadow-sm p-0 m-0 custom-dropdown-list" style={{ zIndex: 100, maxHeight: "200px", overflowY: "auto", listStyle: "none" }}>
                     {librosFiltrados.map((lib, idx) => (
                       <li 
                         key={lib.isbn || idx} 
@@ -172,7 +194,7 @@ export default function NoticiaCard({ noticia, esAdmin, onNoticiaModificada }) {
     );
   }
 
-  // --- RENDER EN MODO VISTA (CON CABECERA EN COLUMNA CORREGIDA) ---
+  // --- RENDER EN MODO VISTA ---
   return (
     <div className="noticia-card mb-4 shadow-sm p-3 bg-white rounded position-relative">
       
@@ -191,8 +213,8 @@ export default function NoticiaCard({ noticia, esAdmin, onNoticiaModificada }) {
       {/* TÍTULO Y FECHA EN COLUMNA ADAPTATIVA */}
       <div className={`noticia-header mb-3 d-flex w-100 ${
         esAdmin 
-          ? "flex-column gap-1 pe-5 align-items-start" // Si es Admin: Estructura vertical (Fecha abajo, espacio para botones)
-          : "justify-content-between align-items-center" // Si es Usuario: Estructura horizontal (Título izquierda, fecha derecha)
+          ? "flex-column gap-1 pe-5 align-items-start" 
+          : "justify-content-between align-items-center" 
       }`}>
         
         {/* Renderizado del Título */}

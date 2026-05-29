@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import Swal from "sweetalert2";
+import React, { useState, useEffect, useRef } from "react";
 import "../assets/css/crearNoticiaAdmin.css";
 
-export default function CrearNoticiaAdmin({ onNoticiaCreada }) {
+// Añadimos mostrarNotificacion aquí en los props
+export default function CrearNoticiaAdmin({ onNoticiaCreada, mostrarNotificacion }) {
   // --- ESTADOS DE CONTROL DE VISIBILIDAD ---
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [titulo, setTitulo] = useState("");
@@ -42,9 +42,11 @@ export default function CrearNoticiaAdmin({ onNoticiaCreada }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Validación preventiva en el lado del cliente
+    // Validación preventiva en el lado del cliente (Usamos el toast de error)
     if (!titulo.trim() || !contenido.trim()) {
-      Swal.fire("Error", "El título y el contenido son obligatorios", "error");
+      if (mostrarNotificacion) {
+        mostrarNotificacion("El título y el contenido son obligatorios", "error");
+      }
       return;
     }
 
@@ -59,7 +61,6 @@ export default function CrearNoticiaAdmin({ onNoticiaCreada }) {
         titulo: libroSeleccionado.titulo,
         autor: libroSeleccionado.autor,
         descripcion: libroSeleccionado.descripcion,
-        // CORREGIDO: Fallback para asegurar la URL de la imagen (venga como portada o fotoPortada)
         fotoPortada: libroSeleccionado.portada || libroSeleccionado.fotoPortada, 
         fechaPublicacion: libroSeleccionado.fechaPublicacion,
         paginas: libroSeleccionado.paginas ? parseInt(libroSeleccionado.paginas) : 0,
@@ -80,7 +81,10 @@ export default function CrearNoticiaAdmin({ onNoticiaCreada }) {
     })
       .then((res) => {
         if (res.ok) {
-          Swal.fire("¡Creada!", "La noticia se ha publicado correctamente", "success");
+          // Toast de éxito
+          if (mostrarNotificacion) {
+            mostrarNotificacion("La noticia se ha publicado correctamente", "success");
+          }
           
           // Reseteamos todos los estados tras un guardado exitoso
           setTitulo("");
@@ -93,10 +97,18 @@ export default function CrearNoticiaAdmin({ onNoticiaCreada }) {
           // Callback para recargar el feed principal del Home al instante
           if (onNoticiaCreada) onNoticiaCreada(); 
         } else {
-          Swal.fire("Error", "No se pudo crear la noticia", "error");
+          // Toast de error
+          if (mostrarNotificacion) {
+            mostrarNotificacion("No se pudo crear la noticia", "error");
+          }
         }
       })
-      .catch((err) => console.error("Error al publicar noticia:", err));
+      .catch((err) => {
+        console.error("Error al publicar noticia:", err);
+        if (mostrarNotificacion) {
+          mostrarNotificacion("Error de conexión", "error");
+        }
+      });
   };
 
   // Renderizado optimizado: Si está oculto, solo muestra el botón de apertura
@@ -164,7 +176,6 @@ export default function CrearNoticiaAdmin({ onNoticiaCreada }) {
                       setBusqueda(lib.titulo);
                     }}
                   >
-                    {/* CORREGIDO: Renderizado de portada dinámico con fallback de propiedades */}
                     {(lib.portada || lib.fotoPortada) && (
                       <img 
                         src={lib.portada || lib.fotoPortada} 
