@@ -1,4 +1,4 @@
-/* --- Tarjeta Principal --- */
+/* --- 1. ESTILOS BASE DE LA TARJETA (Lo que usas en buscador, etc.) --- */
 .libro-card {
   background-color: var(--color-azul-footer);
   padding: 20px;
@@ -10,7 +10,6 @@
   flex-direction: column;
 }
 
-/* Contenedor de la portada */
 .libro-card__contenedor-imagen {
   background-color: white;
   padding: 15px;
@@ -18,16 +17,48 @@
   margin-bottom: 10px;
   display: flex;
   justify-content: center;
+  height: 180px; /* Altura estándar para tarjetas normales */
 }
 
-/* Imagen del libro */
 .libro-card__imagen {
   width: 100%;
-  height: 180px;
-  object-fit: contain;
+  height: 100%;
+  object-fit: contain; /* Mantiene la portada completa */
 }
 
-/* Valoración en estrellas */
+/* --- 2. ESTILO PARA TARJETAS EN ESTANTERÍAS (Compacto) --- */
+/* Estas reglas ganan porque son más específicas */
+.libros-fila-grid .libro-card {
+  padding: 10px;
+  border-radius: 12px;
+  height: auto;
+}
+
+.libros-fila-grid .libro-card__contenedor-imagen {
+  padding: 5px;
+  height: 140px; /* Más pequeño para el grid de 5 */
+}
+
+.libros-fila-grid .libro-card__imagen {
+  height: 100%;
+  object-fit: cover; /* Recorta para llenar el cuadrado */
+}
+
+.libros-fila-grid .libro-card__titulo {
+  font-size: 0.85rem;
+  margin-top: 5px;
+}
+
+.libros-fila-grid .libro-card__autor {
+  font-size: 0.75rem;
+}
+
+.libros-fila-grid .btn-add-vault {
+  padding: 6px;
+  font-size: 0.75rem;
+}
+
+/* --- 3. ELEMENTOS COMUNES --- */
 .libro-card__estrellas {
   color: var(--color-amarillo);
   margin-bottom: 5px;
@@ -36,7 +67,6 @@
   gap: 2px;
 }
 
-/* Textos */
 .libro-card__titulo {
   font-size: 0.95rem;
   font-weight: bold;
@@ -50,7 +80,6 @@
   font-family: var(--font-body);
 }
 
-/* Contenedor inferior */
 .libro-card__acciones {
   margin-top: auto;
   padding-top: 15px;

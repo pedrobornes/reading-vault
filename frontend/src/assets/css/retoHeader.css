@@ -217,3 +217,37 @@
   0%, 100% { transform: rotate(-5deg); }
   50% { transform: rotate(5deg); }
 }
+
+/* --- RESPONSIVE PARA MÓVIL --- */
+@media (max-width: 992px) {
+  .reto-header__content {
+    padding-top: 3rem;
+    flex-direction: column; /* Apila elementos verticalmente */
+    transform: translateY(-50px); /* Ajusta según lo que necesites subirlo sobre el banner */
+    text-align: center;
+  }
+
+  .reto-header__logo-container {
+    align-items: center; /* Centra el logo */
+    margin-bottom: 20px;
+  }
+
+  .reto-header__logo-reading, 
+  .reto-header__logo-vault {
+    font-size: 3rem; /* Un poco más pequeño en móvil */
+    padding: 0;
+    align-self: center;
+  }
+
+  .reto-header__logo-vault {
+    padding-left: 0; /* Quitamos el padding lateral en móvil */
+  }
+
+  .reto-header__info-container {
+    animation-delay: 0.5s; /* Ajuste suave para que entre después del logo */
+  }
+
+  .reto-header__title {
+    font-size: 1.4rem;
+  }
+}

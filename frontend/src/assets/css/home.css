@@ -1,21 +1,37 @@
 /* home.css */
 
-/* DISTRIBUCIÓN EN REJILLA */
+/* --- ESCRITORIO --- */
 .home-grid {
   display: grid;
-  grid-template-columns: 240px 1fr 260px;
+  grid-template-columns: 240px 1fr 260px; /* 3 columnas fijas */
   gap: 1.5rem;
   align-items: start;
-  width: 100%;
 }
 
-/* Responsividad para pantallas medianas y tablets */
-@media (max-width: 1100px) {
+/* --- MÓVIL (Aquí reordenamos todo) --- */
+@media (max-width: 992px) {
   .home-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
+
+  /* 1. La bienvenida debe subir arriba de todo. 
+     Como es hija del 'main', esto es difícil. 
+     SOLUCIÓN: Forzamos el orden del bloque entero. */
+  .home-grid__main {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .noticias__bienvenida { order: -1; margin-bottom: 1rem; width: 100%; }
+  
+  /* 2. Ahora reordenamos las 3 columnas principales */
+  .home-grid__sidebar-left { order: 1; width: 100%; }
+  .home-grid__sidebar-right { order: 2; width: 100%; }
+  .noticias { order: 3; width: 100%; } /* Noticias después de derecha */
 }
+
 
 /* ESTILOS COMPARTIDOS PARA TÍTULOS DE SECCIÓN */
 .leyendo__titulo, 

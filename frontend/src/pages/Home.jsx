@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import NoticiaCard from "../components/NoticiaCard";
 import CrearNoticiaAdmin from "../components/CrearNoticiaAdmin";
-import { API_BASE_URL } from '../apiConfig';
+import { API_BASE_URL } from "../apiConfig";
 import "../assets/css/home.css";
 
 export default function Home() {
   const navigate = useNavigate();
-  const [busquedaLibro, setBusquedaLibro] = useState('');
+  const [busquedaLibro, setBusquedaLibro] = useState("");
   const [resultadosLibros, setResultadosLibros] = useState([]);
   const [isBuscando, setIsBuscando] = useState(false);
   // --- ESTADOS COLUMNA IZQUIERDA ---
@@ -54,16 +54,16 @@ export default function Home() {
     if (toastTimeoutRef.current) {
       clearTimeout(toastTimeoutRef.current);
     }
-    
+
     // Mostramos el mensaje nuevo
     setMensaje({ texto, tipo });
-    
+
     // 3 segundos
     toastTimeoutRef.current = setTimeout(() => {
       setMensaje({ texto: "", tipo: "" });
     }, 3000);
   };
-  
+
   const handleBuscarLibroDinamico = (e) => {
     setBusquedaLibro(e.target.value);
   };
@@ -80,7 +80,7 @@ export default function Home() {
       try {
         const res = await fetch(
           `${API_BASE_URL}/api/libros/buscar?q=${encodeURIComponent(busquedaLibro.trim())}`,
-          { headers }
+          { headers },
         );
         const data = await res.json();
         setResultadosLibros(data);
@@ -188,7 +188,10 @@ export default function Home() {
     cargarNoticiasReales();
 
     // MOTOR DE RECOMENDACIONES
-    fetch(`${API_BASE_URL}/api/reviews/recomendacion-amigo/${miSesion.idUsuario}`, { headers })
+    fetch(
+      `${API_BASE_URL}/api/reviews/recomendacion-amigo/${miSesion.idUsuario}`,
+      { headers },
+    )
       .then((res) => {
         if (!res.ok) throw new Error("Sin recomendaciones de amigos");
         return res.json();
@@ -205,7 +208,8 @@ export default function Home() {
       .catch(() => {
         fetch(`${API_BASE_URL}/api/libros/recomendacion-aleatoria`, { headers })
           .then((res) => {
-            if (!res.ok) throw new Error("No hay libros destacados en el servidor");
+            if (!res.ok)
+              throw new Error("No hay libros destacados en el servidor");
             return res.json();
           })
           .then((libroOptimo) => {
@@ -253,7 +257,7 @@ export default function Home() {
 
       const resLocal = await fetch(
         `${API_BASE_URL}/api/libros/buscar-unico?${params.toString()}`,
-        { headers }
+        { headers },
       );
       const libroLocalizado = await resLocal.json();
 
@@ -263,13 +267,13 @@ export default function Home() {
         {
           method: "PUT",
           headers,
-        }
+        },
       );
 
       if (resMarcar.ok) {
         mostrarNotificacion("Libro del año actualizado con éxito", "success");
         setLibroAnio(libroLocalizado);
-        setBusquedaLibro('');
+        setBusquedaLibro("");
         setResultadosLibros([]);
         setIsEditando(false);
       } else {
@@ -484,7 +488,7 @@ export default function Home() {
             setLibrosLeyendo(librosRestantes);
             setIndiceLibro(0);
             setIsModalOpen(false);
-            setPuntuacion(0); 
+            setPuntuacion(0);
           })
           .catch((err) =>
             console.error("Error al guardar la valoración:", err),
@@ -506,6 +510,9 @@ export default function Home() {
         </div>
       )}
       <div className="home-grid">
+
+      
+
         {/* --- COLUMNA IZQUIERDA --- */}
         <aside className="home-grid__sidebar-left">
           <section className="infoUsuario">
@@ -606,7 +613,7 @@ export default function Home() {
                       className="libro__progreso mt-auto"
                       onClick={(e) => {
                         e.stopPropagation();
-                        abrirModalProgreso(); 
+                        abrirModalProgreso();
                       }}
                       style={{ cursor: "pointer" }}
                       title="Haga clic para actualizar su página actual"
@@ -745,25 +752,22 @@ export default function Home() {
             </div>
           </section>
         </aside>
-
-        {/* --- COLUMNA CENTRAL --- */}
+        
+              {/* --- COLUMNA CENTRAL --- */}
         <main className="home-grid__main">
+            {/* --- BIENVIDA --- */}
+      <section className="noticias__bienvenida" style={{ order: -1 }}>
+          <h3 className="bienvenida__titulo">
+            Bienvenido a Reading{" "}
+            <span className="bienvenida__titulo--verde">Vault</span>
+          </h3>
+          <p className="bienvenida__texto">Encuentra tus libros favoritos, únete a una comunidad y gestiona tu biblioteca personal.</p>
+        </section>
           <section className="noticias">
-            <div className="noticias__bienvenida">
-              <h3 className="bienvenida__titulo">
-                Bienvenido a Reading
-                <span className="bienvenida__titulo--verde">Vault</span>
-              </h3>
-              <p className="bienvenida__texto">
-                Encuentra tus libros favoritos, únete a una comunidad y gestiona
-                tu biblioteca personal
-              </p>
-            </div>
-
             {esAdmin && (
-              <CrearNoticiaAdmin 
-                onNoticiaCreada={cargarNoticiasReales} 
-                mostrarNotificacion={mostrarNotificacion} 
+              <CrearNoticiaAdmin
+                onNoticiaCreada={cargarNoticiasReales}
+                mostrarNotificacion={mostrarNotificacion}
               />
             )}
 
@@ -801,7 +805,7 @@ export default function Home() {
           </section>
         </main>
 
-        {/* --- COLUMNA DERECHA --- */}
+         {/* --- COLUMNA DERECHA --- */}
         <aside className="home-grid__sidebar-right">
           <section className="recomendaciones">
             {libroAmigo && (
@@ -847,40 +851,83 @@ export default function Home() {
                 style={{ cursor: "pointer" }}
                 onClick={() => navigate(`/libro/${libroAnio.isbn}`)}
               >
-                <div className="libro-anio-titulo-admin d-flex align-items-center justify-content-center flex-nowrap gap-2" onClick={(e) => e.stopPropagation()}>
-                  <h3 className="recomendacion__titulo m-0" style={{ background: 'none', padding: 0 }}>¡Libro del año!</h3>
+                <div
+                  className="libro-anio-titulo-admin d-flex align-items-center justify-content-center flex-nowrap gap-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <h3
+                    className="recomendacion__titulo m-0"
+                    style={{ background: "none", padding: 0 }}
+                  >
+                    ¡Libro del año!
+                  </h3>
                   {esAdmin && (
-                    <button onClick={() => setIsEditando(true)} className="btn btn-sm btn-light text-warning border-0 shadow-sm" title="Cambiar Libro del Año">
-                      <i className="bi bi-trophy-fill" style={{ color: "#ffc107" }}></i>
+                    <button
+                      onClick={() => setIsEditando(true)}
+                      className="btn btn-sm btn-light text-warning border-0 shadow-sm"
+                      title="Cambiar Libro del Año"
+                    >
+                      <i
+                        className="bi bi-trophy-fill"
+                        style={{ color: "#ffc107" }}
+                      ></i>
                     </button>
                   )}
                 </div>
                 <div className="d-flex flex-column align-items-center mt-3">
                   <picture className="recomendacion__picture mb-3">
-                    <img src={libroAnio.portada || libroAnio.fotoPortada || "https://via.placeholder.com/150x200?text=Sin+Portada"} alt={libroAnio.titulo} className="recomendacion__portada" />
+                    <img
+                      src={
+                        libroAnio.portada ||
+                        libroAnio.fotoPortada ||
+                        "https://via.placeholder.com/150x200?text=Sin+Portada"
+                      }
+                      alt={libroAnio.titulo}
+                      className="recomendacion__portada"
+                    />
                   </picture>
                   <div className="recomendacion__textos w-100">
-                    <h4 className="recomendacion__libro mb-1">{libroAnio.titulo}</h4>
-                    <h4 className="recomendacion__autor m-0">{libroAnio.autor || "Autor Desconocido"}</h4>
+                    <h4 className="recomendacion__libro mb-1">
+                      {libroAnio.titulo}
+                    </h4>
+                    <h4 className="recomendacion__autor m-0">
+                      {libroAnio.autor || "Autor Desconocido"}
+                    </h4>
                   </div>
                 </div>
               </div>
             )}
           </section>
         </aside>
+
+
+        
+        
       </div>
 
       {/* --- MODAL FLOTANTE PARA CAMBIAR LIBRO DEL AÑO (CENTRAL) --- */}
       {isEditando && (
         <div className="modal-overlay">
-          <div className="modal-custom" style={{ maxWidth: '500px', width: '90%', padding: '24px', borderRadius: '12px', backgroundColor: '#fff' }}>
+          <div
+            className="modal-custom"
+            style={{
+              maxWidth: "500px",
+              width: "90%",
+              padding: "24px",
+              borderRadius: "12px",
+              backgroundColor: "#fff",
+            }}
+          >
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h4 className="m-0 fw-bold">🏆 Buscar nuevo Libro del Año</h4>
-              <button className="btn btn-sm btn-outline-danger border-0" onClick={() => {
-                setIsEditando(false);
-                setBusquedaLibro('');
-                setResultadosLibros([]);
-              }}>
+              <button
+                className="btn btn-sm btn-outline-danger border-0"
+                onClick={() => {
+                  setIsEditando(false);
+                  setBusquedaLibro("");
+                  setResultadosLibros([]);
+                }}
+              >
                 <i className="bi bi-x-lg"></i>
               </button>
             </div>
@@ -896,26 +943,44 @@ export default function Home() {
             />
 
             {/* Indicador de carga */}
-            {isBuscando && <div className="text-center text-muted small my-3">Buscando libros...</div>}
+            {isBuscando && (
+              <div className="text-center text-muted small my-3">
+                Buscando libros...
+              </div>
+            )}
 
             {/* Lista de resultados con portada, título y autor */}
             {resultadosLibros.length > 0 && (
-              <ul className="list-group shadow-sm" style={{ maxHeight: '350px', overflowY: 'auto' }}>
+              <ul
+                className="list-group shadow-sm"
+                style={{ maxHeight: "350px", overflowY: "auto" }}
+              >
                 {resultadosLibros.map((lib) => (
                   <li
                     key={lib.idLibro || lib.isbn}
                     className="list-group-item list-group-item-action d-flex align-items-center gap-3 py-2"
                     onClick={() => asignarLibroAnio(lib)}
-                    style={{ cursor: 'pointer' }}
+                    style={{ cursor: "pointer" }}
                   >
                     <img
-                      src={lib.portada || lib.fotoPortada || "https://via.placeholder.com/50x75?text=Sin+Portada"}
+                      src={
+                        lib.portada ||
+                        lib.fotoPortada ||
+                        "https://via.placeholder.com/50x75?text=Sin+Portada"
+                      }
                       alt={lib.titulo}
-                      style={{ width: '50px', height: '75px', objectFit: 'cover', borderRadius: '5px' }}
+                      style={{
+                        width: "50px",
+                        height: "75px",
+                        objectFit: "cover",
+                        borderRadius: "5px",
+                      }}
                     />
                     <div className="d-flex flex-column text-start">
                       <span className="fw-bold text-dark">{lib.titulo}</span>
-                      <span className="text-muted small">{lib.autor || "Autor Desconocido"}</span>
+                      <span className="text-muted small">
+                        {lib.autor || "Autor Desconocido"}
+                      </span>
                     </div>
                   </li>
                 ))}
@@ -923,9 +988,13 @@ export default function Home() {
             )}
 
             {/* Mensaje de sin resultados */}
-            {busquedaLibro.trim().length >= 3 && resultadosLibros.length === 0 && !isBuscando && (
-              <div className="text-center text-muted small my-3">No se encontró ningún libro.</div>
-            )}
+            {busquedaLibro.trim().length >= 3 &&
+              resultadosLibros.length === 0 &&
+              !isBuscando && (
+                <div className="text-center text-muted small my-3">
+                  No se encontró ningún libro.
+                </div>
+              )}
           </div>
         </div>
       )}

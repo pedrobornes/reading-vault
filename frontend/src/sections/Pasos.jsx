@@ -64,7 +64,7 @@ export default function Pasos() {
     <section className="pasos" ref={sectionRef}>
       <div className="container-custom">
         <div className="pasos__content-relative"> 
-          <img src="/img/reading.svg" alt="Reading" className="pasos__ilustracion" />
+          <img src="/img/reading.svg" alt="Reading" className="pasos__ilustracion pasos__ilustracion-movil" />
           
           <svg className="pasos__svg-line" viewBox="0 0 500 1000" preserveAspectRatio="none">
             <defs>

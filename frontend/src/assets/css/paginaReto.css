@@ -82,12 +82,11 @@ color: var(--color-salmon) !important;
 
 /* --- ESTRUCTURA INTERNA --- */
 .reto-card__body {
-display: flex;
+  display: flex;
   flex-direction: row-reverse; 
   align-items: center;
   justify-content: space-between;
-  padding: 20px 60px ; 
-  
+  padding: 10px 60px 20px 60px; 
 }
 
 .reto-setup-card {
@@ -175,11 +174,20 @@ display: flex;
     box-shadow: 0 4px 15px rgba(214, 122, 110, 0.2);
 }
 
-.reto-setup-card .btn-progreso:hover {
-    background-color: var(--color-amarillo);
+.reto-setup-card  {
+    background-color: var(--color-azul-claro);
     color: var(--color-verde-oscuro);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.3);
+}
+
+.btn-progreso{
+  transition: all 0.3s ease;
+}
+
+.btn-progreso:hover{
+  background-color: var(--color-amarillo) !important;
+    color: var(--color-verde-oscuro) !important;
+    transform: translateY(-2px);
 }
 
 
@@ -289,25 +297,27 @@ background-color: white;
 }
 
 .reto-banner {
-  background-color: var(--color-azul-claro); 
+  background-color: var(--color-azul-claro);
   width: 100%;
-  padding: 50px 0;
+  padding: 40px 20px; /* Padding más equilibrado */
   display: flex;
-  justify-content: center; 
+  justify-content: center;
   margin-bottom: 40px;
 }
 
 .reto-banner__textboton {
   display: flex;
-  justify-content: space-between; 
+  justify-content: space-between;
   align-items: center;
-  width: 85%;
+  width: 100%;
   max-width: 1100px;
+  flex-wrap: wrap; /* CLAVE: Permite que el botón baje si no hay espacio */
+  gap: 20px;
 }
 
 .reto-banner__text h2 {
   font-family: var(--font-titulos);
-  font-size: 3.2rem; 
+  font-size: 3.2rem;
   margin: 0;
   line-height: 1.1;
 }
@@ -319,35 +329,34 @@ background-color: white;
 
 .reto-banner__text .text-amarillo {
   color: var(--color-amarillo);
-  padding-left: 60px; 
+  padding-left: 60px;
   font-weight: 400;
 }
 
-.reto-banner__button-wrapper{
-  padding-right: 10rem;
+.reto-banner__button-wrapper {
+  /* En escritorio, mantenemos el margen, pero en móvil lo eliminamos */
+  padding-right: 0;
+  width: auto;
 }
 
-.btn-progreso {
-  background-color: var(--color-salmon);
-  color: white;
-  border: none;
-  padding: 20px 25px;
-  border-radius: 18px; 
-  font-family: var(--font-cuerpo);
-  font-size: 1.1rem;
-  font-weight: bold;
-  cursor: pointer;
-  width: 100%; 
-  line-height: 1.2;
-  text-align: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
-}
+/* --- AJUSTES PARA MÓVIL --- */
+@media (max-width: 817px) {
+  .reto-banner__textboton {
+    flex-direction: column; /* Apila texto arriba y botón abajo */
+    text-align: center;
+  }
 
-.btn-progreso:hover {
-  background-color: var(--color-amarillo);
-  color: var(--color-verde-oscuro);
-  transform: translateY(-3px);
+  .reto-banner__text h2 {
+    font-size: 2.5rem; /* Tamaño más cómodo para móvil */
+  }
+
+  .reto-banner__text .text-amarillo {
+    padding-left: 0; /* Quitamos el desplazamiento lateral en móvil */
+  }
+
+  .reto-banner__button-wrapper {
+    width: 100%; /* El botón ocupa todo el ancho en móvil */
+  }
 }
 
 /* El fondo oscuro */
@@ -705,18 +714,18 @@ background-color: white;
 
 .btn-editar-objetivo {
     background: none;
-    border: none;
-    color: var(--color-salmon);
-    font-family: var(--font-cuerpo);
-    font-weight: bold;
-    font-size: 0.9rem;
-    margin-top: 15px;
-    padding: 5px 10px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    width: fit-content;
-    transition: color 0.2s ease, transform 0.2s ease;
+  border: none;
+  color: var(--color-salmon);
+  font-family: var(--font-cuerpo);
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-top: 5px; 
+  padding: 5px 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .btn-editar-objetivo:hover {
@@ -727,4 +736,29 @@ background-color: white;
 
 .btn-editar-objetivo i {
     font-size: 1.05rem;
+}
+
+@media (max-width: 768px) {
+  .trofeo-responsive {
+    display: none !important;
+  }
+
+  .reto-card__body {
+    flex-direction: column !important;
+    padding: 20px 20px !important; 
+    text-align: center;
+  }
+
+  /* Forzamos al bloque de datos a ocupar todo el ancho */
+  .reto-card__data {
+    margin-left: 0 !important; 
+    width: 100%;
+    align-items: center; 
+  }
+
+  /* Ajustamos el ancho de la barra para que no se vea estrecha */
+  .reto-progress-bar {
+    width: 90%; 
+    margin: 15px auto;
+  }
 }

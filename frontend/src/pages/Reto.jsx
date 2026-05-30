@@ -190,34 +190,28 @@ const Reto = () => {
       <main className="reto-main-content">
         {datosReto.objetivo === 0 ? (
           <section className="reto-setup-card">
-            <div
-              className="reto-card__icon-circle"
-              style={{ width: "100px", height: "100px", fontSize: "3rem" }}
-            >
-              <i
-                className="bi bi-trophy-fill"
-                style={{ color: "var(--color-amarillo)" }}
-              ></i>
-            </div>
-            <h2 className="text-verde mt-4">
-              ¡Aún no tienes tu reto de lectura anual!
-            </h2>
-            <p className="text-muted">
-              ¿Cuántos libros te propones leer este año {new Date().getFullYear()}?
-            </p>
+      {/* 1. SE ELIMINÓ EL ICONO DEL TROFEO DE AQUÍ */}
+      
+      {/* 2. SE CAMBIÓ LA CLASE 'mt-4' A 'mt-2' PARA SUBIR EL TÍTULO */}
+      <h2 className="text-verde mt-2">
+        ¡Aún no tienes tu reto de lectura anual!
+      </h2>
+      <p className="text-muted">
+        ¿Cuántos libros te propones leer este año {new Date().getFullYear()}?
+      </p>
 
-            <div className="setup-input-group mt-4">
-              <input
-                type="number"
-                className="modal-input-num"
-                value={nuevoObjetivo}
-                onChange={(e) => setNuevoObjetivo(e.target.value)}
-              />
-              <button className="btn-progreso" onClick={crearRetoAnual}>
-                <span>Empezar Desafío</span>
-              </button>
-            </div>
-          </section>
+      <div className="setup-input-group mt-4">
+        <input
+          type="number"
+          className="modal-input-num"
+          value={nuevoObjetivo}
+          onChange={(e) => setNuevoObjetivo(e.target.value)}
+        />
+        <button className="btn-progreso" onClick={crearRetoAnual}>
+          <span>Empezar Desafío</span>
+        </button>
+      </div>
+    </section>
         ) : (
           <>
             {/* TARJETA 3 - ESTADÍSTICAS */}
@@ -342,49 +336,52 @@ const Reto = () => {
 
             {/* TARJETA 1 - PROGRESO */}
             <section
-              className={`reto-card ${paginasPasadas.includes(1) ? "pagina-pasada" : ""}`}
-              style={{ zIndex: 3 }}
-              onClick={() => manejarPasoPagina(1)}
-            >
-              <div className="reto-card__title-container">
-                <h3 className="reto-card__title">Progreso de tu reto</h3>
-              </div>
-              <div className="reto-card__body">
-                <div className="reto-card__icon-circle">
-                  <i className="bi bi-trophy"></i>
-                </div>
-                <div className="reto-card__data">
-                  <p className="texto-principal">
-                    ¡Has leído{" "}
-                    <strong>
-                      {datosReto.leidos} de {datosReto.objetivo}
-                    </strong>{" "}
-                    libros!
-                  </p>
-                  <div className="reto-progress-bar">
-                    <div
-                      className="reto-progress-bar__fill"
-                      style={{ width: `${porcentaje}%` }}
-                    ></div>
-                  </div>
-                  <p className="texto-secundario" style={{ marginTop: "20px" }}>
-                    Te quedan sólo <strong>{librosRestantes} libros</strong>{" "}
-                    para el desafío de este año.
-                  </p>
+        className={`reto-card ${paginasPasadas.includes(1) ? "pagina-pasada" : ""}`}
+        style={{ zIndex: 3 }}
+        onClick={() => manejarPasoPagina(1)}
+      >
+        <div className="reto-card__title-container">
+          <h3 className="reto-card__title">Progreso de tu reto</h3>
+        </div>
+        <div className="reto-card__body">
+          <div className="reto-card__icon-circle trofeo-responsive">
+            <i className="bi bi-trophy"></i>
+          </div>
+          <div className="reto-card__data">
+            <p className="texto-principal">
+              ¡Has leído{" "}
+              <strong>
+                {datosReto.leidos} de {datosReto.objetivo}
+              </strong>{" "}
+              libros!
+            </p>
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation(); 
-                      setNuevoObjetivo(datosReto.objetivo); 
-                      setDatosReto((prev) => ({ ...prev, objetivo: 0 })); 
-                    }}
-                    className="btn-editar-objetivo"
-                  >
-                    <i className="bi bi-pencil-square me-2"></i> Cambiar objetivo anual
-                  </button>
-                </div>
-              </div>
-            </section>
+            {/* 3. SE MOVIÓ EL BOTÓN AQUÍ, ANTES DE LA BARRA DE PROGRESO, PARA SUBIRLO */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation(); 
+                setNuevoObjetivo(datosReto.objetivo); 
+                setDatosReto((prev) => ({ ...prev, objetivo: 0 })); 
+              }}
+              className="btn-editar-objetivo"
+              style={{ marginBottom: "15px" }} /* Añadimos margen inferior para separar */
+            >
+              <i className="bi bi-pencil-square me-2"></i> Cambiar objetivo anual
+            </button>
+
+            <div className="reto-progress-bar">
+              <div
+                className="reto-progress-bar__fill"
+                style={{ width: `${porcentaje}%` }}
+              ></div>
+            </div>
+            <p className="texto-secundario" style={{ marginTop: "20px" }}>
+              Te quedan sólo <strong>{librosRestantes} libros</strong>{" "}
+              para el desafío de este año.
+            </p>
+          </div>
+        </div>
+      </section>
           </>
         )}
       </main>
