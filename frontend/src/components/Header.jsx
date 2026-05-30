@@ -32,7 +32,10 @@ export default function Header() {
 
   const FOTO_DEFAULT = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
+    
     <nav className="navbar-custom">
       <div className="container d-flex justify-content-between align-items-center">
         {/* LOGO */}
@@ -47,38 +50,18 @@ export default function Header() {
         </Link>
 
         {/* MENÚ */}
-        <div className="navbar-custom__menu d-flex align-items-center gap-4">
+        <div className={`navbar-custom__menu d-flex align-items-center gap-4 ${isOpen ? "is-open" : ""}`}>
           
-          <Link to={estaLogueado ? "/home" : "/login"} className="navbar-custom__link">
-            Home
-          </Link>
-          
-          <Link to="/comunidad" className="navbar-custom__link">
-            Comunidad
-          </Link>
-
-          <Link to="/buscador" className="navbar-custom__link">
-            Explorar
-          </Link>
+          <Link to={estaLogueado ? "/home" : "/login"} className="navbar-custom__link">Home</Link>
+          <Link to="/comunidad" className="navbar-custom__link">Comunidad</Link>
+          <Link to="/buscador" className="navbar-custom__link">Explorar</Link>
           
           {estaLogueado && (
-            <Link to="/mis-amigos" className="navbar-custom__link d-flex align-items-center text-nowrap">
-              Amigos
-              {numPendientes > 0 && (
-                <span className="badge rounded-pill bg-danger ms-2" style={{ 
-                    fontSize: '0.7rem', 
-                    padding: '4px 8px',
-                    lineHeight: '1' 
-                  }}>
-                  {numPendientes}
-                </span>
-              )}
-            </Link>
+            <Link to="/mis-amigos" className="navbar-custom__link">Amigos {numPendientes > 0 && <span>{numPendientes}</span>}</Link>
           )}
 
           <div className="navbar-custom__divider"></div>
 
-          {/* ESTADO DE AUTENTICACIÓN */}
           {!estaLogueado ? (
             <>
               <Link to="/registro" className="navbar-custom__link">Registro</Link>
@@ -86,25 +69,22 @@ export default function Header() {
             </>
           ) : (
             <div className="d-flex align-items-center gap-3">
-              <Link 
-                to={`/perfil/${usuarioSesion.idUsuario}`} 
-                className="navbar-custom__link d-flex align-items-center gap-2"
-              >
-                <img 
-                  src={usuarioSesion.fotoPerfil || FOTO_DEFAULT} 
-                  alt="Mi perfil" 
-                  style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} 
-                />
-                Mi perfil
-              </Link>
-
-              <button onClick={handleLogout} className="navbar-custom__auth-btn">
-                Log Out
-              </button>
+              <Link to={`/perfil/${usuarioSesion.idUsuario}`} className="navbar-custom__link">Mi perfil</Link>
+              <button onClick={handleLogout} className="navbar-custom__auth-btn">Log Out</button>
             </div>
           )}
         </div>
+
+        {/* Botón hamburguesa (solo visible en móvil por CSS) */}
+        <div className="navbar-custom__hamburger" onClick={() => setIsOpen(!isOpen)}>
+          <span className={isOpen ? "open" : ""}></span>
+          <span className={isOpen ? "open" : ""}></span>
+          <span className={isOpen ? "open" : ""}></span>
+        </div>
       </div>
+      
     </nav>
   );
+
+  
 }

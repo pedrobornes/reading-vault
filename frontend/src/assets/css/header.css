@@ -97,3 +97,42 @@
   color: var(--color-verde-oscuro) !important;
   transform: translateY(-2px);
 }
+
+/* --- ESTILO HAMBURGUESA --- */
+.navbar-custom__hamburger {
+  display: none; /* Oculto en escritorio */
+  flex-direction: column;
+  cursor: pointer;
+  gap: 5px;
+}
+
+.navbar-custom__hamburger span {
+  width: 25px;
+  height: 3px;
+  background-color: var(--color-verde-oscuro);
+  transition: 0.3s;
+}
+
+/* --- MÓVIL (< 768px) --- */
+@media (max-width: 768px) {
+  .navbar-custom__hamburger {
+    display: flex; /* Visible solo en móvil */
+  }
+
+  .navbar-custom__menu {
+    display: none; /* Ocultar menú por defecto en móvil */
+    position: absolute;
+    top: 100px;
+    left: 0;
+    width: 100%;
+    background-color: var(--color-azul-footer);
+    flex-direction: column;
+    padding: 20px;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .navbar-custom__menu.is-open {
+    display: flex; /* Se muestra al abrir */
+  }
+}
