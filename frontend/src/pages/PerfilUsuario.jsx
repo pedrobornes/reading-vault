@@ -26,8 +26,6 @@ export default function PerfilUsuario() {
   // --- ESTADOS Y FUNCIONES PARA EL TOAST ---
   const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
 
-  
-
   const mostrarNotificacion = (texto, tipo) => {
     setMensaje({ texto, tipo });
     setTimeout(() => setMensaje({ texto: "", tipo: "" }), 3000);
@@ -97,7 +95,6 @@ export default function PerfilUsuario() {
       .then((amigos) =>
         setStats((prev) => ({ ...prev, amigos: amigos.length })),
       );
-
     
     fetch(`${API_BASE_URL}/api/retos/usuario/${idUsuario}/actual`, { headers })
       .then((res) => {
@@ -225,10 +222,36 @@ export default function PerfilUsuario() {
   const tienePermisoLibros = comprobarPermiso(usuario.privacidadLibros);
   const tienePermisoActividad = comprobarPermiso(usuario.privacidadActividad);
 
+  const FOTO_DEFAULT = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+
   return (
     <main className="container-custom py-5">
-      <div className="row g-4">
-        <div className="col-lg-3">
+      <div className="row g-4 d-flex flex-column flex-lg-row">
+        
+        {/* 1. MÓVIL: Foto y Nombre independientes (Fuera del Header) - Orden 1 */}
+        <div className="col-12 d-lg-none order-1 text-center mb-1">
+          <img
+            src={usuario.fotoPerfil || FOTO_DEFAULT}
+            className="rounded-circle shadow-sm"
+            alt="Perfil"
+            style={{ width: "120px", height: "120px", objectFit: "cover", border: "4px solid white" }}
+          />
+          <h2 className="mt-3 fw-bold" style={{ color: "var(--color-verde-oscuro)" }}>
+            {usuario.nombreUsuario}
+          </h2>
+        </div>
+
+        {/* 2. Header (Datos personales) - Visible SOLO en móvil, orden 2 */}
+        <div className="col-12 d-lg-none order-2 mb-2">
+          <HeaderUsuario
+            user={usuario}
+            sonAmigos={sonAmigos}
+            permisoDatos={tienePermisoDatos}
+          />
+        </div>
+
+        {/* 3. Sidebar (Resumen y Reto) - Orden 3 en móvil, Orden 1 en PC */}
+        <div className="col-lg-3 order-3 order-lg-1">
           <SidebarUsuario
             user={usuario}
             stats={stats}
@@ -239,12 +262,18 @@ export default function PerfilUsuario() {
             onEliminarAmigo={manejarEliminarAmistad}
           />
         </div>
-        <div className="col-lg-9">
-          <HeaderUsuario
-            user={usuario}
-            sonAmigos={sonAmigos}
-            permisoDatos={tienePermisoDatos}
-          />
+
+        {/* 4. Columna Derecha (Actividad) - Orden 4 en móvil, Orden 2 en PC */}
+        <div className="col-lg-9 order-4 order-lg-2">
+          
+          {/* Header (Datos personales) - Visible SOLO en PC */}
+          <div className="d-none d-lg-block mb-4">
+            <HeaderUsuario
+              user={usuario}
+              sonAmigos={sonAmigos}
+              permisoDatos={tienePermisoDatos}
+            />
+          </div>
 
           {tienePermisoActividad ? (
             <ActividadUsuario
@@ -253,7 +282,7 @@ export default function PerfilUsuario() {
               idUsuario={idUsuario}
             />
           ) : (
-            <div className="perfil-card p-5 text-center mt-4 border-dashed">
+            <div className="perfil-card p-5 text-center border-dashed">
               <i
                 className="bi bi-shield-lock-fill text-muted"
                 style={{ fontSize: "3rem" }}
@@ -267,15 +296,16 @@ export default function PerfilUsuario() {
             </div>
           )}
         </div>
+
         {/* Toast  */}
-      {mensaje.texto && (
-        <div className={`vault-toast vault-toast--${mensaje.tipo}`}>
-          {mensaje.tipo === "success" 
-            ? <i className="bi bi-check-circle-fill me-2"></i> 
-            : <i className="bi bi-exclamation-triangle-fill me-2"></i>}
-          {mensaje.texto}
-        </div>
-      )}
+        {mensaje.texto && (
+          <div className={`vault-toast vault-toast--${mensaje.tipo}`}>
+            {mensaje.tipo === "success" 
+              ? <i className="bi bi-check-circle-fill me-2"></i> 
+              : <i className="bi bi-exclamation-triangle-fill me-2"></i>}
+            {mensaje.texto}
+          </div>
+        )}
       </div>
     </main>
   );

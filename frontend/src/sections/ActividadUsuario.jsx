@@ -112,7 +112,7 @@ export default function ActividadUsuario({ libros, idUsuario }) {
                 {resenas.slice(0, visibles).map((r) => (
                     <div key={r.idReview} className="list-group-item resena-item shadow-sm">
                         <div className="d-flex justify-content-between align-items-start">
-                            <div>
+                            <div className="me-3">
                                 <Link 
                                     to={`/libro/${r.libro?.isbn}`} 
                                     state={{ libro: r.libro }}
@@ -124,7 +124,7 @@ export default function ActividadUsuario({ libros, idUsuario }) {
                                     {renderEstrellas(r.puntuacion)}
                                 </div>
                             </div>
-                            <small className="text-muted fw-bold">{r.fecha}</small>
+                            <small className="text-muted fw-bold text-nowrap flex-shrink-0">{r.fecha}</small>
                         </div>
                         <TextoResenaTruncado texto={r.contenido} />
                     </div>

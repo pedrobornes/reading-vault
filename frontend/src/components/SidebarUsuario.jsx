@@ -78,12 +78,14 @@ export function SidebarUsuario({
   return (
     <aside className="sidebar-perfil">
       <div className="text-center mb-2">
-        <img
-          src={user.fotoPerfil || FOTO_DEFAULT}
-          className="foto-perfil-circulo"
-          alt="Perfil"
-        />
-        <h4 className="mt-3 sidebar-nombre-usuario">{user.nombreUsuario}</h4>
+        <div className="d-none d-lg-block">
+          <img
+            src={user.fotoPerfil || FOTO_DEFAULT}
+            className="foto-perfil-circulo"
+            alt="Perfil"
+          />
+        </div>
+        <h4 className="mt-3 sidebar-nombre-usuario d-none d-lg-block">{user.nombreUsuario}</h4>
         {renderBotonAmistad()}
       </div>
 

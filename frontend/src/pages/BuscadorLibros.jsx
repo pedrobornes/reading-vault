@@ -51,7 +51,7 @@ const BuscadorLibros = () => {
       .catch((err) => console.error("Error cargando géneros:", err));
   }, []);
 
-  // Función principal de búsqueda MODIFICADA con 'cargando'
+  // Función principal de búsqueda
   const obtenerLibros = async (
     busqueda,
     generoNombre,
@@ -71,7 +71,6 @@ const BuscadorLibros = () => {
       return;
     }
 
-    // --- ACTIVAMOS EL SPINNER ANTES DE LA PETICIÓN ---
     setCargando(true);
 
     try {
@@ -92,7 +91,6 @@ const BuscadorLibros = () => {
       console.error("Error al obtener libros:", error);
       setLibros([]);
     } finally {
-      
       setCargando(false);
     }
   };
@@ -130,22 +128,14 @@ const BuscadorLibros = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Renderizado de botones de paginación
   const renderNumerosPagina = () => {
-    // Si tenemos menos de 12 libros, es que estamos en la última página.
-    // Solo mostramos hasta la página actual.
     const esUltimaPagina = libros.length < 12;
-    
-    // Si estamos en la página 1 y hay menos de 12 libros, solo mostramos la página 1.
     if (pagina === 1 && esUltimaPagina) {
         return <button className="btn btn-success mx-1">1</button>;
     }
 
     const paginas = [];
-    // Calculamos el límite: si es la última página, el límite es la página actual
     const limite = esUltimaPagina ? pagina : pagina + 2; 
-
-    // Empezamos desde 1 o desde (pagina - 1) para que siempre se vea la actual
     let inicio = Math.max(1, pagina - 1);
 
     for (let i = inicio; i <= limite; i++) {
@@ -166,7 +156,9 @@ const BuscadorLibros = () => {
     <div className="buscador-page">
       <div className="container-custom">
         <div className="row">
-          <aside className="col-md-3">
+          
+          {/* SIDEBAR PC: Se oculta en móvil con d-none d-md-block */}
+          <aside className="col-md-3 d-none d-md-block">
             <SidebarGeneros
               tusGeneros={tusGeneros}
               todosLosGeneros={listaMaestraGeneros.map((g) => g.nombre)}
@@ -175,8 +167,9 @@ const BuscadorLibros = () => {
             />
           </aside>
 
-          <main className="col-md-9">
-            <div className="header-buscador">
+          {/* MAIN CONTAINER: Ocupa 12 columnas en móvil y 9 en PC */}
+          <main className="col-12 col-md-9">
+            <div className="header-buscador text-center text-md-start">
               <h2 className="header-buscador__titulo">
                 Encuentra tu próxima lectura
               </h2>
@@ -193,32 +186,65 @@ const BuscadorLibros = () => {
                 <input
                   type="text"
                   className="search-bar__input"
-                  placeholder="Busca por título, autor o género..."
+                  placeholder="Busca título, autor..."
                   value={textoBusqueda}
                   onChange={(e) => setTextoBusqueda(e.target.value)}
-                  autoFocus
                 />
-                <button type="submit" className="search-bar__button">
+                <button type="submit" className="search-bar__button d-none d-md-block">
                   Buscar
                 </button>
               </form>
             </div>
 
-            <div className="sort-section d-flex align-items-center mb-4">
-              <span className="me-2 ordenacion">Ordenar por:</span>
-              <select
-                className="sort-section__select"
-                value={orden}
-                onChange={cambiarOrden}
-              >
-                <option value="relevance">Relevancia</option>
-                <option value="rating">Mejor valorados</option>
-              </select>
+            {/* CONTROLES: Ordenar y Filtro móvil agrupados */}
+            <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 gap-3">
+              
+              {/* ORDENAR POR */}
+              <div className="sort-section d-flex align-items-center">
+                <span className="me-2 ordenacion fw-bold small text-muted">Ordenar por:</span>
+                <select
+                  className="sort-section__select form-select form-select-sm w-auto"
+                  value={orden}
+                  onChange={cambiarOrden}
+                  style={{ minWidth: "140px", borderColor: "var(--color-crema-oscuro)" }}
+                >
+                  <option value="relevance">Relevancia</option>
+                  <option value="rating">Mejor valorados</option>
+                </select>
+              </div>
+
+              {/* GÉNEROS (SOLO MÓVIL): Visible solo en xs y sm */}
+              <div className="d-md-none d-flex align-items-center">
+                <span className="me-2 fw-bold small text-muted">Explorar:</span>
+                <select
+                  className="form-select form-select-sm"
+                  value={generoActivo}
+                  onChange={(e) => buscarPorGenero(e.target.value)}
+                  style={{ borderColor: "var(--color-crema-oscuro)" }}
+                >
+                  <option value="">Selecciona un género...</option>
+                  
+                  {tusGeneros.length > 0 && (
+                    <optgroup label="Tus Favoritos">
+                      {tusGeneros.map((g, idx) => (
+                        <option key={`fav-${idx}`} value={g}>{g}</option>
+                      ))}
+                    </optgroup>
+                  )}
+                  
+                  <optgroup label="Todos los géneros">
+                    {listaMaestraGeneros.map((g, idx) => (
+                      <option key={`all-${idx}`} value={g.nombre}>{g.nombre}</option>
+                    ))}
+                  </optgroup>
+                </select>
+              </div>
+              
             </div>
 
-            {/* --- LÓGICA DE RENDERIZADO CONDICIONAL --- */}
-
+            {/* RESULTADOS */}
             {cargando ? (
+              // SPINNER DE CARGA
               <div className="loader-container text-center d-flex flex-column align-items-center justify-content-center" style={{ minHeight: "400px" }}>
                 <div className="book">
                   <div className="inner">
@@ -228,29 +254,33 @@ const BuscadorLibros = () => {
                   </div>
                   <ul>{[...Array(18)].map((_, i) => <li key={i}></li>)}</ul>
                 </div>
-                <h4 className="loader-texto mt-5">Cargando biblioteca...</h4>
+                <h4 className="loader-texto mt-5 text-muted fw-bold">Buscando en los estantes...</h4>
               </div>
             ) : (
               <>
-                <div className="libros-grid">
-                  {/* PROTECCIÓN: Usamos Array.isArray para evitar que explote si no es un array */}
-                  {Array.isArray(libros) && libros.length > 0 ? (
-                    libros.map((libro, index) => (
+                {Array.isArray(libros) && libros.length > 0 ? (
+                  // GRID DE LIBROS (Solo se renderiza si hay resultados)
+                  <div className="libros-grid">
+                    {libros.map((libro, index) => (
                       <LibroCard
                         key={libro.idLibro || libro.isbn || index}
                         libro={libro}
                       />
-                    ))
-                  ) : (
-                    <p className="libros-grid__mensaje">
+                    ))}
+                  </div>
+                ) : (
+                  // MENSAJE DE VACÍO
+                  <div className="d-flex flex-column justify-content-center align-items-center w-100 py-5 text-center" style={{ minHeight: "35vh" }}>
+                    <i className="bi bi-search display-1 text-muted mb-4 opacity-25"></i>
+                    <p className="text-muted fw-bold fs-5">
                       {textoBusqueda || generoActivo
-                        ? "No se encontraron libros."
-                        : "Usa el buscador para encontrar tus libros favoritos."}
+                        ? "No se encontraron libros con estos criterios."
+                        : "Usa el buscador o explora las categorías para encontrar tu próxima lectura."}
                     </p>
-                  )}
-                </div>
+                  </div>
+                )}
 
-                {/* Solo mostramos paginación si tenemos libros y el array es válido */}
+                {/* PAGINACIÓN */}
                 {Array.isArray(libros) && libros.length > 0 && (
                   <div className="pagination-wrapper d-flex justify-content-center align-items-center mt-5 mb-5 gap-2">
                     <button
@@ -264,11 +294,14 @@ const BuscadorLibros = () => {
                     <div className="d-none d-sm-flex">
                       {renderNumerosPagina()}
                     </div>
+                    {/* En móvil mostramos la página actual como texto */}
+                    <div className="d-sm-none text-muted small fw-bold px-2">
+                      Pág. {pagina}
+                    </div>
 
                     <button
                       className="btn btn-outline-success"
                       onClick={() => cambiarPagina(pagina + 1)}
-                      // Si el servidor devuelve menos de 12, es que ya no hay más páginas
                       disabled={libros.length < 12} 
                     >
                       <i className="bi bi-chevron-right"></i>

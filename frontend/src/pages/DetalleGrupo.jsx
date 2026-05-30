@@ -405,7 +405,6 @@ export default function DetalleGrupo() {
         setGrupo(data);
         setShowModalProgreso(false);
 
-        // --- CAMBIO AQUÍ: Sustituimos el Swal.mixin por tu mostrarNotificacion ---
         mostrarNotificacion("Progreso guardado correctamente", "success");
       } else {
         mostrarNotificacion("Error al guardar el progreso", "error");
@@ -456,6 +455,7 @@ export default function DetalleGrupo() {
           {mensaje.texto}
         </div>
       )}
+      
       {/* Cabecera Hero */}
       <header
         className="grupo-header"
@@ -464,8 +464,9 @@ export default function DetalleGrupo() {
         }}
       >
         <div className="container h-100 d-flex flex-column justify-content-end pb-5">
-          <div className="d-flex justify-content-between align-items-end">
-            <div className="texto-header-container">
+          {/* AQUI ESTÁ EL CAMBIO: d-flex flex-column para móvil y flex-md-row para PC */}
+          <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-end">
+            <div className="texto-header-container mb-3 mb-md-0">
               <h1 className="display-3 fw-bold mb-0 titulo-comunidad">{grupo.nombre}</h1>
               <p className="lead mb-2">{grupo.descripcion}</p>
               
@@ -481,12 +482,15 @@ export default function DetalleGrupo() {
               </div>
             </div>
 
-           <button
-            className={`btn-membresia ${estaUnido ? "btn-salir" : "btn-unirse"}`}
-            onClick={estaUnido ? handleAbandonarGrupo : manejarMembresia}
-          >
-            {estaUnido ? "Salir del grupo" : "¡Unirme!"}
-          </button>
+            {/* w-100 en móvil asegura que sea fácil de pulsar, y mt-3 le da margen arriba */}
+            <div className="w-100 mt-2 mt-md-0" style={{ maxWidth: "250px" }}>
+              <button
+                className={`btn-membresia w-100 ${estaUnido ? "btn-salir" : "btn-unirse"}`}
+                onClick={estaUnido ? handleAbandonarGrupo : manejarMembresia}
+              >
+                {estaUnido ? "Salir del grupo" : "¡Unirme!"}
+              </button>
+            </div>
           </div>
         </div>
       </header>
