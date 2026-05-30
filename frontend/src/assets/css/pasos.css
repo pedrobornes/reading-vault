@@ -110,7 +110,41 @@
 
 @media (max-width: 1024px) {
     .pasos__ilustracion { width: 200px; }
-    .paso__item { padding: 0; justify-content: center; text-align: center; flex-direction: column; }
+    
+    .pasos__grid {
+        gap: 40px; 
+    }
+
+    .paso__item { 
+        padding: 0; 
+        justify-content: center; 
+        text-align: center; 
+        flex-direction: column; 
+    }
+
+    .paso__icono-wrapper {
+        order: -1; 
+        margin-bottom: 10px; 
+        width: 60px; 
+        height: 60px;
+        border-radius: 15px; 
+    }
+
+    .paso__img {
+        width: 30px; 
+        height: 30px;
+    }
+
+    .paso__info {
+        order: 1;
+    }
+
     .text-right { text-align: center; }
     .pasos__svg-line { display: none; }
+}
+
+@media (max-width: 859px) {
+   .pasos__ilustracion-movil{
+    display: none;
+   }
 }

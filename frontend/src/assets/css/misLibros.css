@@ -297,3 +297,61 @@
     background-color: var(--color-salmon);
     transform: translateY(-3px);
 }
+
+@media (max-width: 992px) {
+  /* 1. Convertimos el layout a columna en móvil */
+  .biblioteca-layout {
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 10px;
+  }
+
+  /* 2. El sidebar ocupa todo el ancho y se vuelve horizontal */
+  .sidebar-custom {
+    width: 100%;
+    padding: 15px;
+  }
+  
+  .sidebar-custom__list {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+  }
+  
+  .sidebar-custom__item {
+    font-size: 0.9rem;
+    margin-bottom: 0;
+  }
+
+  /* 3. Ajustamos el grid de los libros para móvil */
+  /* En lugar de 5 columnas, usamos auto-fill para que se ajusten solas */
+  .libros-fila-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .libros-grid-total {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+  }
+
+  /* Reducimos un poco el tamaño de las tarjetas en móvil */
+  .libro-card__contenedor-imagen {
+    height: 150px;
+  }
+
+  @media (max-width: 992px) {
+  /* Ocultar el sidebar en móvil */
+  .sidebar-hidden-mobile {
+    display: none !important;
+  }
+
+  /* Expandir el contenido para que ocupe todo el ancho */
+  .biblioteca-content {
+    width: 100% !important;
+    padding: 0 10px;
+  }
+}
+}
+

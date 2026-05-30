@@ -86,7 +86,9 @@ const MisLibros = () => {
 
   return (
     <div className="biblioteca-layout container-custom">
+    <div className={`sidebar-container  sidebar-hidden-mobile`}>
       <SideBarBiblioteca vistaActual={vista} setVistaActual={setVista} />
+    </div>
 
       <main className="biblioteca-content">
         {vista === "todas" ? (
