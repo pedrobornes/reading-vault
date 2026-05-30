@@ -1,18 +1,16 @@
 import axios from "axios";
+import { API_BASE_URL } from "../apiConfig";
 
-// 1. Solo la URL base (asegúrate de que en Railway sea: https://...)
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-
-// 2. Construimos la ruta de forma limpia
-const API_URL = `${BASE_URL.replace(/\/$/, "")}/api/auth`;
-
-axios.interceptors.request.use(/* ... tu código igual ... */);
+// Construye ruta de auth limpia
+const API_URL = `${API_BASE_URL.replace(/\/$/, "")}/api/auth`;
 
 const register = (userData) => {
+    // Petición registro
     return axios.post(`${API_URL}/registro`, userData);
 };
 
 const login = (email, password) => {
+    // Petición login
     return axios.post(`${API_URL}/login`, {
         email,
         password
