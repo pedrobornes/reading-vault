@@ -75,25 +75,8 @@ export default function DetalleGrupo() {
   }, [id, token, sesion.idUsuario]);
 
   const manejarMembresia = async () => {
-    // ESCUDO DE SEGURIDAD PARA EL ADMIN
-    if (estaUnido && soyAdmin) {
-      const cantidadMiembros = grupo.miembros?.length || 0;
-      
-      // Si hay más gente en el grupo, le prohibimos salir directamente
-      if (cantidadMiembros > 1) {
-        Swal.fire({
-          title: "Acción denegada",
-          text: "No puedes abandonar el club siendo el Administrador. Debes ceder el rol de admin a otro miembro antes de salir.",
-          icon: "error",
-          confirmButtonColor: "#7c4d3a"
-        });
-        return;
-      }
-    }
-
-    const endpoint = estaUnido ? "salir" : "unirse";
     try {
-      const res = await fetch(`${API_BASE_URL}/api/comunidades/${id}/${endpoint}`, {
+      const res = await fetch(`${API_BASE_URL}/api/comunidades/${id}/unirse`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -104,21 +87,11 @@ export default function DetalleGrupo() {
 
       if (res.ok) {
         const comunidadActualizada = await res.json();
-
         setGrupo(comunidadActualizada);
-        setEstaUnido(!estaUnido);
-
-        const esMiembro = comunidadActualizada.miembros?.some(
-          (m) => m.usuario.idUsuario === sesion.idUsuario
-        );
-        setEstaUnido(esMiembro);
-
-      } else {
-        const errorText = await res.text();
-        console.error("Error del servidor:", errorText);
+        setEstaUnido(true);
       }
     } catch (error) {
-      console.error("Error en la petición:", error);
+      console.error("Error al unirse:", error);
     }
   };
 
@@ -197,24 +170,36 @@ export default function DetalleGrupo() {
     const miembros = grupo.miembros || [];
     const esUltimoMiembro = miembros.length === 1;
 
+    if (soyAdmin && !esUltimoMiembro) {
+      Swal.fire({
+        title: "Acción denegada",
+        text: "No puedes abandonar el club siendo el Administrador. Debes ceder el rol de admin a otro miembro antes de salir.",
+        icon: "error",
+        confirmButtonColor: "#7c4d3a"
+      });
+      return; // Detenemos la ejecución aquí, no se lanza la petición al servidor
+    }
+
     if (esUltimoMiembro) {
-      // Si es el último, pedir confirmación para eliminar todo el grupo
       const result = await Swal.fire({
         title: '¿Eres el último miembro?',
-        text: "Al ser el único usuario, el grupo se eliminará automáticamente. ¿Continuar?",
+        text: "Al ser el único usuario, el grupo se eliminará. ¿Continuar?",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
         cancelButtonColor: '#7c4d3a',
-        confirmButtonText: 'Sí, abandonar y eliminar grupo'
+        confirmButtonText: 'Sí, abandonar y eliminar'
       });
 
       if (result.isConfirmed) {
-        // Llamamos directamente a la lógica de eliminación total
-        handleEliminarGrupo(); 
+        if (soyAdmin) {
+          handleEliminarGrupo(); 
+        } else {
+          await ejecutarAbandonar();
+        }
       }
     } else {
-      // Si hay más miembros, ejecución normal de "salir"
+      // Si hay más gente y no eres el admin (o ya cediste el rol), sales normalmente
       await ejecutarAbandonar();
     }
   };

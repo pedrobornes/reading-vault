@@ -251,22 +251,27 @@ public class ComunidadController {
         Comunidad comunidad = comunidadRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Comunidad no encontrada"));
 
-        // Eliminamos la relación
+        // Busca el miembro
         Optional<UsuarioComunidad> relacion = usuarioComunidadRepository
                 .findByComunidadIdComunidadAndUsuarioIdUsuario(id, idUsuario);
         
         if (relacion.isPresent()) {
             comunidad.getMiembros().remove(relacion.get());
+            // Elimina de DB
             usuarioComunidadRepository.delete(relacion.get());
-            // Forzamos el guardado de los cambios en la comunidad antes de contar
-            comunidadRepository.save(comunidad);
+            // Fuerza sincronización con DB
+            usuarioComunidadRepository.flush(); 
         }
 
-        if (comunidad.getMiembros().isEmpty()) {
+        // Comprueba tamaño seguro
+        if (comunidad.getMiembros().size() == 0) {
+            // Borra grupo vacío
             comunidadRepository.delete(comunidad);
             return ResponseEntity.ok("Grupo eliminado por quedar vacío");
         }
 
+        // Guarda si aún hay gente
+        comunidadRepository.save(comunidad);
         return ResponseEntity.ok(comunidad);
     }
 
@@ -293,17 +298,36 @@ public class ComunidadController {
     // EXPULSAR MIEMBRO
     @DeleteMapping("/{idComunidad}/expulsar/{idUsuario}")
     @Transactional
-    public ResponseEntity<?> expulsarMiembro(@PathVariable Long idComunidad, @PathVariable Long idUsuario) {
-        // Buscamos la relación
-        Optional<UsuarioComunidad> relacion = usuarioComunidadRepository
-                .findByComunidadIdComunidadAndUsuarioIdUsuario(idComunidad, idUsuario);
+    public ResponseEntity<?> expulsarMiembro(@PathVariable Long idComunidad, @PathVariable Long idUsuario, @RequestBody Map<String, Long> payload) {
         
-        if (relacion.isPresent()) {
-            usuarioComunidadRepository.delete(relacion.get());
-            usuarioComunidadRepository.flush();
-            return ResponseEntity.ok().build();
+        // Obtener usuario que ejecuta la accion
+        Long idSolicitante = payload.get("idUsuario");
+        Usuario solicitante = usuarioRepository.findById(idSolicitante).orElseThrow();
+
+        // Comprobar si es admin del sistema
+        boolean esAdminSistema = "ADMIN".equalsIgnoreCase(solicitante.getRol());
+        
+        // Comprobar si es admin del grupo
+        boolean esAdminGrupo = usuarioComunidadRepository
+                .findByComunidadIdComunidadAndUsuarioIdUsuario(idComunidad, idSolicitante)
+                .map(uc -> "admin".equals(uc.getRol()))
+                .orElse(false);
+
+        // Si tiene alguno de los dos permisos, procedemos a borrar
+        if (esAdminSistema || esAdminGrupo) {
+            Optional<UsuarioComunidad> relacion = usuarioComunidadRepository
+                    .findByComunidadIdComunidadAndUsuarioIdUsuario(idComunidad, idUsuario);
+            
+            if (relacion.isPresent()) {
+                usuarioComunidadRepository.delete(relacion.get());
+                usuarioComunidadRepository.flush(); // Sincroniza con DB
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
+
+        // Bloquear accion si no tiene permisos
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permisos para expulsar");
     }
 
     // CEDER ADMINISTRACIÓN

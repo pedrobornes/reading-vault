@@ -116,12 +116,22 @@ export default function MiembrosGrupo() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const res = await fetch(`${API_BASE_URL}/api/comunidades/${idGrupo}/expulsar/${idUsuario}`, { method: "DELETE", headers });
+          const res = await fetch(`${API_BASE_URL}/api/comunidades/${idGrupo}/expulsar/${idUsuario}`, { 
+            method: "DELETE", 
+            headers: headers,
+            body: JSON.stringify({ idUsuario: sesion.idUsuario }) 
+          });
+          
           if (res.ok) {
             Swal.fire({ title: '¡Expulsado!', icon: 'success', timer: 1500, showConfirmButton: false });
             cargarDatosComunidad();
+          } else {
+             // Mostrar error si el backend te bloquea
+             Swal.fire('Error', 'No tienes permisos para expulsar', 'error');
           }
-        } catch (error) { console.error("Error al expulsar:", error); }
+        } catch (error) { 
+          console.error("Error al expulsar:", error); 
+        }
       }
     });
   };
