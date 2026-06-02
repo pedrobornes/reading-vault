@@ -131,7 +131,14 @@ export default function HeaderUsuario({ user, sonAmigos, permisoDatos }) {
             </div>
 
             {/* Biografía */}
-            <div className="bio-block mt-3 p-2 rounded text-center text-md-start" style={{ backgroundColor: "rgba(0,0,0,0.02)" }}>
+            <div className="bio-block mt-3 p-2 rounded text-center text-md-start" style={{ 
+                backgroundColor: "rgba(0,0,0,0.02)",
+                wordWrap: "break-word", 
+                overflowWrap: "break-word",
+                maxWidth: "100%",
+                maxHeight: "150px",
+                overflowY: "auto"
+              }}>
               <span className="fst-italic text-muted">
                 “{user.biografia || "Este lector prefiere dejar su historia en blanco..."}”
               </span>

@@ -244,26 +244,32 @@ export default function DetalleLibro() {
   };
 
   const manejarVoto = async (puntuacion) => {
-    if (!usuarioSesion) {
-      mostrarNotificacion("Debes iniciar sesión para votar", "error");
-      return;
-    }
+  if (!usuarioSesion) {
+    mostrarNotificacion("Debes iniciar sesión para votar", "error");
+    return;
+  }
+  
+  // Solo permitir votar si el libro está marcado como "Leído"
+  if (estanteriaActual !== "Leído") {
+    mostrarNotificacion("Debes marcar el libro como 'Leído' para poder votarlo", "error");
+    return;
+  }
 
-    try {
-      const libroParaEnviar = { ...libro, isbn: isbn };
-      await axios.post(`${API_BASE_URL}/api/reviews/votar`, {
-        idUsuario: usuarioSesion.idUsuario,
-        puntuacion: puntuacion,
-        libro: libroParaEnviar 
-      });
+  try {
+    const libroParaEnviar = { ...libro, isbn: isbn };
+    await axios.post(`${API_BASE_URL}/api/reviews/votar`, {
+      idUsuario: usuarioSesion.idUsuario,
+      puntuacion: puntuacion,
+      libro: libroParaEnviar 
+    });
 
-      setMiVoto(puntuacion);
-      await cargarDatosYVoto();
-      mostrarNotificacion("¡Puntuación guardada!", "success");
-    } catch (err) {
-      mostrarNotificacion("No se pudo registrar el voto", "error");
-    }
-  };
+    setMiVoto(puntuacion);
+    await cargarDatosYVoto();
+    mostrarNotificacion("¡Puntuación guardada!", "success");
+  } catch (err) {
+    mostrarNotificacion("No se pudo registrar el voto", "error");
+  }
+};
 
   const enviarResena = async () => {
     if (!libro?.idLibro) {
@@ -387,14 +393,19 @@ export default function DetalleLibro() {
                   {[1, 2, 3, 4, 5].map((num) => (
                     <i
                       key={num}
-                      className={`bi bi-star${num <= (hoverVoto || miVoto) ? '-fill' : ''}`}
-                      onMouseEnter={() => setHoverVoto(num)}
+                      className={`bi bi-star${num <= (hoverVoto || miVoto) ? '-fill' : ''} ${estanteriaActual !== "Leído" ? 'text-muted' : ''}`}
+                      style={{ cursor: estanteriaActual === "Leído" ? 'pointer' : 'not-allowed' }}
+                      onMouseEnter={() => estanteriaActual === "Leído" && setHoverVoto(num)}
                       onMouseLeave={() => setHoverVoto(0)}
                       onClick={() => manejarVoto(num)}
                     ></i>
                   ))}
                 </div>
-                {miVoto === 0 && <p className="small text-muted mb-0" style={{fontSize: '0.7rem'}}>Vota para habilitar la reseña</p>}
+                {estanteriaActual !== "Leído" && (
+                  <p className="small text-muted mb-0" style={{fontSize: '0.7rem'}}>
+                    Marca el libro como "Leído" para votar
+                  </p>
+                )}
               </div>
 
               <div className="detalle-rating text-muted mt-4">

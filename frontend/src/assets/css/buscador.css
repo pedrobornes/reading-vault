@@ -110,11 +110,14 @@
 
 /* Input del selector */
 .sort-section__select {
-    padding: 5px 10px;
+    padding: 5px 30px 5px 10px;
     border-radius: 5px;
     border: 1px solid var(--color-azul-footer);
     font-family: var(--font-body);
     color: var(--text-body);
+    min-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Contenedor de paginación */

@@ -41,6 +41,7 @@ export default function Footer() {
                                 <h4 className="footer__column-title">ReadingVault</h4>
                                 <ul className="footer__list">
                                     <li><Link to="/buscador" className="footer__link">Explorar libros</Link></li>
+                                    <li><Link to="/manual" className="footer__link">Manual de uso</Link></li>
                                 </ul>
                             </div>
                             <div className="col-6 text-center text-md-start">
