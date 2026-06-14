@@ -81,8 +81,13 @@ export default function Header() {
           </Link>
 
           {estaLogueado && (
-            <Link to="/mis-amigos" className="navbar-custom__link" onClick={cerrarMenu}>
-              Amigos {numPendientes > 0 && <span>{numPendientes}</span>}
+            <Link to="/mis-amigos" className="navbar-custom__link d-flex align-items-center" onClick={cerrarMenu}>
+              Amigos 
+              {numPendientes > 0 && (
+                <span className="badge-notificacion ms-2">
+                  {numPendientes > 99 ? '99+' : numPendientes}
+                </span>
+              )}
             </Link>
           )}
 

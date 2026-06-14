@@ -133,6 +133,33 @@
   color: var(--color-amarillo);
 }
 
+.badge-notificacion {
+  background-color: #fa8072; /* Un rojo/salmón agradable */
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 50px; /* Forma de píldora */
+  line-height: 1;
+  min-width: 20px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(250, 128, 114, 0.4); /* Sombra con el mismo color para que resalte */
+  
+  /* Pequeña animación al aparecer */
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 /* --- MÓVIL (< 768px) --- */
 @media (max-width: 768px) {
   .navbar-custom__hamburger {

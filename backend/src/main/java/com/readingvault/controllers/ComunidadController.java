@@ -336,33 +336,49 @@ public class ComunidadController {
     // CEDER ADMINISTRACIÓN
     @PutMapping("/{idComunidad}/cambiar-admin/{idUsuarioNuevo}")
     @Transactional
-    public ResponseEntity<?> cederAdministracion(@PathVariable Long idComunidad, @PathVariable Long idUsuarioNuevo) {
-        // Buscamos al admin actual (el que hace la petición)
-        List<UsuarioComunidad> miembros = usuarioComunidadRepository.findByComunidadIdComunidad(idComunidad);
-        
-        UsuarioComunidad adminActual = miembros.stream()
-                .filter(m -> "admin".equals(m.getRol()))
-                .findFirst()
-                .orElse(null);
+    public ResponseEntity<?> gestionarAdministracion(
+            @PathVariable Long idComunidad, 
+            @PathVariable Long idUsuarioNuevo,
+            @RequestBody Map<String, Long> payload) {
 
-        UsuarioComunidad nuevoAdmin = miembros.stream()
-                .filter(m -> m.getUsuario().getIdUsuario().equals(idUsuarioNuevo))
-                .findFirst()
-                .orElse(null);
+        Long idSolicitante = payload.get("idUsuario");
+        Usuario solicitante = usuarioRepository.findById(idSolicitante).orElseThrow();
 
-        if (adminActual != null && nuevoAdmin != null) {
-            // Degradamos al actual
-            adminActual.setRol("miembro");
-            usuarioComunidadRepository.save(adminActual);
-            
-            // Ascendemos al nuevo
+        // Validar permisos
+        boolean esAdminSistema = "ADMIN".equalsIgnoreCase(solicitante.getRol());
+        boolean esAdminGrupo = usuarioComunidadRepository
+                .findByComunidadIdComunidadAndUsuarioIdUsuario(idComunidad, idSolicitante)
+                .map(uc -> "admin".equals(uc.getRol()))
+                .orElse(false);
+
+        if (!esAdminSistema && !esAdminGrupo) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permisos");
+        }
+
+        // Buscamos al nuevo usuario para ascenderlo
+        UsuarioComunidad nuevoAdmin = usuarioComunidadRepository
+                .findByComunidadIdComunidadAndUsuarioIdUsuario(idComunidad, idUsuarioNuevo)
+                .orElseThrow(() -> new RuntimeException("El usuario debe ser miembro del grupo"));
+
+        // Lógica según el origen de la petición
+        if (esAdminSistema) {
+            // El Admin del sistema simplemente concede el rol sin degradar a nadie
             nuevoAdmin.setRol("admin");
             usuarioComunidadRepository.save(nuevoAdmin);
+        } else {
+            // El Admin del grupo cede el rol: degradamos al actual y ascendemos al nuevo
+            UsuarioComunidad adminActual = usuarioComunidadRepository
+                    .findByComunidadIdComunidadAndUsuarioIdUsuario(idComunidad, idSolicitante)
+                    .orElseThrow();
             
-            return ResponseEntity.ok().build();
+            adminActual.setRol("miembro");
+            nuevoAdmin.setRol("admin");
+            
+            usuarioComunidadRepository.save(adminActual);
+            usuarioComunidadRepository.save(nuevoAdmin);
         }
-        
-        return ResponseEntity.badRequest().body("No se pudo realizar el cambio de roles");
+
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")

@@ -28,9 +28,23 @@ export default function DetalleGrupo() {
 
   const [progreso, setProgreso] = useState({ pagina: 0, total: 0, nota: "" });
 
-  const sesion = JSON.parse(localStorage.getItem("usuario"));
+  const sesionStr = localStorage.getItem("usuario");
+  const sesion = sesionStr ? JSON.parse(sesionStr) : null;
   const token = localStorage.getItem("token");
 
+  // === BLOQUE DE PERMISOS PROTEGIDO ===
+  // Usamos "?." para evitar que falle cuando "grupo" o "sesion" aún son null
+  const miMembresia = grupo?.miembros?.find(m => m.usuario.idUsuario === sesion?.idUsuario);
+  
+  // Determinar si el usuario es Admin del grupo
+  const soyAdmin = miMembresia?.rol === "admin";
+
+  // Determinar si el usuario es Admin del Sistema
+  const esAdminSistema = sesion?.rol === "ADMIN" || sesion?.rol === "admin"; 
+
+  // Determinar si el usuario puede gestionar (es Admin del sistema O es Admin del grupo)
+  const puedeGestionar = esAdminSistema || soyAdmin;
+  // =====================================
   
   // Toast
   const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
@@ -61,7 +75,7 @@ export default function DetalleGrupo() {
           setMensajes(data.mensajes || []);
           // Comprobar si el usuario actual está unido
           const unido = data.miembros?.some(
-            (m) => m.usuario.idUsuario === sesion.idUsuario,
+            (m) => m.usuario.idUsuario === sesion?.idUsuario,
           );
           setEstaUnido(unido);
         }
@@ -72,7 +86,7 @@ export default function DetalleGrupo() {
       }
     };
     cargarDatos();
-  }, [id, token, sesion.idUsuario]);
+  }, [id, token, sesion?.idUsuario]);
 
   const manejarMembresia = async () => {
     try {
@@ -82,7 +96,7 @@ export default function DetalleGrupo() {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ idUsuario: sesion.idUsuario }),
+        body: JSON.stringify({ idUsuario: sesion?.idUsuario }),
       });
 
       if (res.ok) {
@@ -113,7 +127,7 @@ export default function DetalleGrupo() {
               "Authorization": `Bearer ${token}`,
               "Content-Type": "application/json"
             },
-            body: JSON.stringify({ idUsuario: sesion.idUsuario })
+            body: JSON.stringify({ idUsuario: sesion?.idUsuario })
           });
           
           if (res.ok) {
@@ -167,7 +181,7 @@ export default function DetalleGrupo() {
   };
 
   const handleAbandonarGrupo = async () => {
-    const miembros = grupo.miembros || [];
+    const miembros = grupo?.miembros || [];
     const esUltimoMiembro = miembros.length === 1;
 
     if (soyAdmin && !esUltimoMiembro) {
@@ -192,7 +206,7 @@ export default function DetalleGrupo() {
       });
 
       if (result.isConfirmed) {
-        if (soyAdmin) {
+        if (puedeGestionar) {
           handleEliminarGrupo(); 
         } else {
           await ejecutarAbandonar();
@@ -212,7 +226,7 @@ export default function DetalleGrupo() {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ idUsuario: sesion.idUsuario }),
+        body: JSON.stringify({ idUsuario: sesion?.idUsuario }),
       });
 
       if (res.ok) {
@@ -279,7 +293,7 @@ export default function DetalleGrupo() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            idUsuario: sesion.idUsuario,
+            idUsuario: sesion?.idUsuario,
             contenido: nuevoMensaje,
           }),
         },
@@ -445,9 +459,6 @@ export default function DetalleGrupo() {
     );
   }
 
-  const miMembresia = grupo.miembros?.find(m => m.usuario.idUsuario === sesion.idUsuario);
-  const soyAdmin = miMembresia?.rol === "admin";
-
   return (
     <div className="detalle-grupo-bg">
       {mensaje.texto && (
@@ -468,7 +479,7 @@ export default function DetalleGrupo() {
           <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-end">
             <div className="texto-header-container mb-3 mb-md-0">
               <h1 className="display-3 fw-bold mb-0 titulo-comunidad">{grupo.nombre}</h1>
-              <p className="lead mb-2">{grupo.descripcion}</p>
+              <p className="lead mb-2 detalleGrupo">{grupo.descripcion}</p>
               
               <div className="d-flex align-items-center gap-2">
                 <Link 
@@ -541,12 +552,12 @@ export default function DetalleGrupo() {
                     </div>
                   </div>
 
-                  {soyAdmin && (
+                  {puedeGestionar && (
                     <button className="btn-nueva-lectura w-100 mt-3" onClick={() => setShowModalLibro(true)}>
                       <i className="bi bi-journal-plus me-2"></i>Cambiar Lectura
                     </button>
                   )}
-                  {soyAdmin && (
+                  {puedeGestionar && (
                     <button className="btn btn-outline-danger w-100 mt-3" onClick={handleEliminarGrupo}>
                       <i className="bi bi-trash-fill me-2"></i>Eliminar Grupo
                     </button>
@@ -555,7 +566,7 @@ export default function DetalleGrupo() {
               ) : (
                 <div className="text-center py-4">
                   <p className="text-muted">No hay lectura activa.</p>
-                  {soyAdmin && (
+                  {puedeGestionar && (
                     <button className="btn-nueva-lectura w-100" onClick={() => setShowModalLibro(true)}>
                       Elegir Libro
                     </button>
@@ -575,7 +586,7 @@ export default function DetalleGrupo() {
                 <form onSubmit={enviarMensaje} className="mb-5">
                   <div className="d-flex gap-3">
                     <img
-                      src={sesion.fotoPerfil || FOTO_DEFECTO}
+                      src={sesion?.fotoPerfil || FOTO_DEFECTO}
                       alt="Tú"
                       className="rounded-circle"
                       style={{ width: "45px", height: "45px", objectFit: "cover" }}
@@ -607,9 +618,9 @@ export default function DetalleGrupo() {
               <div className="mensajes-container">
                 {mensajes.length > 0 ? (
                   mensajes.map((msg) => {
-                    const esMio = msg.usuario.idUsuario == sesion.idUsuario;
+                    const esMio = msg.usuario.idUsuario === sesion?.idUsuario;
                     const estaEditandoEste = idMensajeEditando === msg.idMensaje;
-                    const esAdminGlobal = sesion.rol === "ADMIN" || sesion.rol === "admin";
+                    const esAdminGlobal = sesion?.rol === "ADMIN" || sesion?.rol === "admin";
                     const puedeBorrar = esMio || soyAdmin || esAdminGlobal;
 
                     return (

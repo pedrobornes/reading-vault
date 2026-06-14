@@ -23,11 +23,12 @@ export default function Comunidad() {
   const sesionStr = localStorage.getItem("usuario");
   const sesion = sesionStr ? JSON.parse(sesionStr) : null;
 
+  const [filtroVista, setFiltroVista] = useState('todos'); // 'todos' o 'mios'
+  const esAdminSistema = sesion?.rol === "ADMIN" || sesion?.rol === "admin";
 
   // FUNCIÓN PARA PROTEGER BOTONES ---
   const ejecutarAccionProtegida = (accionCallback, mensajeAccion) => {
     if (!sesion) {
-      // Si no hay sesión, mostramos el SweetAlert
       Swal.fire({
         title: "¿Te unes a la lectura?",
         text: `Debes iniciar sesión o registrarte para ${mensajeAccion}.`,
@@ -44,7 +45,6 @@ export default function Comunidad() {
         }
       });
     } else {
-      // Si hay sesión, ejecutamos la acción que nos hayan pasado
       accionCallback();
     }
   };
@@ -52,13 +52,12 @@ export default function Comunidad() {
   // Reset de página al buscar o cambiar de pestaña
   useEffect(() => {
     setPaginaActual(1);
-  }, [busqueda, pestaña]);
+  }, [busqueda, pestaña, filtroVista]);
 
   const cargarUsuarios = async () => {
     setCargando(true);
     const token = localStorage.getItem("token");
     
-    // Construimos las cabeceras condicionalmente
     const headers = {};
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -66,7 +65,7 @@ export default function Comunidad() {
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/usuarios`, {
-        headers: headers // Pasamos nuestro objeto inteligente
+        headers: headers 
       });
       if (response.ok) {
         const data = await response.json();
@@ -104,7 +103,6 @@ export default function Comunidad() {
     setCargando(true);
     const token = localStorage.getItem("token");
     
-    // Construimos las cabeceras condicionalmente
     const headers = {};
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -112,7 +110,7 @@ export default function Comunidad() {
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/comunidades`, {
-        headers: headers // Pasamos nuestro objeto inteligente
+        headers: headers 
       });
       if (response.ok) {
         const data = await response.json();
@@ -125,9 +123,14 @@ export default function Comunidad() {
     }
   };
 
-  const gruposFiltrados = grupos.filter(g => 
-    g.nombre?.toLowerCase().includes(busqueda.toLowerCase())
-  );
+  // gruposFiltrados
+  const gruposFiltrados = grupos.filter(g => {
+    const coincideBusqueda = g.nombre?.toLowerCase().includes(busqueda.toLowerCase());
+    const esMiembro = g.miembros?.some(m => m.usuario.idUsuario === sesion?.idUsuario);
+    
+    if (filtroVista === 'mios') return coincideBusqueda && esMiembro;
+    return coincideBusqueda;
+  });
 
   // ORDENACIÓN: Grupos del usuario primero
   const gruposOrdenados = [...gruposFiltrados].sort((a, b) => {
@@ -147,10 +150,8 @@ export default function Comunidad() {
 
 
   // --- FUNCIONES DE ESTILO DE PAGINACIÓN IDÉNTICAS AL BUSCADOR ---
-
   const cambiarPagina = (nuevaPagina) => {
     setPaginaActual(nuevaPagina);
-    // Efecto smooth scroll hacia arriba al cambiar de página
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -160,7 +161,6 @@ export default function Comunidad() {
     let inicio = Math.max(1, paginaActual - 2);
     let fin = Math.min(totalPaginas, inicio + maxPaginasVisibles - 1);
 
-    // Ajuste si estamos cerca del final para mostrar siempre 5 botones si es posible
     if (fin - inicio + 1 < maxPaginasVisibles) {
       inicio = Math.max(1, fin - maxPaginasVisibles + 1);
     }
@@ -229,6 +229,24 @@ export default function Comunidad() {
           </div>
         </div>
 
+        {/* Selector de Vista: Todos vs Mis Grupos */}
+        {pestaña === 'grupos' && (
+          <div className="d-flex justify-content-center mb-4 gap-2">
+            <button 
+              className={`btn ${filtroVista === 'todos' ? 'btn-success' : 'btn-outline-success'}`}
+              onClick={() => setFiltroVista('todos')}
+            >
+              Todos los Grupos
+            </button>
+            <button 
+              className={`btn ${filtroVista === 'mios' ? 'btn-success' : 'btn-outline-success'}`}
+              onClick={() => setFiltroVista('mios')}
+            >
+              Mis Grupos
+            </button>
+          </div>
+        )}
+
         {/* Resultados */}
         <div className="row g-4">
           {pestaña === 'grupos' && (
@@ -250,48 +268,61 @@ export default function Comunidad() {
               </div>
             ) : gruposPaginados.length > 0 ? (
               <>
-                {gruposPaginados.map(grupo => (
-                  <div key={grupo.idComunidad} className="col-md-6 col-lg-4">
-                    <div className="comunidad-card h-100 d-flex flex-column">
-                      <div className="posicion-foto-grupo">
-                        <img src={grupo.foto} alt={grupo.nombre} className="card-img-top grupo-img" />
-                      </div>
-                      <div className="card-body p-4 text-center d-flex flex-column flex-grow-1">
-                        <h5 className="fw-bold mb-1 grupo-nombre-comunidad">{grupo.nombre}</h5>
-                        <p className="text-muted small mb-3">
-                          <i className="bi bi-person-hearts me-1 text-danger"></i> 
-                          {grupo.miembros ? grupo.miembros.length : 0} miembros
-                        </p>
+                {gruposPaginados.map(grupo => {
+                  const esMiembro = grupo.miembros?.some(m => m.usuario.idUsuario === sesion?.idUsuario);
+                  
+                  return (
+                    <div key={grupo.idComunidad} className="col-md-6 col-lg-4">
+                      {/* Añadimos position-relative para la estrella */}
+                      <div className="comunidad-card h-100 d-flex flex-column position-relative">
                         
-                        <div className="mt-2 mb-4 flex-grow-1 d-flex align-items-center justify-content-center">
-                          {grupo.libro ? (
-                            <div className="lectura-actual-badge p-2.5 rounded w-100 d-flex align-items-center gap-2 text-start">
-                              <i className="bi bi-book-half text-vault-verde fs-5 ms-1"></i>
-                              <div>
-                                <span className="d-block libro-leyendo-label">Leyendo ahora:</span>
-                                <strong className="libro-leyendo-titulo">{grupo.libro.titulo}</strong>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="lectura-vacia-badge p-2.5 rounded w-100 text-center">
-                              <span className="text-muted small"><i className="bi bi-pause-circle me-1"></i> Sin lectura activa</span>
-                            </div>
-                          )}
+                        {/* ICONO DE ESTRELLA PARA MIS GRUPOS */}
+                        {esMiembro && (
+                          <div className="badge-mi-grupo position-absolute" style={{ top: '10px', right: '15px', zIndex: 10, background: 'rgba(0,0,0,0.6)', padding: '5px 10px', borderRadius: '20px' }}>
+                             <i className="bi bi-star-fill text-warning" title="Es uno de mis grupos"></i>
+                          </div>
+                        )}
+
+                        <div className="posicion-foto-grupo">
+                          <img src={grupo.foto} alt={grupo.nombre} className="card-img-top grupo-img" />
                         </div>
-                        
-                        <button 
-                          className="btn-unirse mt-auto w-100"
-                          onClick={() => ejecutarAccionProtegida(
-                            () => navigate(`/comunidad/grupo/${grupo.idComunidad}`), 
-                            "ver los detalles y unirte a este grupo"
-                          )}
-                        >
-                          Ver grupo
-                        </button>
+                        <div className="card-body p-4 text-center d-flex flex-column flex-grow-1">
+                          <h5 className="fw-bold mb-1 grupo-nombre-comunidad">{grupo.nombre}</h5>
+                          <p className="text-muted small mb-3">
+                            <i className="bi bi-person-hearts me-1 text-danger"></i> 
+                            {grupo.miembros ? grupo.miembros.length : 0} miembros
+                          </p>
+                          
+                          <div className="mt-2 mb-4 flex-grow-1 d-flex align-items-center justify-content-center">
+                            {grupo.libro ? (
+                              <div className="lectura-actual-badge p-2.5 rounded w-100 d-flex align-items-center gap-2 text-start">
+                                <i className="bi bi-book-half text-vault-verde fs-5 ms-1"></i>
+                                <div>
+                                  <span className="d-block libro-leyendo-label">Leyendo ahora:</span>
+                                  <strong className="libro-leyendo-titulo">{grupo.libro.titulo}</strong>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="lectura-vacia-badge p-2.5 rounded w-100 text-center">
+                                <span className="text-muted small"><i className="bi bi-pause-circle me-1"></i> Sin lectura activa</span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <button 
+                            className="btn-unirse mt-auto w-100"
+                            onClick={() => ejecutarAccionProtegida(
+                              () => navigate(`/comunidad/grupo/${grupo.idComunidad}`), 
+                              "ver los detalles y unirte a este grupo"
+                            )}
+                          >
+                            Ver grupo
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 
                 {/* --- PAGINACIÓN ESTILO BUSCADOR PARA GRUPOS --- */}
                 {totalPaginasGrupos > 1 && (

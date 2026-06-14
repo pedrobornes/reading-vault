@@ -42,6 +42,15 @@
     color: var(--color-amarillo) !important; 
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
     letter-spacing: 1px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+
+.detalleGrupo{
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
 }
 
 .lead {

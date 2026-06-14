@@ -25,9 +25,12 @@ export default function MiembrosGrupo() {
     "Content-Type": "application/json",
   };
 
-  const soyAdminDelGrupo = grupoInfo?.miembros?.find(m => m.usuario.idUsuario === sesion.idUsuario)?.rol === "admin";
-  const soyAdminGlobal = sesion.rol === "ADMIN" || sesion.rol === "admin";
-  const tengoPermisosGestion = soyAdminDelGrupo || soyAdminGlobal;
+  // Determinar permisos de forma global
+  const esAdminSistema = sesion?.rol === "ADMIN" || sesion?.rol === "admin";
+  const soyAdminDelGrupo = grupoInfo?.miembros?.find(m => m.usuario.idUsuario === sesion?.idUsuario)?.rol === "admin";
+
+  // El botón de gestionar aparece si eres Admin del sistema o eres Admin del grupo
+  const tengoPermisosGestion = soyAdminDelGrupo || esAdminSistema;
 
   useEffect(() => {
     cargarDatosComunidad();
@@ -148,7 +151,12 @@ export default function MiembrosGrupo() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const res = await fetch(`${API_BASE_URL}/api/comunidades/${idGrupo}/cambiar-admin/${idUsuario}`, { method: "PUT", headers });
+          const res = await fetch(`${API_BASE_URL}/api/comunidades/${idGrupo}/cambiar-admin/${idUsuario}`, { 
+            method: "PUT", 
+            headers: { ...headers, "Content-Type": "application/json" },
+            body: JSON.stringify({ idUsuario: sesion.idUsuario }) 
+          });
+          
           if (res.ok) {
             Swal.fire({ title: '¡Rol transferido!', icon: 'success', timer: 1500, showConfirmButton: false });
             cargarDatosComunidad();
@@ -229,7 +237,7 @@ export default function MiembrosGrupo() {
                         <div className="d-flex gap-2">
                           {tengoPermisosGestion && !esElMismo && (
                             <>
-                              {!esAdminDelFila && soyAdminDelGrupo && (
+                              {!esAdminDelFila && tengoPermisosGestion && (
                                 <button className="btn-gestion-comunidad btn-hacer-admin" onClick={() => handleCederAdmin(membro.usuario.idUsuario, membro.usuario.nombreUsuario)}>
                                   <i className="bi bi-shield-check me-1"></i> Admin
                                 </button>
