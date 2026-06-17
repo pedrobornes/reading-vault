@@ -65,30 +65,34 @@ export default function TusAmigos() {
   };
 
 const obtenerEstadoConexion = (ultimaConexion) => {
-    if (!ultimaConexion) return { online: false, texto: "Desconectado" };
-    
-    const ultima = new Date(ultimaConexion);
-    const ahora = new Date();
-    const diferenciaMinutos = Math.floor((ahora - ultima) / (1000 * 60));
+  if (!ultimaConexion) return { online: false, texto: "Desconectado" };
 
-    // Si está online, devolvemos eso y SALIMOS de la función.
-    if (diferenciaMinutos < 5) return { online: true, texto: "En línea" };
+  const ultima = new Date(ultimaConexion).getTime();
+  const ahora = new Date().getTime();
+  
+  const diferenciaMinutos = Math.floor((ahora - ultima) / (1000 * 60));
 
-    // Si no es online, miramos si fue hoy
-    if (ultima.toDateString() === ahora.toDateString()) {
-      return { online: false, texto: "Última conexión hoy" };
-    }
+  // Si la diferencia está entre -5 y +5 minutos, está en línea.
+  if (diferenciaMinutos >= -5 && diferenciaMinutos < 5) {
+    return { online: true, texto: "En línea" };
+  }
 
-    // Miramos si fue ayer
-    const ayer = new Date();
-    ayer.setDate(ahora.getDate() - 1);
-    if (ultima.toDateString() === ayer.toDateString()) {
-      return { online: false, texto: "Última conexión ayer" };
-    }
+  // Seguimos con la lógica de hoy/ayer
+  const ultimaDate = new Date(ultimaConexion);
+  const ahoraDate = new Date();
 
-    // Fecha antigua.
-    return { online: false, texto: `Última conexión el ${ultima.toLocaleDateString()}` };
-  };
+  if (ultimaDate.toDateString() === ahoraDate.toDateString()) {
+    return { online: false, texto: "Última conexión hoy" };
+  }
+
+  const ayer = new Date();
+  ayer.setDate(ahoraDate.getDate() - 1);
+  if (ultimaDate.toDateString() === ayer.toDateString()) {
+    return { online: false, texto: "Última conexión ayer" };
+  }
+
+  return { online: false, texto: `Última conexión el ${ultimaDate.toLocaleDateString()}` };
+};
 
   const gestionarAccion = async (id, accion) => {
     const endpoint = accion === "aceptar" ? "aceptar" : "rechazar";
@@ -284,7 +288,7 @@ const obtenerEstadoConexion = (ultimaConexion) => {
                         />
                         <div className="flex-grow-1">
                           <h5 className="mb-0">{amigo.nombreUsuario}</h5>
-                          <div className={`status-indicator small ${estado.online ? "text-success fw-bold" : "text-muted"}`}>
+                          <div className={`status-indicator small ${estado.online ? "text-success fw-bold" : "status-offline"}`}>
                             {estado.online && (
                               <i className="bi bi-circle-fill me-1" style={{ fontSize: "0.4rem", verticalAlign: "middle" }}></i>
                             )}

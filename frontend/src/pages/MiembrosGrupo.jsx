@@ -91,26 +91,32 @@ export default function MiembrosGrupo() {
 
   const obtenerEstadoConexion = (ultimaConexion) => {
     if (!ultimaConexion) return { online: false, texto: "Desconectado" };
-    
-    const ultima = new Date(ultimaConexion);
-    const ahora = new Date();
+
+    const ultima = new Date(ultimaConexion).getTime();
+    const ahora = new Date().getTime();
+
     const diferenciaMinutos = Math.floor((ahora - ultima) / (1000 * 60));
 
-    // Si ha pasado menos de 5 min, es "En línea"
-    if (diferenciaMinutos < 5) return { online: true, texto: "En línea" };
+    // Si la diferencia está entre -5 y +5 minutos, está en línea.
+    if (diferenciaMinutos >= -5 && diferenciaMinutos < 5) {
+      return { online: true, texto: "En línea" };
+    }
 
-    // Si no es online, miramos fechas
-    if (ultima.toDateString() === ahora.toDateString()) {
-       return { online: false, texto: "Última conexión hoy" };
+    // Seguimos con la lógica de hoy/ayer
+    const ultimaDate = new Date(ultimaConexion);
+    const ahoraDate = new Date();
+
+    if (ultimaDate.toDateString() === ahoraDate.toDateString()) {
+      return { online: false, texto: "Última conexión hoy" };
     }
 
     const ayer = new Date();
-    ayer.setDate(ahora.getDate() - 1);
-    if (ultima.toDateString() === ayer.toDateString()) {
-       return { online: false, texto: "Última conexión ayer" };
+    ayer.setDate(ahoraDate.getDate() - 1);
+    if (ultimaDate.toDateString() === ayer.toDateString()) {
+      return { online: false, texto: "Última conexión ayer" };
     }
 
-    return { online: false, texto: `Última conexión el ${ultima.toLocaleDateString()}` };
+    return { online: false, texto: `Última conexión el ${ultimaDate.toLocaleDateString()}` };
   };
 
   const handleExpulsar = (idUsuario, nombreUsuario) => {
@@ -237,7 +243,7 @@ export default function MiembrosGrupo() {
                             <h5 className="mb-0 fw-bold">{membro.usuario.nombreUsuario}</h5>
                             {esAdminDelFila && <span className="badge bg-warning text-dark">Admin</span>}
                           </div>
-                          <div className={`status-indicator small ${estado.online ? "text-success fw-bold" : "text-muted"}`}>
+                          <div className={`status-indicator small ${estado.online ? "text-success fw-bold" : "status-offline"}`}>
                             {estado.online && (
                               <i className="bi bi-circle-fill me-1" style={{ fontSize: '0.4rem', verticalAlign: "middle", marginBottom: "2px" }}></i>
                             )}
