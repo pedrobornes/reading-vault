@@ -92,20 +92,31 @@ export default function MiembrosGrupo() {
   const obtenerEstadoConexion = (ultimaConexion) => {
     if (!ultimaConexion) return { online: false, texto: "Desconectado" };
 
-    const ultima = new Date(ultimaConexion);
-    const ahora = new Date();
-    const diferenciaMinutos = (ahora - ultima) / 1000 / 60;
+    // Convertimos todo a tiempo UTC para evitar líos de zonas horarias
+    const ultima = new Date(ultimaConexion).getTime();
+    const ahora = new Date().getTime();
     
-    if (diferenciaMinutos < 5) return { online: true, texto: "● En línea" };
+    // Diferencia en minutos
+    const diffMs = ahora - ultima;
+    const diffMin = Math.floor(diffMs / (1000 * 60));
 
-    const esHoy = ultima.getDate() === ahora.getDate() &&
-                  ultima.getMonth() === ahora.getMonth() &&
-                  ultima.getFullYear() === ahora.getFullYear();
+    // Si la diferencia es menor a 5 minutos
+    // O si la diferencia es negativa
+    if (Math.abs(diffMin) < 5) {
+      return { online: true, texto: "● En línea" };
+    }
+    const ultimaDate = new Date(ultimaConexion);
+    const ahoraDate = new Date();
+
+    // Comparamos días, meses y años para evitar problemas de horas
+    const esHoy = ultimaDate.getDate() === ahoraDate.getDate() &&
+                  ultimaDate.getMonth() === ahoraDate.getMonth() &&
+                  ultimaDate.getFullYear() === ahoraDate.getFullYear();
 
     if (esHoy) {
       return { online: false, texto: "Última vez: Hoy" };
     } else {
-      return { online: false, texto: `Última vez: ${ultima.toLocaleDateString()}` };
+      return { online: false, texto: `Última vez: ${ultimaDate.toLocaleDateString()}` };
     }
   };
 
@@ -224,12 +235,7 @@ export default function MiembrosGrupo() {
                     const esElMismo = membro.usuario.idUsuario === sesion.idUsuario;
                     const esAdminDelFila = membro.rol === "admin";
                     const estado = obtenerEstadoConexion(membro.usuario.ultimaConexion);
-                    console.log("DEBUG ESTADO:", {
-                      nombre: membro.usuario.nombreUsuario,
-                      ultimaConexionRaw: membro.usuario.ultimaConexion,
-                      ahora: new Date().toISOString(),
-                      diferenciaCalculada: (new Date() - new Date(membro.usuario.ultimaConexion)) / 1000 / 60
-                  });
+
                     return (
                       <div key={membro.usuario.idUsuario} className="amigo-item-card d-flex align-items-center p-3 mb-3 bg-white rounded-4 shadow-sm">
                         <img src={membro.usuario.fotoPerfil || FOTO_DEFECTO} className="amigo-avatar me-3" alt="avatar" style={{ width: "50px", height: "50px", borderRadius: "50%", objectFit: "cover" }} />
@@ -238,7 +244,7 @@ export default function MiembrosGrupo() {
                             <h5 className="mb-0 fw-bold">{membro.usuario.nombreUsuario}</h5>
                             {esAdminDelFila && <span className="badge bg-warning text-dark">Admin</span>}
                           </div>
-                          <div className={`status-indicator small ${estado.online ? "text-success fw-bold" : "status-offline"}`}>
+                          <div className={`status-indicator small ${estado.online ? "text-success fw-bold" : "text-muted"}`}>
                             <span>{estado.texto}</span>
                           </div>
                         </div>

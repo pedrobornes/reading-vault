@@ -64,25 +64,37 @@ export default function TusAmigos() {
     }
   };
 
-const obtenerEstadoConexion = (ultimaConexion) => {
-  if (!ultimaConexion) return { online: false, texto: "Desconectado" };
+  const obtenerEstadoConexion = (ultimaConexion) => {
+    if (!ultimaConexion) return { online: false, texto: "Desconectado" };
 
-  const ultima = new Date(ultimaConexion);
-  const ahora = new Date();
-  const diferenciaMinutos = (ahora - ultima) / 1000 / 60;
-  
-  if (diferenciaMinutos < 5) return { online: true, texto: "● En línea" };
+    // Convertimos todo a tiempo UTC para evitar líos de zonas horarias
+    const ultima = new Date(ultimaConexion).getTime();
+    const ahora = new Date().getTime();
+    
+    // Diferencia en minutos
+    const diffMs = ahora - ultima;
+    const diffMin = Math.floor(diffMs / (1000 * 60));
 
-  const esHoy = ultima.getDate() === ahora.getDate() &&
-                ultima.getMonth() === ahora.getMonth() &&
-                ultima.getFullYear() === ahora.getFullYear();
+    // Si la diferencia es menor a 5 minutos (usamos valor absoluto por si el reloj del servidor va un poco desfasado)
+    // O si la diferencia es negativa (el servidor va unos segundos por delante)
+    if (Math.abs(diffMin) < 5) {
+      return { online: true, texto: "● En línea" };
+    }
 
-  if (esHoy) {
-    return { online: false, texto: "Última vez: Hoy" };
-  } else {
-    return { online: false, texto: `Última vez: ${ultima.toLocaleDateString()}` };
-  }
-};
+    const ultimaDate = new Date(ultimaConexion);
+    const ahoraDate = new Date();
+
+    // Comparamos días, meses y años para evitar problemas de horas
+    const esHoy = ultimaDate.getDate() === ahoraDate.getDate() &&
+                  ultimaDate.getMonth() === ahoraDate.getMonth() &&
+                  ultimaDate.getFullYear() === ahoraDate.getFullYear();
+
+    if (esHoy) {
+      return { online: false, texto: "Última vez: Hoy" };
+    } else {
+      return { online: false, texto: `Última vez: ${ultimaDate.toLocaleDateString()}` };
+    }
+  };
 
   const gestionarAccion = async (id, accion) => {
     const endpoint = accion === "aceptar" ? "aceptar" : "rechazar";
