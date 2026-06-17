@@ -417,14 +417,16 @@ export default function DetalleLibro() {
                 )}
               </div>
 
-              <div className="detalle-rating text-muted mt-4">
-                <p className="mb-1 small">Valoración global</p>
-                <div className="estrellas mb-1">{renderEstrellas(libro.valoracion || 0)}</div>
-                <div className="small">
-                  <strong>{(libro.valoracion || 0).toFixed(1)}</strong> / 5
-                  <br />
-                  ({(libro.votos || 0).toLocaleString()} votos)
+              <div className="valoracion-global-container">
+                <span className="valoracion-numero">{(libro.valoracion || 0).toFixed(1)}</span>
+                
+                <div className="valoracion-estrellas-contenedor">
+                  {renderEstrellas(libro.valoracion || 0)}
                 </div>
+                
+                <span className="valoracion-texto-pequeno">
+                  {(libro.votos || 0).toLocaleString()} votos
+                </span>
               </div>
             </div>
 

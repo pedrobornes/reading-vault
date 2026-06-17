@@ -27,7 +27,7 @@ export default function HeaderUsuario({ user, sonAmigos, permisoDatos }) {
     const ahora = new Date();
     
     const diferenciaMinutos = (ahora - ultima) / 1000 / 60;
-    if (diferenciaMinutos < 5) return { online: true, texto: "● En línea ahora" };
+    if (diferenciaMinutos < 5) return { online: true, texto: "● En línea" };
 
     const esHoy = ultima.getDate() === ahora.getDate() &&
                  ultima.getMonth() === ahora.getMonth() &&
@@ -45,7 +45,7 @@ export default function HeaderUsuario({ user, sonAmigos, permisoDatos }) {
   // Componente visual del estado para reutilizarlo
   const badgeEstado = esMiPerfil || estado.online ? (
     <span className="small text-success fw-bold" style={{ whiteSpace: 'nowrap' }}>
-      ● En línea ahora
+      ● En línea
     </span>
   ) : (
     <span className="small text-muted fst-italic" style={{ whiteSpace: 'nowrap' }}>

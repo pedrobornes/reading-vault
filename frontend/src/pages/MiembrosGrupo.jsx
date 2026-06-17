@@ -91,16 +91,24 @@ export default function MiembrosGrupo() {
 
   const obtenerEstadoConexion = (ultimaConexion) => {
     if (!ultimaConexion) return { online: false, texto: "Desconectado" };
+    
     const ultima = new Date(ultimaConexion);
     const ahora = new Date();
     const diferenciaMinutos = Math.floor((ahora - ultima) / (1000 * 60));
 
-    if (diferenciaMinutos < 5) return { online: true, texto: "● En línea ahora" };
-    if (ultima.toDateString() === ahora.toDateString()) return { online: false, texto: "Última conexión hoy" };
+    // Si ha pasado menos de 5 min, es "En línea"
+    if (diferenciaMinutos < 5) return { online: true, texto: "En línea" };
+
+    // Si no es online, miramos fechas
+    if (ultima.toDateString() === ahora.toDateString()) {
+       return { online: false, texto: "Última conexión hoy" };
+    }
 
     const ayer = new Date();
     ayer.setDate(ahora.getDate() - 1);
-    if (ultima.toDateString() === ayer.toDateString()) return { online: false, texto: "Última conexión ayer" };
+    if (ultima.toDateString() === ayer.toDateString()) {
+       return { online: false, texto: "Última conexión ayer" };
+    }
 
     return { online: false, texto: `Última conexión el ${ultima.toLocaleDateString()}` };
   };
@@ -229,7 +237,10 @@ export default function MiembrosGrupo() {
                             <h5 className="mb-0 fw-bold">{membro.usuario.nombreUsuario}</h5>
                             {esAdminDelFila && <span className="badge bg-warning text-dark">Admin</span>}
                           </div>
-                          <div className={`status-indicator small ${estado.online ? "status-online" : "status-offline"}`}>
+                          <div className={`status-indicator small ${estado.online ? "text-success fw-bold" : "text-muted"}`}>
+                            {estado.online && (
+                              <i className="bi bi-circle-fill me-1" style={{ fontSize: '0.4rem', verticalAlign: "middle", marginBottom: "2px" }}></i>
+                            )}
                             <span>{estado.texto}</span>
                           </div>
                         </div>
@@ -239,7 +250,7 @@ export default function MiembrosGrupo() {
                             <>
                               {!esAdminDelFila && tengoPermisosGestion && (
                                 <button className="btn-gestion-comunidad btn-hacer-admin" onClick={() => handleCederAdmin(membro.usuario.idUsuario, membro.usuario.nombreUsuario)}>
-                                  <i className="bi bi-shield-check me-1"></i> Admin
+                                  <i className="bi bi-shield-check me-1"></i> Promover
                                 </button>
                               )}
                               <button className="btn-gestion-comunidad btn-expulsar" onClick={() => handleExpulsar(membro.usuario.idUsuario, membro.usuario.nombreUsuario)}>

@@ -85,10 +85,6 @@
     font-family: var(--font-body);
 }
 
-.status-online { 
-    color: var(--color-verde-oscuro); 
-}
-
 .status-offline { 
     color: var(--color-salmon); 
 }
