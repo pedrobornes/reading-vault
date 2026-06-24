@@ -8,7 +8,7 @@ Reading Vault es una plataforma digital desarrollada como un gestor de lecturas 
 - Backend: Java, Spring Boot y MySQL.
 - Figma
 
-## Autoras del proyecto
+## Autores del proyecto
 
 Este proyecto ha sido desarrollado de forma conjunta y coordinada por:
 - [Pedro Bornes](https://www.linkedin.com/in/pedro-bornes/) - [GitHub](https://github.com/pedrobornes)
