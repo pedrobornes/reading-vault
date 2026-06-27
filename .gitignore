@@ -8,4 +8,3 @@ target/
 *.class
 .mvn/
 .idea/
-application.properties
